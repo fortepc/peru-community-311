@@ -1,0 +1,231 @@
+{
+  "location": {
+    "city": "Peru",
+    "county": "Miami County",
+    "state": "IN",
+    "defaultCenter": {
+      "lat": 40.7537,
+      "lng": -86.0689
+    },
+    "defaultZoom": 14
+  },
+  "categories": [
+    {
+      "id": "potholes_streets",
+      "name": "Potholes & Street Damage",
+      "department": "Peru Street Department",
+      "destinations": {
+        "email": "streetdepartment@cityofperu.org",
+        "webformUrl": "https://www.cityofperu.org/",
+        "phone": "(765) 472-2501",
+        "socialUrl": "https://www.facebook.com/CityofPeruIndiana"
+      },
+      "questions": [
+        {
+          "id": "hazard_type",
+          "label": "Type of Road Hazard",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Pothole",
+            "Damaged / Missing Street Sign",
+            "Traffic Light Malfunction",
+            "Sinking / Cracked Asphalt",
+            "Debris / Obstruction in Road"
+          ]
+        },
+        {
+          "id": "traffic_impact",
+          "label": "Is this blocking active traffic?",
+          "type": "select",
+          "required": true,
+          "options": [
+            "No - Normal traffic flow",
+            "Partially - Drivers must swerve/slow down",
+            "Completely - Lane/Road completely blocked"
+          ]
+        },
+        {
+          "id": "description",
+          "label": "Specific Details / Landmarks",
+          "type": "textarea",
+          "required": false,
+          "placeholder": "e.g. Deep pothole in eastbound lane right across from the park entrance."
+        }
+      ]
+    },
+    {
+      "id": "animal_control",
+      "name": "Animal Care & Control",
+      "department": "Peru Animal Care & Control",
+      "destinations": {
+        "email": "animalcontrol@cityofperu.org",
+        "webformUrl": null,
+        "phone": "(765) 473-6055",
+        "socialUrl": "https://www.facebook.com/p/Peru-Animal-Care-Control-100064379768541/"
+      },
+      "questions": [
+        {
+          "id": "issue_type",
+          "label": "Type of Animal Issue",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Stray Animal",
+            "Lost / Found Pet",
+            "Deceased Animal Removal",
+            "Nuisance / Aggressive Animal",
+            "Animal Neglect / Welfare Concern"
+          ]
+        },
+        {
+          "id": "animal_species",
+          "label": "Animal Type",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Dog",
+            "Cat",
+            "Wildlife",
+            "Livestock / Other"
+          ]
+        },
+        {
+          "id": "animal_status",
+          "label": "Current Situation",
+          "type": "textarea",
+          "required": false,
+          "placeholder": "e.g. Brown lab mix running loose near Broadway. Friendly but won't let people approach."
+        }
+      ]
+    },
+    {
+      "id": "code_enforcement",
+      "name": "Code Enforcement & Zoning",
+      "department": "Peru Building & Zoning Department",
+      "destinations": {
+        "email": "buildingzoning@cityofperu.org",
+        "webformUrl": "https://www.cityofperu.org/department/index.php?structureid=11",
+        "phone": "(765) 473-4881",
+        "socialUrl": null
+      },
+      "questions": [
+        {
+          "id": "violation_type",
+          "label": "Violation Type",
+          "type": "select",
+          "required": true,
+          "options": [
+            "High Grass / Overgrown Lawn",
+            "Trash / Junk / Blight in Yard",
+            "Abandoned Vehicle",
+            "Unsafe Structure / Property Maintenance",
+            "Illegal Signage / Zoning Violation"
+          ]
+        },
+        {
+          "id": "property_type",
+          "label": "Property Status",
+          "type": "select",
+          "required": false,
+          "options": [
+            "Occupied Residential",
+            "Vacant / Abandoned House",
+            "Commercial Business",
+            "Public Property / Alley"
+          ]
+        },
+        {
+          "id": "details",
+          "label": "Violation Description",
+          "type": "textarea",
+          "required": false,
+          "placeholder": "e.g. Grass over 12 inches high and multiple unregistered vehicles in back alley."
+        }
+      ]
+    },
+    {
+      "id": "water_sewer",
+      "name": "Water & Sewer Utilities",
+      "department": "Peru Utilities",
+      "destinations": {
+        "email": "customerservice@peruutilities.com",
+        "webformUrl": "https://www.peruutilities.com/",
+        "phone": "(765) 473-6681",
+        "socialUrl": "https://www.facebook.com/PeruUtilities"
+      },
+      "questions": [
+        {
+          "id": "utility_issue",
+          "label": "Issue Category",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Water Main Leak / Standing Water",
+            "Low Water Pressure",
+            "Discolored / Odorous Water",
+            "Storm Drain Blockage / Localized Flooding",
+            "Sewer Backup / Odor"
+          ]
+        },
+        {
+          "id": "urgency",
+          "label": "Urgency Level",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Standard Issue (Report)",
+            "Active Leak (Gushing water / Active flooding)",
+            "Emergency (Threat to property/safety - CALL DIRECTLY)"
+          ]
+        },
+        {
+          "id": "notes",
+          "label": "Location & Damage Details",
+          "type": "textarea",
+          "required": false,
+          "placeholder": "e.g. Water bubbling up through the edge of the street pavement."
+        }
+      ]
+    },
+    {
+      "id": "parks_trees",
+      "name": "Parks & Fallen Trees",
+      "department": "Peru Parks Department / Street Dept",
+      "destinations": {
+        "email": "parks@cityofperu.org",
+        "webformUrl": "https://www.cityofperu.org/",
+        "phone": "(765) 472-2400",
+        "socialUrl": "https://www.facebook.com/PeruParks"
+      },
+      "questions": [
+        {
+          "id": "park_issue",
+          "label": "Issue Type",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Fallen Tree Limb / Dangerous Branch",
+            "Damaged Park Equipment / Playground",
+            "Trash / Overflowing Receptacle",
+            "Vandalism / Graffiti"
+          ]
+        },
+        {
+          "id": "park_location",
+          "label": "Park or Location Name",
+          "type": "text",
+          "required": true,
+          "placeholder": "e.g. Maconaquah Park, Riverview Park, Street Tree on Main St"
+        },
+        {
+          "id": "details",
+          "label": "Additional Context",
+          "type": "textarea",
+          "required": false,
+          "placeholder": "e.g. Swing set chain broken near the south shelter."
+        }
+      ]
+    }
+  ]
+}
