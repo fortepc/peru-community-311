@@ -76,8 +76,35 @@
         <span class="font-semibold text-gray-700">
           <i class="fa-solid fa-crosshairs text-indigo-600 mr-1"></i> Step 1: Click map to pin location
         </span>
-        <span id="location-status" class="text-xs text-gray-500 italic">Click anywhere on map</span>
+        
+        <div class="flex items-center space-x-1.5 relative group">
+          <span id="location-status" class="text-xs text-gray-500 italic">Click anywhere on map</span>
+          
+          <!-- Info Icon & Trigger -->
+          <button type="button" id="osm-info-btn" onclick="toggleOsmTooltip(event)" class="text-gray-400 hover:text-indigo-600 transition focus:outline-none p-0.5">
+            <i class="fa-solid fa-circle-info text-xs"></i>
+          </button>
+
+          <!-- Tooltip Popup -->
+          <div id="osm-tooltip" class="absolute right-0 top-6 w-64 p-3 bg-slate-900 text-white text-xs rounded-lg shadow-xl border border-slate-700 z-[10000] hidden group-hover:block transition-all">
+            <div class="font-semibold text-indigo-300 mb-1 flex items-center justify-between">
+              <span><i class="fa-solid fa-map-location-dot mr-1"></i> About Map Data</span>
+              <span class="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-400">OpenStreetMap</span>
+            </div>
+            <p class="text-slate-300 leading-normal mb-2 text-[11px]">
+              This map is provided free by <strong>OpenStreetMap Contributors</strong>.
+            </p>
+            <p class="text-slate-400 text-[10px] leading-snug border-t border-slate-800 pt-1.5">
+              Is a street, alley, or building missing or incorrect? 
+              <a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:text-indigo-300 underline font-medium">
+                Contribute to OpenStreetMap.org <i class="fa-solid fa-arrow-up-right-from-square text-[9px] ml-0.5"></i>
+              </a>
+            </p>
+          </div>
+        </div>
       </div>
+
+      
       <div id="map" class="w-full flex-grow"></div>
       <div class="p-3 bg-gray-50 border-t border-gray-200 text-xs text-gray-600 flex justify-between items-center">
         <div>
@@ -156,7 +183,7 @@
   <div id="mobile-next-btn" class="lg:hidden fixed bottom-4 right-4 z-[9999] transition-all">
     <button onclick="scrollToReportForm()" class="flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-5 rounded-full shadow-lg border border-indigo-500 text-sm">
       <i class="fa-solid fa-arrow-down"></i>
-      <span>Next: Select Category</span>
+      <span>Scroll Down</span>
     </button>
   </div>
 
@@ -501,6 +528,21 @@
         ]
       };
     }
+    // Toggle OpenStreetMap Info Tooltip on Mobile Tap
+    function toggleOsmTooltip(e) {
+      e.stopPropagation();
+      const tooltip = document.getElementById("osm-tooltip");
+      tooltip.classList.toggle("hidden");
+    }
+
+    // Close tooltip when clicking outside
+    document.addEventListener("click", (e) => {
+      const tooltip = document.getElementById("osm-tooltip");
+      const btn = document.getElementById("osm-info-btn");
+      if (tooltip && !tooltip.classList.contains("hidden") && !btn.contains(e.target) && !tooltip.contains(e.target)) {
+        tooltip.classList.add("hidden");
+      }
+    });
   </script>
 </body>
 </html>
