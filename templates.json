@@ -29,7 +29,7 @@
           "required": true,
           "options": [
             "Pothole / Road Damage",
-            "Damaged or Missing Street Sign",
+            "Alley Obstruction / Overgrowth / Illegal Alley Dumping",
             "Sinking / Cracked Asphalt",
             "Debris / Obstruction in Roadway",
             "Trash / Trash Can / Recycling Issue",
@@ -52,7 +52,40 @@
           "label": "Location Details & Description",
           "type": "textarea",
           "required": false,
-          "placeholder": "e.g. Deep pothole right across from the park entrance in the westbound lane."
+          "placeholder": "e.g. Deep pothole or overgrown alley brush behind 200 W Canal St."
+        }
+      ]
+    },
+    {
+      "id": "traffic_department",
+      "name": "Traffic Department",
+      "department": "Traffic Department (Todd Wolfe, Department Head)",
+      "destinations": {
+        "email": "brians@cityofperu.org",
+        "webformUrl": "https://www.cityofperu.org/",
+        "phone": "(765) 473-5821",
+        "address": "Peru City Hall / Street Garage",
+        "socialUrl": null
+      },
+      "questions": [
+        {
+          "id": "traffic_issue",
+          "label": "Traffic Issue Type",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Traffic Signal / Light Malfunction",
+            "Damaged or Missing Street Sign / Stop Sign",
+            "Crosswalk / Curb Painting Need",
+            "Traffic Sightline Obstruction"
+          ]
+        },
+        {
+          "id": "details",
+          "label": "Intersection or Location Details",
+          "type": "textarea",
+          "required": false,
+          "placeholder": "e.g. Stop sign knocked down at the corner of Broadway and Main St."
         }
       ]
     },
@@ -89,7 +122,7 @@
           "options": [
             "Standard Report",
             "Active Water Main Break / Gushing Water",
-            "Emergency (Threat to safety/property - Call 911 or 765-473-7651 immediately)"
+            "Emergency (Threat to safety/property - Call 765-473-7651 immediately)"
           ]
         },
         {
@@ -97,7 +130,7 @@
           "label": "Specific Location & Notes",
           "type": "textarea",
           "required": false,
-          "placeholder": "e.g. Water leaking out from under the curb in front of 150 N Main."
+          "placeholder": "e.g. Water leaking out from under the curb in front of 150 W Main."
         }
       ]
     },
@@ -143,7 +176,7 @@
     },
     {
       "id": "peru_utilities_stormwater",
-      "name": "Peru Utilities - Stormwater & Underpass Flooding",
+      "name": "Peru Utilities - Stormwater & Drainage",
       "department": "Division of Water Management (Stormwater Coordinator)",
       "destinations": {
         "email": "nparkman@peruutilities.com",
@@ -159,18 +192,19 @@
           "type": "select",
           "required": true,
           "options": [
-            "Railroad Underpass Flooded / Standing Water (Broadway / Wayne St)",
+            "Railroad Underpass Flooded / Standing Water (Broadway Tunnel)",
             "Report a Plugged Catch Basin or Storm Drain",
             "Localized Street Flooding / Drain Overflow",
+            "Creek Bank Erosion / Riverbank / Drainage Ditch Issue",
             "Report a Stormwater Polluter or Illegal Dumping"
           ]
         },
         {
           "id": "details",
-          "label": "Location & Details",
+          "label": "Details",
           "type": "textarea",
           "required": false,
-          "placeholder": "e.g. Underpass is completely flooded with 1+ feet of standing water, cars turning around."
+          "placeholder": "e.g. Underpass is completely flooded with standing water, or severe bank erosion near ditch."
         }
       ]
     },
@@ -179,11 +213,7 @@
       "name": "Blocked Railroad Crossing",
       "department": "Federal Railroad Administration (FRA) & Local Dispatch",
       "destinations": {
-        "email": "brians@cityofperu.org",
-        "webformUrl": "https://www.fra.dot.gov/blockedcrossings/",
-        "phone": "(765) 473-5522",
-        "address": "Federal Railroad Administration / Local Authorities",
-        "socialUrl": null
+        "webformUrl": "https://www.fra.dot.gov/blockedcrossings/"
       },
       "questions": [
         {
@@ -209,6 +239,7 @@
             "Tippecanoo St Crossing",
             "Freemont St Crossing",
             "Grant St Crossing",
+            "Union St Crossing",
             "Kelly Ave Crossing",
             "Other Crossing (Include it in details)"
           ]
@@ -225,7 +256,7 @@
     {
       "id": "building_code_enforcement",
       "name": "Building, Zoning & Code Enforcement",
-      "department": "Peru Building & Zoning Department (Bill Sheets)",
+      "department": "Building & Zoning Dept (Bruce Carson, Comm. / Bill Sheets, Code Enf.)",
       "destinations": {
         "email": "buildingzoning@cityofperu.org",
         "webformUrl": "https://peru.portal.iworq.net/PERU/new-case/400/530",
@@ -244,8 +275,7 @@
             "Trash, Junk, or Blight in Yard/Alley",
             "Inoperable / Abandoned Vehicle",
             "Unsafe Structure / Property Maintenance",
-            "Illegal Signage or Zoning Violation",
-            "Other"
+            "Illegal Signage or Zoning Violation"
           ]
         },
         {
@@ -257,8 +287,7 @@
             "Occupied Residential",
             "Vacant / Abandoned Property",
             "Commercial Business",
-            "Alley / Public Right of Way",
-            "Other"
+            "Alley / Public Right of Way"
           ]
         },
         {
@@ -273,7 +302,7 @@
     {
       "id": "animal_control",
       "name": "Peru Animal Care & Control",
-      "department": "Peru Animal Care & Control",
+      "department": "Peru Animal Care & Control (Greg Douglass, Officer)",
       "destinations": {
         "email": "animalcontrol@cityofperu.org",
         "webformUrl": null,
@@ -314,11 +343,11 @@
     {
       "id": "parks_recreation",
       "name": "Parks & Recreation Department",
-      "department": "Peru Parks Department",
+      "department": "Peru Parks Department (Cliff Helvie, Superintendent)",
       "destinations": {
         "email": "parks@cityofperu.org",
         "webformUrl": "https://www.cityofperu.org/",
-        "phone": "(765) 472-2400",
+        "phone": "(765) 472-1432",
         "address": "Maconaquah Park, Peru, IN 46970",
         "socialUrl": "https://www.facebook.com/PeruParks"
       },
@@ -340,7 +369,7 @@
           "label": "Park / Facility Name",
           "type": "text",
           "required": true,
-          "placeholder": "e.g. Maconaquah Park, Riverview Park, Golf Course"
+          "placeholder": "e.g. Maconaquah Park, Miami's Fort, Municipal Golf Course"
         },
         {
           "id": "details",
