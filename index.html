@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -16,12 +16,15 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
   <style>
-    #map { height: calc(100vh - 160px); min-height: 400px; }
+    #map { height: calc(100vh - 220px); min-height: 350px; }
+    @media (max-width: 1024px) {
+      #map { height: 380px; }
+    }
     .category-card { transition: all 0.2s ease-in-out; }
     .category-card.active { border-color: #4f46e5; background-color: #f5f3ff; }
   </style>
 </head>
-<body class="bg-gray-100 font-sans text-gray-900 flex flex-col min-h-screen">
+<body class="bg-gray-100 font-sans text-gray-900 flex flex-col min-h-screen pb-20 lg:pb-0">
 
   <!-- Header Section -->
   <header class="bg-slate-900 text-white shadow-md">
@@ -72,17 +75,22 @@
     </section>
 
     <!-- Form Panel (6 cols on Desktop) -->
-    <section class="lg:col-span-6 bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col">
+    <section id="report-form-section" class="lg:col-span-6 bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col">
       
-      <div class="mb-4">
-        <h2 class="text-lg font-bold text-gray-800">
-          <i class="fa-solid fa-building-flag text-indigo-600 mr-1.5"></i> Step 2: Select Department & Category
-        </h2>
-        <p class="text-xs text-gray-500">Choose who this report should be dispatched to.</p>
+      <div class="mb-4 flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold text-gray-800">
+            <i class="fa-solid fa-building-flag text-indigo-600 mr-1.5"></i> Step 2: Select Category
+          </h2>
+          <p class="text-xs text-gray-500" id="step2-subtitle">Choose a category to display department questions.</p>
+        </div>
+        <button id="change-category-btn" class="hidden text-xs bg-gray-100 hover:bg-gray-200 text-indigo-700 font-medium px-2.5 py-1 rounded border border-gray-300 transition">
+          <i class="fa-solid fa-arrows-rotate mr-1"></i> Change Category
+        </button>
       </div>
 
-      <!-- Category List UI (Original Card-Based UX) -->
-      <div id="category-cards-container" class="grid grid-cols-1 gap-2.5 max-h-[260px] overflow-y-auto pr-1 mb-4">
+      <!-- Category List UI -->
+      <div id="category-cards-container" class="grid grid-cols-1 gap-2.5 max-h-[420px] overflow-y-auto pr-1 mb-4">
         <!-- Dynamically populated via JS -->
       </div>
 
@@ -94,7 +102,7 @@
           </h3>
           <span id="active-dept-tag" class="text-[11px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100"></span>
         </div>
-        <form id="dynamic-form" class="space-y-3 max-h-[260px] overflow-y-auto pr-1"></form>
+        <form id="dynamic-form" class="space-y-3 max-h-[300px] overflow-y-auto pr-1"></form>
       </div>
 
       <!-- Dispatch Output / Actions Box -->
@@ -127,6 +135,14 @@
 
   </main>
 
+  <!-- Floating Mobile "Next" / Action Bar -->
+  <div id="mobile-next-btn" class="lg:hidden fixed bottom-4 right-4 z-[9999] transition-all">
+    <button onclick="scrollToReportForm()" class="flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-5 rounded-full shadow-lg border border-indigo-500 text-sm">
+      <i class="fa-solid fa-arrow-down"></i>
+      <span>Next: Select Category</span>
+    </button>
+  </div>
+
   <!-- Footer -->
   <footer class="bg-white border-t border-gray-200 py-3 text-center text-xs text-gray-500 mt-auto">
     <div class="max-w-7xl mx-auto px-4 flex justify-between items-center flex-wrap">
@@ -158,6 +174,12 @@
       animal_control: "fa-paw",
       parks_recreation: "fa-tree"
     };
+
+    // Scroll Smoothly to Form Section on Mobile
+    function scrollToReportForm() {
+      const formSection = document.getElementById("report-form-section");
+      formSection.scrollIntoView({ behavior: "smooth" });
+    }
 
     // Application Initialization
     document.addEventListener("DOMContentLoaded", async () => {
@@ -221,7 +243,7 @@
       updateDispatchOutput();
     }
 
-    // Render original card-based category list
+    // Render category list with optional descriptions
     function renderCategoryCards() {
       const container = document.getElementById("category-cards-container");
       container.innerHTML = "";
@@ -232,6 +254,9 @@
         card.dataset.id = cat.id;
 
         const iconClass = categoryIcons[cat.id] || "fa-circle-info";
+        const descriptionHtml = cat.description 
+          ? `<p class="text-[11px] text-gray-500 mt-1 leading-snug">${cat.description}</p>`
+          : "";
         
         card.innerHTML = `
           <div class="bg-indigo-50 text-indigo-600 p-2.5 rounded-lg text-sm flex-shrink-0 mt-0.5">
@@ -242,8 +267,9 @@
               <h4 class="text-xs font-bold text-gray-900 truncate">${cat.name}</h4>
               <i class="fa-solid fa-circle-check text-indigo-600 hidden select-check text-xs"></i>
             </div>
-            <p class="text-[11px] text-gray-600 mt-0.5 truncate">${cat.department}</p>
-            <div class="text-[10px] text-gray-400 mt-1 flex items-center space-x-3">
+            <p class="text-[11px] font-medium text-indigo-600 mt-0.5 truncate">${cat.department}</p>
+            ${descriptionHtml}
+            <div class="text-[10px] text-gray-400 mt-1.5 flex items-center space-x-3">
               ${cat.destinations.email ? `<span><i class="fa-regular fa-envelope mr-1"></i>Email</span>` : ""}
               ${cat.destinations.phone ? `<span><i class="fa-solid fa-phone mr-1"></i>${cat.destinations.phone}</span>` : ""}
               ${cat.destinations.webformUrl ? `<span><i class="fa-solid fa-globe mr-1"></i>Webform</span>` : ""}
@@ -256,23 +282,45 @@
       });
     }
 
-    // Select category card and show questionnaire
+    // Select category card, hide other cards, and show questionnaire
     function selectCategory(categoryId) {
       selectedCategoryId = categoryId;
 
-      // Update Card Visual States
+      // Filter category list visibility
       document.querySelectorAll(".category-card").forEach((card) => {
         const check = card.querySelector(".select-check");
         if (card.dataset.id === categoryId) {
           card.classList.add("active");
+          card.classList.remove("hidden");
           check.classList.remove("hidden");
         } else {
           card.classList.remove("active");
+          card.classList.add("hidden");
           check.classList.add("hidden");
         }
       });
 
+      // Adjust UI headers and buttons
+      document.getElementById("change-category-btn").classList.remove("hidden");
+      document.getElementById("step2-subtitle").textContent = "Active category selected below.";
+
       renderQuestionnaire(categoryId);
+    }
+
+    // Reset category selection and show full category list again
+    function resetCategorySelection() {
+      selectedCategoryId = null;
+
+      document.querySelectorAll(".category-card").forEach((card) => {
+        card.classList.remove("active", "hidden");
+        const check = card.querySelector(".select-check");
+        if (check) check.classList.add("hidden");
+      });
+
+      document.getElementById("change-category-btn").classList.add("hidden");
+      document.getElementById("questionnaire-section").classList.add("hidden");
+      document.getElementById("dispatch-box").classList.add("hidden");
+      document.getElementById("step2-subtitle").textContent = "Choose a category to display department questions.";
     }
 
     // Setup event listeners
@@ -285,6 +333,8 @@
           });
         }
       });
+
+      document.getElementById("change-category-btn").addEventListener("click", resetCategorySelection);
 
       document.getElementById("copy-btn").addEventListener("click", () => {
         const text = buildEmailBody();
@@ -426,7 +476,8 @@
           {
             id: "default",
             name: "Other Issue",
-            department: "Detailed Categories Failed to Load, report issue to site owner ",
+            department: "Detailed Categories Failed to Load",
+            description: "Default fallback category when custom config is unavailable.",
             destinations: { phone: "(765) 555-2501" },
             questions: [{ id: "description", label: "Details", type: "textarea", required: true }]
           }

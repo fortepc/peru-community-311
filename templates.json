@@ -14,6 +14,7 @@
       "id": "street_sanitation",
       "name": "Street & Sanitation Department",
       "department": "Street & Sanitation Department (Brian Stillings, Commissioner)",
+      "description": "Report potholes, illegal alley dumping, damaged asphalt, roadway debris, or missed trash collection.",
       "destinations": {
         "email": "brians@cityofperu.org",
         "webformUrl": "https://www.cityofperu.org/egov/apps/action/center.egov?view=form;page=1;id=33",
@@ -60,6 +61,7 @@
       "id": "traffic_department",
       "name": "Traffic Department",
       "department": "Traffic Department (Todd Wolfe, Department Head)",
+      "description": "Report traffic signal outages, damaged/missing stop signs, faded crosswalk lines, or sightline hazards.",
       "destinations": {
         "email": "brians@cityofperu.org",
         "webformUrl": "https://www.cityofperu.org/",
@@ -93,6 +95,7 @@
       "id": "peru_utilities_water",
       "name": "Peru Utilities - Water & Wastewater",
       "department": "Division of Water Management (Jamin Beisiegel, Superintendent)",
+      "description": "Report water main leaks, sewer odor/backups, discolored water, or gushing water lines.",
       "destinations": {
         "email": "jbeisiegel@peruutilities.com",
         "webformUrl": "https://www.peruutilities.com/my-account-1/report-a-problem/",
@@ -138,6 +141,7 @@
       "id": "peru_utilities_electric",
       "name": "Peru Utilities - Electric & Line Dept",
       "department": "Line Department (Michael Biesenbach, T&D Superintendent)",
+      "description": "Report street light outages, power line tree trimming needs, or electric line hazards.",
       "destinations": {
         "email": "mbiesenbach@peruutilities.com",
         "webformUrl": "https://www.peruutilities.com/my-account-1/report-a-problem/",
@@ -178,6 +182,7 @@
       "id": "peru_utilities_stormwater",
       "name": "Peru Utilities - Stormwater & Drainage",
       "department": "Division of Water Management (Stormwater Coordinator)",
+      "description": "Report flooded underpasses (e.g., Broadway Tunnel), clogged storm drains, or creek bank erosion.",
       "destinations": {
         "email": "nparkman@peruutilities.com",
         "webformUrl": "https://www.peruutilities.com/my-account-1/report-a-problem/",
@@ -212,6 +217,7 @@
       "id": "railroad_crossing",
       "name": "Blocked Railroad Crossing",
       "department": "Federal Railroad Administration (FRA) & Local Dispatch",
+      "description": "Report stopped or blocking trains at local railroad intersections directly to FRA tracking.",
       "destinations": {
         "webformUrl": "https://www.fra.dot.gov/blockedcrossings/"
       },
@@ -236,7 +242,7 @@
           "options": [
             "Benton St Crossing",
             "Water St Crossing",
-            "Tippecanoo St Crossing",
+            "Tippecanoe St Crossing",
             "Freemont St Crossing",
             "Grant St Crossing",
             "Union St Crossing",
@@ -257,6 +263,7 @@
       "id": "building_code_enforcement",
       "name": "Building, Zoning & Code Enforcement",
       "department": "Building & Zoning Dept (Bruce Carson, Comm. / Bill Sheets, Code Enf.)",
+      "description": "Report high grass (>8 inches), trash/blight accumulation, unsafe structures, or abandoned vehicles.",
       "destinations": {
         "email": "buildingzoning@cityofperu.org",
         "webformUrl": "https://peru.portal.iworq.net/PERU/new-case/400/530",
@@ -303,6 +310,7 @@
       "id": "animal_control",
       "name": "Peru Animal Care & Control",
       "department": "Peru Animal Care & Control (Greg Douglass, Officer)",
+      "description": "Report stray or aggressive animals, lost/found pets, deceased animal removal, or welfare concerns.",
       "destinations": {
         "email": "animalcontrol@cityofperu.org",
         "webformUrl": null,
@@ -344,6 +352,7 @@
       "id": "parks_recreation",
       "name": "Parks & Recreation Department",
       "department": "Peru Parks Department (Cliff Helvie, Superintendent)",
+      "description": "Report fallen tree limbs, broken playground equipment, damaged park shelters, or graffiti.",
       "destinations": {
         "email": "parks@cityofperu.org",
         "webformUrl": "https://www.cityofperu.org/",
