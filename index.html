@@ -22,6 +22,21 @@
     }
     .category-card { transition: all 0.2s ease-in-out; }
     .category-card.active { border-color: #4f46e5; background-color: #f5f3ff; }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
   </style>
 </head>
 <body class="bg-gray-100 font-sans text-gray-900 flex flex-col min-h-screen pb-20 lg:pb-0">
@@ -73,11 +88,11 @@
         </button>
       </div>
     </section>
-
+    
     <!-- Form Panel (6 cols on Desktop) -->
-    <section id="report-form-section" class="lg:col-span-6 bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col">
+    <section id="report-form-section" class="lg:col-span-6 bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col min-h-[550px]">
       
-      <div class="mb-4 flex items-center justify-between">
+      <div class="mb-3 flex items-center justify-between flex-shrink-0">
         <div>
           <h2 class="text-lg font-bold text-gray-800">
             <i class="fa-solid fa-building-flag text-indigo-600 mr-1.5"></i> Step 2: Select Category
@@ -89,9 +104,11 @@
         </button>
       </div>
 
-      <!-- Category List UI -->
-      <div id="category-cards-container" class="grid grid-cols-1 gap-2.5 max-h-[420px] overflow-y-auto pr-1 mb-4">
-        <!-- Dynamically populated via JS -->
+      <!-- Category List Container with Visible Border and Custom Scrollbar -->
+      <div class="relative flex-grow flex flex-col min-h-0 mb-4">
+        <div id="category-cards-container" class="custom-scrollbar grid grid-cols-1 gap-2.5 overflow-y-auto pr-1.5 p-2 bg-slate-50/60 border border-gray-200 rounded-lg flex-grow min-h-[220px] max-h-[500px] shadow-inner">
+          <!-- Dynamically populated via JS -->
+        </div>
       </div>
 
       <!-- Dynamic Questionnaire Form -->
@@ -102,7 +119,7 @@
           </h3>
           <span id="active-dept-tag" class="text-[11px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100"></span>
         </div>
-        <form id="dynamic-form" class="space-y-3 max-h-[300px] overflow-y-auto pr-1"></form>
+        <form id="dynamic-form" class="custom-scrollbar space-y-3 max-h-[300px] overflow-y-auto pr-1.5"></form>
       </div>
 
       <!-- Dispatch Output / Actions Box -->
@@ -148,8 +165,8 @@
     <div class="max-w-7xl mx-auto px-4 flex justify-between items-center flex-wrap">
       <span>Peru Community 311 &bull; Open Source Civic Tech</span>
       <span>
-        <a href="https://github.com/peru-community-311/peru-community-311" target="_blank" class="text-indigo-600 hover:underline">
-          <i class="fa-brands fa-github mr-1"></i> GitHub Repository
+        <a href="https://github.com/fortepc/peru-community-311/" target="_blank" class="text-indigo-600 hover:underline">
+          <i class="fa-brands fa-github mr-1"></i> By FortePC on GitHub
         </a>
       </span>
     </div>
