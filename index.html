@@ -17,6 +17,8 @@
 
   <style>
     #map { height: calc(100vh - 160px); min-height: 400px; }
+    .category-card { transition: all 0.2s ease-in-out; }
+    .category-card.active { border-color: #4f46e5; background-color: #f5f3ff; }
   </style>
 </head>
 <body class="bg-gray-100 font-sans text-gray-900 flex flex-col min-h-screen">
@@ -50,8 +52,8 @@
   <!-- Main Content Layout -->
   <main class="flex-grow max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-6">
     
-    <!-- Map Panel (7 cols on Desktop) -->
-    <section class="lg:col-span-7 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+    <!-- Map Panel (6 cols on Desktop) -->
+    <section class="lg:col-span-6 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
       <div class="p-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center text-sm">
         <span class="font-semibold text-gray-700">
           <i class="fa-solid fa-crosshairs text-indigo-600 mr-1"></i> Step 1: Click map to pin location
@@ -69,32 +71,31 @@
       </div>
     </section>
 
-    <!-- Form Panel (5 cols on Desktop) -->
-    <section class="lg:col-span-5 bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col">
+    <!-- Form Panel (6 cols on Desktop) -->
+    <section class="lg:col-span-6 bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col">
       
       <div class="mb-4">
         <h2 class="text-lg font-bold text-gray-800">
-          <i class="fa-solid fa-clipboard-list text-indigo-600 mr-1.5"></i> Step 2: Issue Details
+          <i class="fa-solid fa-building-flag text-indigo-600 mr-1.5"></i> Step 2: Select Department & Category
         </h2>
-        <p class="text-xs text-gray-500">Select an issue category to load the department form.</p>
+        <p class="text-xs text-gray-500">Choose who this report should be dispatched to.</p>
       </div>
 
-      <!-- Category Selector -->
-      <div class="mb-4">
-        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Issue Category</label>
-        <select id="category-select" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-          <option value="">-- Choose Category --</option>
-        </select>
-      </div>
-
-      <!-- Department Information Box -->
-      <div id="department-box" class="hidden mb-4 p-3 bg-indigo-50 border border-indigo-100 rounded-lg text-xs">
-        <div class="font-bold text-indigo-900" id="dept-name"></div>
-        <div class="text-indigo-700 mt-0.5" id="dept-contacts"></div>
+      <!-- Category List UI (Original Card-Based UX) -->
+      <div id="category-cards-container" class="grid grid-cols-1 gap-2.5 max-h-[260px] overflow-y-auto pr-1 mb-4">
+        <!-- Dynamically populated via JS -->
       </div>
 
       <!-- Dynamic Questionnaire Form -->
-      <form id="dynamic-form" class="space-y-3 flex-grow overflow-y-auto max-h-[350px] pr-1 mb-4"></form>
+      <div id="questionnaire-section" class="hidden border-t border-gray-200 pt-4 mb-4">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wider">
+            <i class="fa-solid fa-pen-to-square text-indigo-600 mr-1"></i> Follow-up Questions
+          </h3>
+          <span id="active-dept-tag" class="text-[11px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100"></span>
+        </div>
+        <form id="dynamic-form" class="space-y-3 max-h-[260px] overflow-y-auto pr-1"></form>
+      </div>
 
       <!-- Dispatch Output / Actions Box -->
       <div id="dispatch-box" class="hidden mt-auto border-t border-gray-200 pt-4 space-y-2">
@@ -143,6 +144,20 @@
     let map, marker;
     let selectedCoords = { lat: 40.7537, lng: -86.0689 };
     let selectedAddress = "Center of Peru, IN";
+    let selectedCategoryId = null;
+
+    // Icon map for department cards
+    const categoryIcons = {
+      street_sanitation: "fa-road",
+      traffic_department: "fa-traffic-light",
+      peru_utilities_water: "fa-droplet",
+      peru_utilities_electric: "fa-bolt",
+      peru_utilities_stormwater: "fa-cloud-showers-heavy",
+      railroad_crossing: "fa-train",
+      building_code_enforcement: "fa-house-triangle-exclamation",
+      animal_control: "fa-paw",
+      parks_recreation: "fa-tree"
+    };
 
     // Application Initialization
     document.addEventListener("DOMContentLoaded", async () => {
@@ -161,7 +176,7 @@
         console.warn("Notice: Fetching templates.json failed, loading default fallback config.", err);
         appConfig = getDefaultConfig();
       }
-      populateCategories();
+      renderCategoryCards();
     }
 
     // Initialize Leaflet Map
@@ -206,23 +221,62 @@
       updateDispatchOutput();
     }
 
-    // Populate category dropdown
-    function populateCategories() {
-      const select = document.getElementById("category-select");
+    // Render original card-based category list
+    function renderCategoryCards() {
+      const container = document.getElementById("category-cards-container");
+      container.innerHTML = "";
+
       appConfig.categories.forEach((cat) => {
-        const opt = document.createElement("option");
-        opt.value = cat.id;
-        opt.textContent = cat.name;
-        select.appendChild(opt);
+        const card = document.createElement("div");
+        card.className = "category-card border border-gray-200 rounded-lg p-3 cursor-pointer hover:border-indigo-300 hover:bg-gray-50 flex items-start space-x-3";
+        card.dataset.id = cat.id;
+
+        const iconClass = categoryIcons[cat.id] || "fa-circle-info";
+        
+        card.innerHTML = `
+          <div class="bg-indigo-50 text-indigo-600 p-2.5 rounded-lg text-sm flex-shrink-0 mt-0.5">
+            <i class="fa-solid ${iconClass}"></i>
+          </div>
+          <div class="flex-grow min-w-0">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-bold text-gray-900 truncate">${cat.name}</h4>
+              <i class="fa-solid fa-circle-check text-indigo-600 hidden select-check text-xs"></i>
+            </div>
+            <p class="text-[11px] text-gray-600 mt-0.5 truncate">${cat.department}</p>
+            <div class="text-[10px] text-gray-400 mt-1 flex items-center space-x-3">
+              ${cat.destinations.email ? `<span><i class="fa-regular fa-envelope mr-1"></i>Email</span>` : ""}
+              ${cat.destinations.phone ? `<span><i class="fa-solid fa-phone mr-1"></i>${cat.destinations.phone}</span>` : ""}
+              ${cat.destinations.webformUrl ? `<span><i class="fa-solid fa-globe mr-1"></i>Webform</span>` : ""}
+            </div>
+          </div>
+        `;
+
+        card.addEventListener("click", () => selectCategory(cat.id));
+        container.appendChild(card);
       });
     }
 
-    // Setup event handlers
-    function setupEventListeners() {
-      document.getElementById("category-select").addEventListener("change", (e) => {
-        renderForm(e.target.value);
+    // Select category card and show questionnaire
+    function selectCategory(categoryId) {
+      selectedCategoryId = categoryId;
+
+      // Update Card Visual States
+      document.querySelectorAll(".category-card").forEach((card) => {
+        const check = card.querySelector(".select-check");
+        if (card.dataset.id === categoryId) {
+          card.classList.add("active");
+          check.classList.remove("hidden");
+        } else {
+          card.classList.remove("active");
+          check.classList.add("hidden");
+        }
       });
 
+      renderQuestionnaire(categoryId);
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
       document.getElementById("locate-me-btn").addEventListener("click", () => {
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition((pos) => {
@@ -242,29 +296,19 @@
       });
     }
 
-    // Render category questionnaire fields
-    function renderForm(categoryId) {
+    // Render questionnaire form for selected category
+    function renderQuestionnaire(categoryId) {
+      const section = document.getElementById("questionnaire-section");
       const form = document.getElementById("dynamic-form");
-      const deptBox = document.getElementById("department-box");
       const dispatchBox = document.getElementById("dispatch-box");
-      form.innerHTML = "";
+      const deptTag = document.getElementById("active-dept-tag");
 
-      if (!categoryId) {
-        deptBox.classList.add("hidden");
-        dispatchBox.classList.add("hidden");
-        return;
-      }
+      form.innerHTML = "";
 
       const category = appConfig.categories.find((c) => c.id === categoryId);
       if (!category) return;
 
-      // Update Department Info Box
-      document.getElementById("dept-name").textContent = category.department;
-      let contacts = [];
-      if (category.destinations.email) contacts.push(`Email: ${category.destinations.email}`);
-      if (category.destinations.phone) contacts.push(`Phone: ${category.destinations.phone}`);
-      document.getElementById("dept-contacts").textContent = contacts.join(" | ");
-      deptBox.classList.remove("hidden");
+      deptTag.textContent = category.department;
 
       // Render Dynamic Inputs
       category.questions.forEach((q) => {
@@ -276,7 +320,7 @@
         let input;
         if (q.type === "select") {
           input = document.createElement("select");
-          input.className = "w-full border border-gray-300 rounded-md p-2 text-xs focus:ring-1 focus:ring-indigo-500";
+          input.className = "w-full border border-gray-300 rounded-md p-2 text-xs focus:ring-1 focus:ring-indigo-500 bg-white";
           q.options.forEach((opt) => {
             const o = document.createElement("option");
             o.value = opt;
@@ -304,14 +348,15 @@
         form.appendChild(wrapper);
       });
 
+      section.classList.remove("hidden");
       dispatchBox.classList.remove("hidden");
       updateDispatchOutput();
     }
 
     // Build plain-text email summary
     function buildEmailBody() {
-      const categoryId = document.getElementById("category-select").value;
-      const category = appConfig.categories.find((c) => c.id === categoryId);
+      if (!selectedCategoryId) return "";
+      const category = appConfig.categories.find((c) => c.id === selectedCategoryId);
       if (!category) return "";
 
       let body = `CIVIC REPORT: ${category.name}\n`;
@@ -334,10 +379,11 @@
 
     // Update dispatch mailto links and external URLs
     function updateDispatchOutput() {
-      const categoryId = document.getElementById("category-select").value;
-      if (!categoryId) return;
+      if (!selectedCategoryId) return;
 
-      const category = appConfig.categories.find((c) => c.id === categoryId);
+      const category = appConfig.categories.find((c) => c.id === selectedCategoryId);
+      if (!category) return;
+
       const emailBody = buildEmailBody();
 
       // Mailto Button
@@ -378,10 +424,10 @@
         location: { city: "Peru", defaultCenter: { lat: 40.7537, lng: -86.0689 }, defaultZoom: 14 },
         categories: [
           {
-            id: "potholes_streets",
-            name: "Potholes & Street Damage",
-            department: "Peru Street Department",
-            destinations: { email: "streetdepartment@cityofperu.org", phone: "(765) 472-2501" },
+            id: "default",
+            name: "Other Issue",
+            department: "Detailed Categories Failed to Load, report issue to site owner ",
+            destinations: { phone: "(765) 555-2501" },
             questions: [{ id: "description", label: "Details", type: "textarea", required: true }]
           }
         ]
