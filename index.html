@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Peru Community 311 - Citizen Issue Reporting</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    #map { height: calc(100vh - 160px); min-height: 400px; }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans text-gray-900 flex flex-col min-h-screen">
+
+  <!-- Header Section -->
+  <header class="bg-slate-900 text-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center">
+      <div class="flex items-center space-x-3">
+        <div class="bg-indigo-600 p-2 rounded-lg text-white">
+          <i class="fa-solid fa-map-location-dot text-2xl"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight">Peru Community 311</h1>
+          <p class="text-xs text-slate-400">Citizen-Powered Civic Reporting for Peru, Indiana</p>
+        </div>
+      </div>
+      <div class="mt-2 sm:mt-0 flex items-center space-x-2">
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+          <i class="fa-solid fa-circle-check mr-1 text-[10px]"></i> Open Source 311
+        </span>
+      </div>
+    </div>
+    
+    <!-- Disclaimer Banner -->
+    <div class="bg-amber-500/10 border-y border-amber-500/20 px-4 py-1.5 text-xs text-amber-200 text-center">
+      <i class="fa-solid fa-circle-info mr-1"></i>
+      <strong>Independent Tool:</strong> Peru Community 311 is run by local residents to generate structured municipal communications. It is not an official city agency.
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="flex-grow max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-6">
+    
+    <!-- Map Panel (7 cols on Desktop) -->
+    <section class="lg:col-span-7 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+      <div class="p-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center text-sm">
+        <span class="font-semibold text-gray-700">
+          <i class="fa-solid fa-crosshairs text-indigo-600 mr-1"></i> Step 1: Click map to pin location
+        </span>
+        <span id="location-status" class="text-xs text-gray-500 italic">Click anywhere on map</span>
+      </div>
+      <div id="map" class="w-full flex-grow"></div>
+      <div class="p-3 bg-gray-50 border-t border-gray-200 text-xs text-gray-600 flex justify-between items-center">
+        <div>
+          <strong>Selected Location:</strong> <span id="address-display" class="text-gray-900 font-medium">Click map to select location</span>
+        </div>
+        <button id="locate-me-btn" class="px-2.5 py-1 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-100 text-gray-700">
+          <i class="fa-solid fa-location-arrow mr-1 text-indigo-600"></i> My Location
+        </button>
+      </div>
+    </section>
+
+    <!-- Form Panel (5 cols on Desktop) -->
+    <section class="lg:col-span-5 bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col">
+      
+      <div class="mb-4">
+        <h2 class="text-lg font-bold text-gray-800">
+          <i class="fa-solid fa-clipboard-list text-indigo-600 mr-1.5"></i> Step 2: Issue Details
+        </h2>
+        <p class="text-xs text-gray-500">Select an issue category to load the department form.</p>
+      </div>
+
+      <!-- Category Selector -->
+      <div class="mb-4">
+        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Issue Category</label>
+        <select id="category-select" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <option value="">-- Choose Category --</option>
+        </select>
+      </div>
+
+      <!-- Department Information Box -->
+      <div id="department-box" class="hidden mb-4 p-3 bg-indigo-50 border border-indigo-100 rounded-lg text-xs">
+        <div class="font-bold text-indigo-900" id="dept-name"></div>
+        <div class="text-indigo-700 mt-0.5" id="dept-contacts"></div>
+      </div>
+
+      <!-- Dynamic Questionnaire Form -->
+      <form id="dynamic-form" class="space-y-3 flex-grow overflow-y-auto max-h-[350px] pr-1 mb-4"></form>
+
+      <!-- Dispatch Output / Actions Box -->
+      <div id="dispatch-box" class="hidden mt-auto border-t border-gray-200 pt-4 space-y-2">
+        <div class="text-xs font-bold text-gray-700 uppercase mb-2">Step 3: Send Report</div>
+        
+        <!-- Mailto Button -->
+        <a id="mailto-btn" href="#" target="_blank" class="w-full flex items-center justify-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-4 rounded-lg text-sm transition shadow-sm">
+          <i class="fa-solid fa-paper-plane"></i>
+          <span>Send Report via Email</span>
+        </a>
+
+        <!-- Secondary Action Row -->
+        <div class="grid grid-cols-2 gap-2">
+          <button id="copy-btn" type="button" class="flex items-center justify-center space-x-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-3 rounded-lg text-xs border border-gray-300 transition">
+            <i class="fa-solid fa-copy"></i>
+            <span id="copy-text">Copy Text</span>
+          </button>
+          <a id="phone-btn" href="#" class="hidden flex items-center justify-center space-x-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-medium py-2 px-3 rounded-lg text-xs border border-emerald-200 transition">
+            <i class="fa-solid fa-phone"></i>
+            <span>Call Dept</span>
+          </a>
+        </div>
+
+        <!-- External Webform / Social Links -->
+        <div id="extra-links" class="pt-2 text-xs text-gray-500 space-y-1"></div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-gray-200 py-3 text-center text-xs text-gray-500 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 flex justify-between items-center flex-wrap">
+      <span>Peru Community 311 &bull; Open Source Civic Tech</span>
+      <span>
+        <a href="https://github.com/peru-community-311/peru-community-311" target="_blank" class="text-indigo-600 hover:underline">
+          <i class="fa-brands fa-github mr-1"></i> GitHub Repository
+        </a>
+      </span>
+    </div>
+  </footer>
+
+  <script>
+    let appConfig = null;
+    let map, marker;
+    let selectedCoords = { lat: 40.7537, lng: -86.0689 };
+    let selectedAddress = "Center of Peru, IN";
+
+    // Application Initialization
+    document.addEventListener("DOMContentLoaded", async () => {
+      await loadTemplates();
+      initMap();
+      setupEventListeners();
+    });
+
+    // Fetch local templates.json with inline fallback
+    async function loadTemplates() {
+      try {
+        const response = await fetch("templates.json");
+        if (!response.ok) throw new Error("Failed to load templates.json");
+        appConfig = await response.json();
+      } catch (err) {
+        console.warn("Notice: Fetching templates.json failed, loading default fallback config.", err);
+        appConfig = getDefaultConfig();
+      }
+      populateCategories();
+    }
+
+    // Initialize Leaflet Map
+    function initMap() {
+      const center = appConfig.location.defaultCenter;
+      map = L.map("map").setView([center.lat, center.lng], appConfig.location.defaultZoom);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      marker = L.marker([center.lat, center.lng], { draggable: true }).addTo(map);
+
+      map.on("click", (e) => setMarker(e.latlng.lat, e.latlng.lng));
+      marker.on("dragend", (e) => {
+        const pos = e.target.getLatLng();
+        setMarker(pos.lat, pos.lng);
+      });
+
+      reverseGeocode(center.lat, center.lng);
+    }
+
+    // Set map pin and trigger address lookup
+    function setMarker(lat, lng) {
+      selectedCoords = { lat, lng };
+      marker.setLatLng([lat, lng]);
+      reverseGeocode(lat, lng);
+    }
+
+    // OpenStreetMap Reverse Geocoding
+    async function reverseGeocode(lat, lng) {
+      const display = document.getElementById("address-display");
+      display.textContent = "Finding address...";
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+        const data = await res.json();
+        selectedAddress = data.display_name ? data.display_name.split(",").slice(0, 3).join(",") : `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+      } catch (e) {
+        selectedAddress = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+      }
+      display.textContent = selectedAddress;
+      updateDispatchOutput();
+    }
+
+    // Populate category dropdown
+    function populateCategories() {
+      const select = document.getElementById("category-select");
+      appConfig.categories.forEach((cat) => {
+        const opt = document.createElement("option");
+        opt.value = cat.id;
+        opt.textContent = cat.name;
+        select.appendChild(opt);
+      });
+    }
+
+    // Setup event handlers
+    function setupEventListeners() {
+      document.getElementById("category-select").addEventListener("change", (e) => {
+        renderForm(e.target.value);
+      });
+
+      document.getElementById("locate-me-btn").addEventListener("click", () => {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition((pos) => {
+            map.setView([pos.coords.latitude, pos.coords.longitude], 16);
+            setMarker(pos.coords.latitude, pos.coords.longitude);
+          });
+        }
+      });
+
+      document.getElementById("copy-btn").addEventListener("click", () => {
+        const text = buildEmailBody();
+        navigator.clipboard.writeText(text).then(() => {
+          const btnText = document.getElementById("copy-text");
+          btnText.textContent = "Copied!";
+          setTimeout(() => (btnText.textContent = "Copy Text"), 2000);
+        });
+      });
+    }
+
+    // Render category questionnaire fields
+    function renderForm(categoryId) {
+      const form = document.getElementById("dynamic-form");
+      const deptBox = document.getElementById("department-box");
+      const dispatchBox = document.getElementById("dispatch-box");
+      form.innerHTML = "";
+
+      if (!categoryId) {
+        deptBox.classList.add("hidden");
+        dispatchBox.classList.add("hidden");
+        return;
+      }
+
+      const category = appConfig.categories.find((c) => c.id === categoryId);
+      if (!category) return;
+
+      // Update Department Info Box
+      document.getElementById("dept-name").textContent = category.department;
+      let contacts = [];
+      if (category.destinations.email) contacts.push(`Email: ${category.destinations.email}`);
+      if (category.destinations.phone) contacts.push(`Phone: ${category.destinations.phone}`);
+      document.getElementById("dept-contacts").textContent = contacts.join(" | ");
+      deptBox.classList.remove("hidden");
+
+      // Render Dynamic Inputs
+      category.questions.forEach((q) => {
+        const wrapper = document.createElement("div");
+        const label = document.createElement("label");
+        label.className = "block text-xs font-medium text-gray-700 mb-1";
+        label.textContent = q.label + (q.required ? " *" : "");
+
+        let input;
+        if (q.type === "select") {
+          input = document.createElement("select");
+          input.className = "w-full border border-gray-300 rounded-md p-2 text-xs focus:ring-1 focus:ring-indigo-500";
+          q.options.forEach((opt) => {
+            const o = document.createElement("option");
+            o.value = opt;
+            o.textContent = opt;
+            input.appendChild(o);
+          });
+        } else if (q.type === "textarea") {
+          input = document.createElement("textarea");
+          input.className = "w-full border border-gray-300 rounded-md p-2 text-xs focus:ring-1 focus:ring-indigo-500 h-20";
+          if (q.placeholder) input.placeholder = q.placeholder;
+        } else {
+          input = document.createElement("input");
+          input.type = "text";
+          input.className = "w-full border border-gray-300 rounded-md p-2 text-xs focus:ring-1 focus:ring-indigo-500";
+          if (q.placeholder) input.placeholder = q.placeholder;
+        }
+
+        input.dataset.questionId = q.id;
+        input.dataset.questionLabel = q.label;
+        input.addEventListener("input", updateDispatchOutput);
+        input.addEventListener("change", updateDispatchOutput);
+
+        wrapper.appendChild(label);
+        wrapper.appendChild(input);
+        form.appendChild(wrapper);
+      });
+
+      dispatchBox.classList.remove("hidden");
+      updateDispatchOutput();
+    }
+
+    // Build plain-text email summary
+    function buildEmailBody() {
+      const categoryId = document.getElementById("category-select").value;
+      const category = appConfig.categories.find((c) => c.id === categoryId);
+      if (!category) return "";
+
+      let body = `CIVIC REPORT: ${category.name}\n`;
+      body += `Department: ${category.department}\n`;
+      body += `Location: ${selectedAddress}\n`;
+      body += `Coordinates: https://maps.google.com/?q=${selectedCoords.lat},${selectedCoords.lng}\n`;
+      body += `--------------------------------------------------\n\n`;
+
+      const inputs = document.querySelectorAll("#dynamic-form [data-question-id]");
+      inputs.forEach((input) => {
+        const label = input.dataset.questionLabel;
+        const val = input.value || "N/A";
+        body += `${label}:\n${val}\n\n`;
+      });
+
+      body += `--------------------------------------------------\n`;
+      body += `Report generated via Peru Community 311 (open-source citizen portal)`;
+      return body;
+    }
+
+    // Update dispatch mailto links and external URLs
+    function updateDispatchOutput() {
+      const categoryId = document.getElementById("category-select").value;
+      if (!categoryId) return;
+
+      const category = appConfig.categories.find((c) => c.id === categoryId);
+      const emailBody = buildEmailBody();
+
+      // Mailto Button
+      const mailtoBtn = document.getElementById("mailto-btn");
+      if (category.destinations.email) {
+        const subject = encodeURIComponent(`Civic Report: ${category.name} - ${selectedAddress}`);
+        const body = encodeURIComponent(emailBody);
+        mailtoBtn.href = `mailto:${category.destinations.email}?subject=${subject}&body=${body}`;
+        mailtoBtn.classList.remove("opacity-50", "pointer-events-none");
+      } else {
+        mailtoBtn.href = "#";
+        mailtoBtn.classList.add("opacity-50", "pointer-events-none");
+      }
+
+      // Phone Call Button
+      const phoneBtn = document.getElementById("phone-btn");
+      if (category.destinations.phone) {
+        phoneBtn.href = `tel:${category.destinations.phone.replace(/[^0-9]/g, "")}`;
+        phoneBtn.classList.remove("hidden");
+      } else {
+        phoneBtn.classList.add("hidden");
+      }
+
+      // Extra Webform & Social Links
+      const extraLinks = document.getElementById("extra-links");
+      extraLinks.innerHTML = "";
+      if (category.destinations.webformUrl) {
+        extraLinks.innerHTML += `<div><a href="${category.destinations.webformUrl}" target="_blank" class="text-indigo-600 hover:underline"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Official City Webform</a></div>`;
+      }
+      if (category.destinations.socialUrl) {
+        extraLinks.innerHTML += `<div><a href="${category.destinations.socialUrl}" target="_blank" class="text-indigo-600 hover:underline"><i class="fa-brands fa-facebook mr-1"></i> Department Facebook Page</a></div>`;
+      }
+    }
+
+    // Default Fallback Config
+    function getDefaultConfig() {
+      return {
+        location: { city: "Peru", defaultCenter: { lat: 40.7537, lng: -86.0689 }, defaultZoom: 14 },
+        categories: [
+          {
+            id: "potholes_streets",
+            name: "Potholes & Street Damage",
+            department: "Peru Street Department",
+            destinations: { email: "streetdepartment@cityofperu.org", phone: "(765) 472-2501" },
+            questions: [{ id: "description", label: "Details", type: "textarea", required: true }]
+          }
+        ]
+      };
+    }
+  </script>
+</body>
+</html>
