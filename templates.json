@@ -12,9 +12,9 @@
   "categories": [
     {
       "id": "street_sanitation",
-      "name": "Street & Sanitation Department",
+      "name": "1. Street Surface & Debris (Potholes, Roadkill, Obstructions)",
       "department": "Street & Sanitation Department (Brian Stillings, Commissioner)",
-      "description": "Report potholes, illegal alley dumping, damaged asphalt, roadway debris, or missed trash collection.",
+      "description": "Report potholes, asphalt damage, roadkill removal on street/alley, fallen road debris, or missed trash collection.",
       "destinations": {
         "email": "brians@cityofperu.org",
         "webformUrl": "https://www.cityofperu.org/egov/apps/action/center.egov?view=form;page=1;id=33",
@@ -25,15 +25,16 @@
       "questions": [
         {
           "id": "issue_type",
-          "label": "Type of Street / Sanitation Issue",
+          "label": "Type of Roadway / Surface Hazard",
           "type": "select",
           "required": true,
           "options": [
-            "Pothole / Road Damage",
-            "Alley Obstruction / Overgrowth / Illegal Alley Dumping",
-            "Sinking / Cracked Asphalt",
-            "Debris / Obstruction in Roadway",
-            "Trash / Trash Can / Recycling Issue",
+            "Pothole / Deep Asphalt Crater",
+            "Deceased Animal Removal (Roadkill on Public Street)",
+            "Roadway Obstruction / Fallen Cargo / Debris",
+            "Alley Obstruction / Illegal Alley Dumping",
+            "Sinking / Cracked Pavement",
+            "Trash / Recycling Collection Issue",
             "Snow / Ice Removal Request"
           ]
         },
@@ -45,7 +46,7 @@
           "options": [
             "No - Traffic moving normally",
             "Partially - Drivers must slow down or swerve",
-            "Completely - Lane or road completely blocked"
+            "Completely - Lane or alley completely blocked"
           ]
         },
         {
@@ -53,15 +54,15 @@
           "label": "Location Details & Description",
           "type": "textarea",
           "required": false,
-          "placeholder": "e.g. Deep pothole or overgrown alley brush behind 200 W Canal St."
+          "placeholder": "e.g. Deep pothole or roadkill in eastbound lane near 200 W Canal St."
         }
       ]
     },
     {
-      "id": "traffic_department",
-      "name": "Traffic Department",
+      "id": "traffic_signals_signs",
+      "name": "2. Traffic Signals, Signs & Road Control Devices",
       "department": "Traffic Department (Todd Wolfe, Department Head)",
-      "description": "Report traffic signal outages, damaged/missing stop signs, faded crosswalk lines, or sightline hazards.",
+      "description": "Report broken or dark traffic lights, knocked-down stop/yield signs, missing street markers, or damaged signal poles.",
       "destinations": {
         "email": "brians@cityofperu.org",
         "webformUrl": "https://www.cityofperu.org/",
@@ -72,14 +73,15 @@
       "questions": [
         {
           "id": "traffic_issue",
-          "label": "Traffic Issue Type",
+          "label": "Traffic Infrastructure Issue",
           "type": "select",
           "required": true,
           "options": [
-            "Traffic Signal / Light Malfunction",
-            "Damaged or Missing Street Sign / Stop Sign",
-            "Crosswalk / Curb Painting Need",
-            "Traffic Sightline Obstruction"
+            "Traffic Signal Dark / Flashing / Malfunctioning",
+            "Damaged or Knocked-Down Stop / Yield Sign",
+            "Missing Street Name Sign",
+            "Crosswalk / Curb Line Painting Need",
+            "Damaged Traffic Signal Pole / Push Button"
           ]
         },
         {
@@ -92,97 +94,55 @@
       ]
     },
     {
-      "id": "peru_utilities_water",
-      "name": "Peru Utilities - Water & Wastewater",
-      "department": "Division of Water Management (Jamin Beisiegel, Superintendent)",
-      "description": "Report water main leaks, sewer odor/backups, discolored water, or gushing water lines.",
+      "id": "foliage_hazard_tree",
+      "name": "3. Hazardous Trees, Foliage & Sign Visibility Obstructions",
+      "department": "Peru Street Dept / Utility Line Trim / Parks Dept",
+      "description": "Report overgrown branches blocking stop signs/sightlines, fallen limbs blocking roads, or tree branches threatening power/telecom wires.",
       "destinations": {
-        "email": "jbeisiegel@peruutilities.com",
-        "webformUrl": "https://www.peruutilities.com/my-account-1/report-a-problem/",
-        "phone": "(765) 473-7651",
-        "address": "330 E Canal St, Peru, IN 46970",
-        "socialUrl": "https://www.facebook.com/PeruUtilities"
+        "email": "brians@cityofperu.org",
+        "webformUrl": "https://www.cityofperu.org/",
+        "phone": "(765) 472-2501",
+        "address": "351 E Canal St, Peru, IN 46970",
+        "socialUrl": null
       },
       "questions": [
         {
-          "id": "water_issue",
-          "label": "Water / Wastewater Problem",
+          "id": "foliage_issue",
+          "label": "Foliage / Tree Safety Hazard",
           "type": "select",
           "required": true,
           "options": [
-            "Water Main Leak / Water Bubbling Up",
-            "Low Water Pressure",
-            "Discolored or Odorous Water",
-            "Sewer Backup / Heavy Sewer Odor",
-            "Report Miscellaneous Water or Wastewater Problems"
+            "Overgrown Tree / Hedge Obscuring Stop Sign or Intersection View",
+            "Fallen Tree Branch Blocking Roadway / Alley / Sidewalk",
+            "Tree Limb Resting on Wires (Power / Telecom)",
+            "Dead or Leaning Municipal Tree Posing Immediate Fall Risk"
           ]
         },
         {
-          "id": "urgency",
-          "label": "Urgency Level",
+          "id": "near_utility_lines",
+          "label": "Is the tree touching power or utility lines?",
           "type": "select",
           "required": true,
           "options": [
-            "Standard Report",
-            "Active Water Main Break / Gushing Water",
-            "Emergency (Threat to safety/property - Call 765-473-7651 immediately)"
+            "No - Clear of utility lines",
+            "Yes - Touching or tangled in electrical / telecom lines",
+            "Unsure"
           ]
         },
         {
           "id": "details",
-          "label": "Specific Location & Notes",
+          "label": "Specific Location & Visual Description",
           "type": "textarea",
           "required": false,
-          "placeholder": "e.g. Water leaking out from under the curb in front of 150 W Main."
+          "placeholder": "e.g. Low pine branch completely blocks view of stop sign approaching 5th & Broadway."
         }
       ]
     },
     {
-      "id": "peru_utilities_electric",
-      "name": "Peru Utilities - Electric & Line Dept",
-      "department": "Line Department (Michael Biesenbach, T&D Superintendent)",
-      "description": "Report street light outages, power line tree trimming needs, or electric line hazards.",
-      "destinations": {
-        "email": "mbiesenbach@peruutilities.com",
-        "webformUrl": "https://www.peruutilities.com/my-account-1/report-a-problem/",
-        "phone": "(765) 473-6681",
-        "address": "330 E Canal St, Peru, IN 46970",
-        "socialUrl": "https://www.facebook.com/PeruUtilities"
-      },
-      "questions": [
-        {
-          "id": "electric_issue",
-          "label": "Electrical / Line Problem",
-          "type": "select",
-          "required": true,
-          "options": [
-            "Report a Street Light Out",
-            "Report a Tree that Needs Trimmed (Near Power Lines)",
-            "Report Miscellaneous Electrical Problems",
-            "Power Outage / Sparking Line"
-          ]
-        },
-        {
-          "id": "pole_number",
-          "label": "Pole Number or Nearest Address",
-          "type": "text",
-          "required": false,
-          "placeholder": "e.g. Pole # printed on street light or address nearest to light"
-        },
-        {
-          "id": "details",
-          "label": "Additional Context",
-          "type": "textarea",
-          "required": false,
-          "placeholder": "e.g. Street light flickers constantly or is completely dark at night."
-        }
-      ]
-    },
-    {
-      "id": "peru_utilities_stormwater",
-      "name": "Peru Utilities - Stormwater & Drainage",
-      "department": "Division of Water Management (Stormwater Coordinator)",
-      "description": "Report flooded underpasses (e.g., Broadway Tunnel), clogged storm drains, or creek bank erosion.",
+      "id": "stormwater_flooding_drain",
+      "name": "4. Storm Drains, Flooding & Railroad Underpass (Broadway Tunnel)",
+      "department": "Peru Utilities - Stormwater & Drainage",
+      "description": "Report clogged storm drain catch basins, standing water at the Broadway Tunnel underpass, or localized street flooding.",
       "destinations": {
         "email": "nparkman@peruutilities.com",
         "webformUrl": "https://www.peruutilities.com/my-account-1/report-a-problem/",
@@ -193,31 +153,236 @@
       "questions": [
         {
           "id": "stormwater_issue",
-          "label": "Stormwater / Flooding Issue",
+          "label": "Drainage / Flooding Problem",
           "type": "select",
           "required": true,
           "options": [
             "Railroad Underpass Flooded / Standing Water (Broadway Tunnel)",
-            "Report a Plugged Catch Basin or Storm Drain",
-            "Localized Street Flooding / Drain Overflow",
-            "Creek Bank Erosion / Riverbank / Drainage Ditch Issue",
-            "Report a Stormwater Polluter or Illegal Dumping"
+            "Clogged Storm Drain Inlet / Leaf & Trash Accumulation",
+            "Localized Street Flooding / Surface Overflow",
+            "Creek Bank Erosion / Riverbank / Ditch Washout",
+            "Stormwater Contamination / Illegal Dumping in Drain"
           ]
         },
         {
           "id": "details",
-          "label": "Details",
+          "label": "Specific Location & Water Depth Details",
           "type": "textarea",
           "required": false,
-          "placeholder": "e.g. Underpass is completely flooded with standing water, or severe bank erosion near ditch."
+          "placeholder": "e.g. Broadway underpass flooded with 6+ inches of standing water after heavy rain."
+        }
+      ]
+    },
+    {
+      "id": "peru_utilities_water_sewer",
+      "name": "5. Water Main Leaks, Running Water & Sewage Odors",
+      "department": "Peru Utilities - Division of Water Management",
+      "description": "Report gushing water leaks, water bubbling from street/curb, low pressure, discolored water, or raw sewage backup/smell.",
+      "destinations": {
+        "email": "jbeisiegel@peruutilities.com",
+        "webformUrl": "https://www.peruutilities.com/my-account-1/report-a-problem/",
+        "phone": "(765) 473-7651",
+        "address": "330 E Canal St, Peru, IN 46970",
+        "socialUrl": "https://www.facebook.com/PeruUtilities"
+      },
+      "questions": [
+        {
+          "id": "water_issue",
+          "label": "Water / Sewer Issue Type",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Suspected Water Main Break / Gushing Water in Street or Yard",
+            "Water Bubbling Up From Curb / Sidewalk",
+            "Sewage Odor / Raw Sewer Line Backup",
+            "Discolored / Cloudy / Rusty Water",
+            "Unusually Low Water Pressure"
+          ]
+        },
+        {
+          "id": "urgency",
+          "label": "Report Urgency",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Standard Maintenance Report",
+            "Active Water Main Break / Property Threat",
+            "EMERGENCY (Call 765-473-7651 immediately for 24/7 dispatch)"
+          ]
+        },
+        {
+          "id": "details",
+          "label": "Location & Observed Conditions",
+          "type": "textarea",
+          "required": false,
+          "placeholder": "e.g. Water stream flowing out from lawn near meter pit in front of 120 E 3rd St."
+        }
+      ]
+    },
+    {
+      "id": "natural_gas_nipsco",
+      "name": "6. Natural Gas Smell or Pipeline Hazard (NIPSCO)",
+      "department": "NIPSCO Gas Emergency Dispatch",
+      "description": "Report suspected natural gas leaks or rotten egg odors. IF YOU SMELL GAS INSIDE OR NEAR BUILDINGS, EVACUATE IMMEDIATELY AND CALL 911.",
+      "destinations": {
+        "email": null,
+        "webformUrl": "https://www.nipsco.com/outages/report-a-gas-leak",
+        "phone": "(800) 634-3524",
+        "address": "NIPSCO Customer Operations",
+        "socialUrl": "https://www.facebook.com/NIPSCO"
+      },
+      "questions": [
+        {
+          "id": "gas_hazard_type",
+          "label": "Gas Incident Type",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Outdoor Rotten Egg / Sulfur Smell Near Street or Alley",
+            "Hissing Sound Near Gas Meter or Main Line",
+            "Damaged Gas Line During Excavation / Digging",
+            "Indoor Gas Smell (EVACUATE IMMEDIATELY & CALL 1-800-634-3524 / 911)"
+          ]
+        },
+        {
+          "id": "details",
+          "label": "Location & Details",
+          "type": "textarea",
+          "required": false,
+          "placeholder": "e.g. Distinct rotten egg gas odor near alley meter behind 45 N Broadway."
+        }
+      ]
+    },
+    {
+      "id": "animal_control",
+      "name": "7. Animal Care & Control (Loose, Injured, or Stray Animals)",
+      "department": "Peru Animal Care & Control (Greg Douglass, Officer)",
+      "description": "Report stray dogs running loose, aggressive or nuisance animals, injured wildlife, or lost/found pets.",
+      "destinations": {
+        "email": "animalcontrol@cityofperu.org",
+        "webformUrl": null,
+        "phone": "(765) 473-6055",
+        "address": "75 Webb Bell Dr, Peru, IN 46970",
+        "socialUrl": "https://www.facebook.com/p/Peru-Animal-Care-Control-100064379768541/"
+      },
+      "questions": [
+        {
+          "id": "issue_type",
+          "label": "Type of Animal Issue",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Stray Animal Loose in Traffic / Neighborhood",
+            "Aggressive / Nuisance Animal",
+            "Lost or Found Pet Report",
+            "Animal Neglect / Cruelty / Welfare Concern",
+            "Injured Wildlife Request"
+          ]
+        },
+        {
+          "id": "animal_species",
+          "label": "Species",
+          "type": "select",
+          "required": true,
+          "options": ["Dog", "Cat", "Wildlife", "Other"]
+        },
+        {
+          "id": "details",
+          "label": "Animal Description & Last Known Location",
+          "type": "textarea",
+          "required": false,
+          "placeholder": "e.g. Brown lab mix running loose near Broadway. Friendly but heading towards highway."
+        }
+      ]
+    },
+    {
+      "id": "parks_recreation",
+      "name": "8. Parks & Recreation Facilities (Damage, Vandalism, Playgrounds)",
+      "department": "Peru Parks Department (Cliff Helvie, Superintendent)",
+      "description": "Report broken playground equipment, damaged park shelters, trash overflow in parks, or vandalism at Maconaquah Park & municipal facilities.",
+      "destinations": {
+        "email": "parks@cityofperu.org",
+        "webformUrl": "https://www.cityofperu.org/",
+        "phone": "(765) 472-1432",
+        "address": "Maconaquah Park, Peru, IN 46970",
+        "socialUrl": "https://www.facebook.com/PeruParks"
+      },
+      "questions": [
+        {
+          "id": "park_issue",
+          "label": "Park Issue Type",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Damaged / Broken Playground Equipment",
+            "Park Shelter / Restroom / Bench Damage",
+            "Overflowing Trash Receptacles in Park",
+            "Vandalism or Graffiti on Park Structure",
+            "Fallen Tree Branch on Park Trail or Play Area"
+          ]
+        },
+        {
+          "id": "park_name",
+          "label": "Park / Facility Name",
+          "type": "text",
+          "required": true,
+          "placeholder": "e.g. Maconaquah Park, Miami's Fort, Riverwalk, Municipal Golf Course"
+        },
+        {
+          "id": "details",
+          "label": "Specific Location & Context",
+          "type": "textarea",
+          "required": false,
+          "placeholder": "e.g. Broken swing chain on the west swing set near the big playground shelter."
+        }
+      ]
+    },
+    {
+      "id": "peru_utilities_electric",
+      "name": "9. Electric Power Outage & Street Light Outages",
+      "department": "Peru Utilities Line Department (Michael Biesenbach, T&D Supt)",
+      "description": "Report street light outages, flickering neighborhood lights, damaged utility poles, or localized electric outages.",
+      "destinations": {
+        "email": "mbiesenbach@peruutilities.com",
+        "webformUrl": "https://www.peruutilities.com/my-account-1/report-a-problem/",
+        "phone": "(765) 473-6681",
+        "address": "330 E Canal St, Peru, IN 46970",
+        "socialUrl": "https://www.facebook.com/PeruUtilities"
+      },
+      "questions": [
+        {
+          "id": "electric_issue",
+          "label": "Electrical Issue",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Street Light Out / Flickering Dark at Night",
+            "Power Outage / Neighborhood Blackout",
+            "Damaged Electrical Pole / Loose Equipment",
+            "Sparking Wire / Electrical Hazard"
+          ]
+        },
+        {
+          "id": "pole_number",
+          "label": "Pole Tag Number or Nearest Address",
+          "type": "text",
+          "required": false,
+          "placeholder": "e.g. Metal tag number on pole or nearest street address"
+        },
+        {
+          "id": "details",
+          "label": "Additional Context",
+          "type": "textarea",
+          "required": false,
+          "placeholder": "e.g. Street light over intersection flickers on and off every few minutes."
         }
       ]
     },
     {
       "id": "railroad_crossing",
-      "name": "Blocked Railroad Crossing",
+      "name": "10. Blocked Railroad Crossing (Stopped Trains)",
       "department": "Federal Railroad Administration (FRA) & Local Dispatch",
-      "description": "Report stopped or blocking trains at local railroad intersections directly to FRA tracking.",
+      "description": "Report stopped or blocking trains at local grade crossings directly to Federal Railroad Administration safety tracking.",
       "destinations": {
         "webformUrl": "https://www.fra.dot.gov/blockedcrossings/"
       },
@@ -247,7 +412,7 @@
             "Grant St Crossing",
             "Union St Crossing",
             "Kelly Ave Crossing",
-            "Other Crossing (Include it in details)"
+            "Other Crossing (Include in details)"
           ]
         },
         {
@@ -261,9 +426,9 @@
     },
     {
       "id": "building_code_enforcement",
-      "name": "Building, Zoning & Code Enforcement",
+      "name": "11. High Grass, Blight, Junk Vehicles & Code Violations",
       "department": "Building & Zoning Dept (Bruce Carson, Comm. / Bill Sheets, Code Enf.)",
-      "description": "Report high grass (>8 inches), trash/blight accumulation, unsafe structures, or abandoned vehicles.",
+      "description": "Report tall grass (>8 inches), junk/blight accumulation in yards, abandoned/inoperable vehicles, or unsafe structures.",
       "destinations": {
         "email": "buildingzoning@cityofperu.org",
         "webformUrl": "https://peru.portal.iworq.net/PERU/new-case/400/530",
@@ -279,9 +444,9 @@
           "required": true,
           "options": [
             "High Grass / Overgrown Vegetation (>8 inches)",
-            "Trash, Junk, or Blight in Yard/Alley",
-            "Inoperable / Abandoned Vehicle",
-            "Unsafe Structure / Property Maintenance",
+            "Trash, Junk, or Blight in Yard or Alley",
+            "Inoperable / Unlicensed / Abandoned Vehicle",
+            "Unsafe Structure / Unmaintained Dilapidated Building",
             "Illegal Signage or Zoning Violation"
           ]
         },
@@ -302,90 +467,129 @@
           "label": "Specific Description of Violation",
           "type": "textarea",
           "required": false,
-          "placeholder": "e.g. Grass over 12 inches high with trash accumulating in back alley."
+          "placeholder": "e.g. Overgrown grass exceeding 12 inches with trash piling up near back alley."
         }
       ]
     },
     {
-      "id": "animal_control",
-      "name": "Peru Animal Care & Control",
-      "department": "Peru Animal Care & Control (Greg Douglass, Officer)",
-      "description": "Report stray or aggressive animals, lost/found pets, deceased animal removal, or welfare concerns.",
+      "id": "sidewalk_curb_ada",
+      "name": "12. Sidewalks, Trip Hazards & ADA Curb Aprons",
+      "department": "Peru Street & Building Departments",
+      "description": "Report buckled or cracked sidewalks, severe tripping hazards, sunken curb ramps, or blocked public walkways.",
       "destinations": {
-        "email": "animalcontrol@cityofperu.org",
-        "webformUrl": null,
-        "phone": "(765) 473-6055",
-        "address": "75 Webb Bell Dr, Peru, IN 46970",
-        "socialUrl": "https://www.facebook.com/p/Peru-Animal-Care-Control-100064379768541/"
+        "email": "brians@cityofperu.org",
+        "webformUrl": "https://www.cityofperu.org/",
+        "phone": "(765) 472-2501",
+        "address": "351 E Canal St, Peru, IN 46970",
+        "socialUrl": null
       },
       "questions": [
         {
-          "id": "issue_type",
-          "label": "Type of Animal Issue",
+          "id": "sidewalk_issue",
+          "label": "Walkway Hazard",
           "type": "select",
           "required": true,
           "options": [
-            "Stray Animal Loose",
-            "Lost or Found Pet",
-            "Deceased Animal Removal",
-            "Nuisance or Aggressive Animal",
-            "Animal Neglect / Welfare Concern"
+            "Tree Root Buckled Sidewalk / Severe Lipping Hazard",
+            "Cracked / Collapsed / Missing Concrete Slab",
+            "Damaged ADA Curb Ramp / Tactile Mat",
+            "Obstruction Blocking Public Sidewalk Passability"
           ]
-        },
-        {
-          "id": "animal_species",
-          "label": "Species",
-          "type": "select",
-          "required": true,
-          "options": ["Dog", "Cat", "Wildlife", "Other"]
         },
         {
           "id": "details",
-          "label": "Animal Description & Last Known Location",
+          "label": "Location & Context",
           "type": "textarea",
           "required": false,
-          "placeholder": "e.g. Brown lab mix running loose near Broadway. Friendly but wandering into traffic."
+          "placeholder": "e.g. Large 3-inch concrete lip caused by tree roots outside 220 N Broadway."
         }
       ]
     },
     {
-      "id": "parks_recreation",
-      "name": "Parks & Recreation Department",
-      "department": "Peru Parks Department (Cliff Helvie, Superintendent)",
-      "description": "Report fallen tree limbs, broken playground equipment, damaged park shelters, or graffiti.",
+      "id": "indot_state_highway",
+      "name": "13. State Highway Issue (US 24, US 31, SR 19, SR 124)",
+      "department": "Indiana Dept of Transportation (INDOT Fort Wayne District)",
+      "description": "Report issues on state routes (US 24, US 31, SR 19, SR 124) directly to INDOT, as they are outside municipal jurisdiction.",
       "destinations": {
-        "email": "parks@cityofperu.org",
-        "webformUrl": "https://www.cityofperu.org/",
-        "phone": "(765) 472-1432",
-        "address": "Maconaquah Park, Peru, IN 46970",
-        "socialUrl": "https://www.facebook.com/PeruParks"
+        "email": "NEinformation@indot.in.gov",
+        "webformUrl": "https://indot.carsprogram.org/",
+        "phone": "(855) 463-6848",
+        "address": "INDOT Fort Wayne District Office",
+        "socialUrl": "https://www.facebook.com/INDOTNortheast"
       },
       "questions": [
         {
-          "id": "park_issue",
-          "label": "Park Issue Type",
+          "id": "highway_route",
+          "label": "State Highway / Route",
           "type": "select",
           "required": true,
           "options": [
-            "Fallen Tree Limb / Hazardous Branch",
-            "Damaged Playground Equipment / Shelter",
-            "Overflowing Trash Receptacle",
-            "Vandalism or Graffiti"
+            "US 31 Bypass / Corridor",
+            "US 24 Corridor",
+            "SR 19 (Benton St / Business Route)",
+            "SR 124 (E Main St / County Road)"
           ]
         },
         {
-          "id": "park_name",
-          "label": "Park / Facility Name",
+          "id": "highway_issue",
+          "label": "Issue Type",
+          "type": "select",
+          "required": true,
+          "options": [
+            "State Highway Pothole / Bridge Deck Damage",
+            "State Traffic Signal Malfunction",
+            "State Highway Debris / Roadkill",
+            "Ramp or Shoulder Washout"
+          ]
+        },
+        {
+          "id": "details",
+          "label": "Mile Marker or Nearest Intersection",
+          "type": "textarea",
+          "required": false,
+          "placeholder": "e.g. Deep pothole on US 31 northbound ramp at SR 19 exit."
+        }
+      ]
+    },
+    {
+      "id": "unlisted_missing_category",
+      "name": "14. Unlisted / Missing Category (Report to Site Admin)",
+      "department": "Peru Community 311 - Site Maintainer & Civic Tech Team",
+      "description": "Can't find a matching department above? Send a report to the site admin so we can direct you to the correct agency or update templates.json.",
+      "destinations": {
+        "email": "admin@shoplocalperu.com",
+        "webformUrl": "https://github.com/peru-community-311/peru-community-311/issues/new",
+        "phone": null,
+        "address": "Peru, IN Open Source Project",
+        "socialUrl": "https://github.com/peru-community-311/peru-community-311"
+      },
+      "questions": [
+        {
+          "id": "unlisted_issue_title",
+          "label": "What kind of municipal issue are you trying to report?",
           "type": "text",
           "required": true,
-          "placeholder": "e.g. Maconaquah Park, Miami's Fort, Municipal Golf Course"
+          "placeholder": "e.g. Airport runway lighting, noise complaint, county bridge issue"
+        },
+        {
+          "id": "intended_department",
+          "label": "Which entity do you believe should handle this?",
+          "type": "select",
+          "required": false,
+          "options": [
+            "Unsure / Need Admin Guidance",
+            "City of Peru (General Municipal)",
+            "Miami County Highway / Sheriff Dept",
+            "Indiana Dept of Transportation (INDOT)",
+            "Private Utility (NIPSCO, Comcast, Indiana Michigan Power)"
+          ]
         },
         {
           "id": "details",
-          "label": "Additional Context",
+          "label": "Detailed Summary & Suggestions for Site Improvement",
           "type": "textarea",
-          "required": false,
-          "placeholder": "e.g. Broken swing chain near the east playground shelter."
+          "required": true,
+          "placeholder": "Describe the issue and why an unlisted category is needed. The maintainer will reply with guidance or open a GitHub issue to add the category."
         }
       ]
     }
