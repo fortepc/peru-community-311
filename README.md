@@ -54,6 +54,8 @@ Each object in the top-level `categories` array describes one report option. Add
 
 The `destinations` object supports `email`, `phone`, `webformUrl`, `socialUrl`, and `address`. The email button uses `email`; the call button uses `phone`; and the extra links use `webformUrl` and `socialUrl`. Use `null` for a destination that is not available. A configured `address` is shown on the category card as location/contact information; confirm with the destination whether it accepts in-person reports.
 
+Categories can also optionally include an `emergency` object to trigger the flashing emergency mode in the app. Use `enabled: true` for categories that should always trigger emergency mode, or provide a `keywords` array for answer text that should trigger the alert when selected. The app will still use the category's phone number for the emergency call button.
+
 Here is an example category object to add to the `categories` array. Replace the sample contact details with verified information:
 
 ```json
@@ -62,6 +64,9 @@ Here is an example category object to add to the `categories` array. Replace the
    "name": "Street Surface Issues",
    "department": "Street Department",
    "description": "Report potholes and debris on public streets.",
+   "emergency": {
+      "keywords": ["active water main break", "sparking wire"]
+   },
    "emailSubjectTemplate": "Street issue: {location}",
    "emailTemplate": "Please inspect this street issue.\nLocation: {location}\nIssue: {question:details}\nMap: {mapsUrl}",
    "destinations": {

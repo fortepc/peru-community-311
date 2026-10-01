@@ -180,6 +180,12 @@
       "name": "5. Water Main Leaks, Running Water & Sewage Odors",
       "department": "Peru Utilities - Division of Water Management",
       "description": "Report gushing water leaks, water bubbling from street/curb, low pressure, discolored water, or raw sewage backup/smell.",
+      "emergency": {
+        "keywords": [
+          "active water main break",
+          "emergency (call 765-473-7651 immediately for 24/7 dispatch)"
+        ]
+      },
       "destinations": {
         "email": null,
         "webformUrl": "https://www.peruutilities.com/my-account-1/report-a-problem/",
@@ -226,6 +232,9 @@
       "name": "6. Natural Gas Smell or Pipeline Hazard (NIPSCO)",
       "department": "NIPSCO Gas Emergency Dispatch",
       "description": "Report suspected natural gas leaks or rotten egg odors. IF YOU SMELL GAS INSIDE OR NEAR BUILDINGS, EVACUATE IMMEDIATELY AND CALL 911.",
+      "emergency": {
+        "enabled": true
+      },
       "destinations": {
         "email": null,
         "webformUrl": "https://www.nipsco.com/outages/report-a-gas-leak",

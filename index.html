@@ -306,6 +306,12 @@ Coordinates: {mapsUrl}
 --------------------------------------------------
 Report generated via Peru Community 311 (open-source citizen portal)`;
     const defaultEmailSubjectTemplate = "Civic Report: {category} - {location}";
+    const defaultEmergencyKeywords = [
+      "evacuate",
+      "emergency (call",
+      "sparking wire",
+      "active water main break"
+    ];
 
     // Scroll Smoothly to Form Section on Mobile
     function scrollToReportForm() {
@@ -802,20 +808,25 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
       return true;
     }
 
-    // Acute Emergency Detection: Detects gas smell, water main breaks, downed lines
+    // Acute Emergency Detection: configurable at the category level, with safe defaults
     function isAcuteEmergency(category) {
-      if (category.id === "natural_gas_nipsco") return true;
+      const emergencyConfig = category && category.emergency ? category.emergency : null;
+
+      if (emergencyConfig && emergencyConfig.enabled === true) {
+        return true;
+      }
+
+      const keywords = Array.isArray(emergencyConfig && emergencyConfig.keywords) && emergencyConfig.keywords.length > 0
+        ? emergencyConfig.keywords
+        : defaultEmergencyKeywords;
 
       const inputs = document.querySelectorAll("#dynamic-form [data-question-id]");
       for (const input of inputs) {
         const val = (input.value || "").toLowerCase();
-        if (
-          val.includes("evacuate") ||
-          val.includes("emergency (call") ||
-          val.includes("sparking wire") ||
-          val.includes("active water main break")
-        ) {
-          return true;
+        for (const keyword of keywords) {
+          if (val.includes(String(keyword).toLowerCase())) {
+            return true;
+          }
         }
       }
       return false;
