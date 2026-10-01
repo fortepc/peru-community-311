@@ -9,6 +9,8 @@
     },
     "defaultZoom": 14
   },
+  "emailSubjectTemplate": "Civic Report: {category} - {location}",
+  "emailTemplate": "CIVIC REPORT: {category}\nDepartment: {department}\nLocation: {location}\nCoordinates: {mapsUrl}\n--------------------------------------------------\n\n{answers}\n\n--------------------------------------------------\nReport generated via Peru Community 311 (open-source citizen portal)",
   "categories": [
     {
       "id": "street_sanitation",

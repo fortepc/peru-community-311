@@ -219,6 +219,18 @@
       parks_recreation: "fa-tree"
     };
 
+    const defaultEmailTemplate = `CIVIC REPORT: {category}
+Department: {department}
+Location: {location}
+Coordinates: {mapsUrl}
+--------------------------------------------------
+
+{answers}
+
+--------------------------------------------------
+Report generated via Peru Community 311 (open-source citizen portal)`;
+  const defaultEmailSubjectTemplate = "Civic Report: {category} - {location}";
+
     // Scroll Smoothly to Form Section on Mobile
     function scrollToReportForm() {
       const formSection = document.getElementById("report-form-section");
@@ -301,6 +313,9 @@
         const descriptionHtml = cat.description 
           ? `<p class="text-[11px] text-gray-500 mt-1 leading-snug">${cat.description}</p>`
           : "";
+        const addressHtml = cat.destinations.address
+          ? `<div class="text-[10px] text-gray-500 mt-1.5 flex items-start space-x-1.5"><i class="fa-solid fa-location-dot text-gray-400 mt-px flex-shrink-0"></i><span class="min-w-0 break-words">Address: ${cat.destinations.address}</span></div>`
+          : "";
         
         card.innerHTML = `
           <div class="bg-indigo-50 text-indigo-600 p-2.5 rounded-lg text-sm flex-shrink-0 mt-0.5">
@@ -313,6 +328,7 @@
             </div>
             <p class="text-[11px] font-medium text-indigo-600 mt-0.5 truncate">${cat.department}</p>
             ${descriptionHtml}
+            ${addressHtml}
             <div class="text-[10px] text-gray-400 mt-1.5 flex items-center space-x-3">
               ${cat.destinations.email ? `<span><i class="fa-regular fa-envelope mr-1"></i>Email</span>` : ""}
               ${cat.destinations.phone ? `<span><i class="fa-solid fa-phone mr-1"></i>${cat.destinations.phone}</span>` : ""}
@@ -447,28 +463,56 @@
       updateDispatchOutput();
     }
 
-    // Build plain-text email summary
+    function getEmailTemplateData(category) {
+      const answers = {};
+      const answerLines = [];
+      const inputs = document.querySelectorAll("#dynamic-form [data-question-id]");
+      inputs.forEach((input) => {
+        const label = input.dataset.questionLabel;
+        const val = input.value || "N/A";
+        answers[input.dataset.questionId] = val;
+        answerLines.push(`${label}:\n${val}`);
+      });
+
+      return {
+        answers,
+        variables: {
+          category: category.name,
+          department: category.department,
+          location: selectedAddress,
+          latitude: selectedCoords.lat,
+          longitude: selectedCoords.lng,
+          mapsUrl: `https://maps.google.com/?q=${selectedCoords.lat},${selectedCoords.lng}`,
+          answers: answerLines.join("\n\n")
+        }
+      };
+    }
+
+    function renderEmailTemplate(template, category) {
+      const { answers, variables } = getEmailTemplateData(category);
+      return template.replace(/\{([a-zA-Z][a-zA-Z0-9]*)(?::([^}]+))?\}/g, (match, name, questionId) => {
+        if (name === "question" && questionId) return answers[questionId] || "N/A";
+        return Object.prototype.hasOwnProperty.call(variables, name) ? variables[name] : match;
+      });
+    }
+
+    // Build the configured plain-text email body for both dispatch actions.
     function buildEmailBody() {
       if (!selectedCategoryId) return "";
       const category = appConfig.categories.find((c) => c.id === selectedCategoryId);
       if (!category) return "";
 
-      let body = `CIVIC REPORT: ${category.name}\n`;
-      body += `Department: ${category.department}\n`;
-      body += `Location: ${selectedAddress}\n`;
-      body += `Coordinates: https://maps.google.com/?q=${selectedCoords.lat},${selectedCoords.lng}\n`;
-      body += `--------------------------------------------------\n\n`;
+      const template = category.emailTemplate || appConfig.emailTemplate || defaultEmailTemplate;
+      return renderEmailTemplate(template, category);
+    }
 
-      const inputs = document.querySelectorAll("#dynamic-form [data-question-id]");
-      inputs.forEach((input) => {
-        const label = input.dataset.questionLabel;
-        const val = input.value || "N/A";
-        body += `${label}:\n${val}\n\n`;
-      });
+    function buildEmailSubject() {
+      if (!selectedCategoryId) return "";
+      const category = appConfig.categories.find((c) => c.id === selectedCategoryId);
+      if (!category) return "";
 
-      body += `--------------------------------------------------\n`;
-      body += `Report generated via Peru Community 311 (open-source citizen portal)`;
-      return body;
+      const template = category.emailSubjectTemplate || appConfig.emailSubjectTemplate || defaultEmailSubjectTemplate;
+      return renderEmailTemplate(template, category);
     }
 
     // Update dispatch mailto links and external URLs
@@ -483,7 +527,7 @@
       // Mailto Button
       const mailtoBtn = document.getElementById("mailto-btn");
       if (category.destinations.email) {
-        const subject = encodeURIComponent(`Civic Report: ${category.name} - ${selectedAddress}`);
+        const subject = encodeURIComponent(buildEmailSubject());
         const body = encodeURIComponent(emailBody);
         mailtoBtn.href = `mailto:${category.destinations.email}?subject=${subject}&body=${body}`;
         mailtoBtn.classList.remove("opacity-50", "pointer-events-none");
