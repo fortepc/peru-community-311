@@ -22,6 +22,23 @@ The top-level `location` object controls the initial map view:
 - `defaultCenter.lat` and `defaultCenter.lng` set the initial map coordinates.
 - `defaultZoom` sets the initial map zoom level.
 
+For example, this configuration opens the map near Peru at zoom level 14:
+
+```json
+{
+   "location": {
+      "city": "Peru",
+      "county": "Miami County",
+      "state": "IN",
+      "defaultCenter": {
+         "lat": 40.7537,
+         "lng": -86.0689
+      },
+      "defaultZoom": 14
+   }
+}
+```
+
 ### Categories
 
 Each object in the top-level `categories` array describes one report option. Add a new object to the array or edit an existing one. Each category can contain:
@@ -37,6 +54,35 @@ Each object in the top-level `categories` array describes one report option. Add
 
 The `destinations` object supports `email`, `phone`, `webformUrl`, `socialUrl`, and `address`. The email button uses `email`; the call button uses `phone`; and the extra links use `webformUrl` and `socialUrl`. Use `null` for a destination that is not available. A configured `address` is shown on the category card as location/contact information; confirm with the destination whether it accepts in-person reports.
 
+Here is an example category object to add to the `categories` array. Replace the sample contact details with verified information:
+
+```json
+{
+   "id": "street_surface",
+   "name": "Street Surface Issues",
+   "department": "Street Department",
+   "description": "Report potholes and debris on public streets.",
+   "emailSubjectTemplate": "Street issue: {location}",
+   "emailTemplate": "Please inspect this street issue.\nLocation: {location}\nIssue: {question:details}\nMap: {mapsUrl}",
+   "destinations": {
+      "email": "street-dept@example.gov",
+      "phone": "(765) 555-0100",
+      "webformUrl": null,
+      "socialUrl": null,
+      "address": "123 Main St, Peru, IN"
+   },
+   "questions": [
+      {
+         "id": "details",
+         "label": "Describe the issue",
+         "type": "textarea",
+         "required": true,
+         "placeholder": "Include the nearest address or intersection."
+      }
+   ]
+}
+```
+
 ### Questionnaire Fields
 
 Each object in a category's `questions` array defines one input:
@@ -44,7 +90,7 @@ Each object in a category's `questions` array defines one input:
 - `id`: Unique identifier within that category. It also lets an email template refer to this answer.
 - `label`: Text shown beside the input and used as its label in `{answers}`.
 - `type`: `select`, `text`, or `textarea`.
-- `required`: Whether the interface displays an asterisk beside the label. This currently does not prevent a report from being sent when the field is empty.
+- `required`: Whether the field is required before sending or copying the report. Enforced with inline validation.
 - `placeholder`: Optional hint for `text` and `textarea` inputs.
 - `options`: Required for `select`; an array of the choices to show.
 
@@ -80,3 +126,14 @@ Available placeholders:
 | `{question:question_id}` | One answer, using its `id` from the category's `questions` list |
 
 These placeholders are supported in both subject and body templates. For example, `{question:surface_issue}` inserts the answer to the `surface_issue` question. Empty answers and unknown question IDs become `N/A`. Unrecognized placeholders remain unchanged so configuration mistakes are visible.
+
+For example, these top-level settings create a short subject and a multi-line message body:
+
+```json
+{
+   "emailSubjectTemplate": "Report: {category} at {location}",
+   "emailTemplate": "CIVIC REPORT: {category}\nDepartment: {department}\nLocation: {location}\nIssue: {question:surface_issue}\nDetails: {question:details}\nMap: {mapsUrl}"
+}
+```
+
+A category can override either value by including `emailSubjectTemplate` or `emailTemplate` in that category object.

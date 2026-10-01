@@ -4,6 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Peru Community 311 - Citizen Issue Reporting</title>
+  <meta name="description" content="Official community-built civic reporting portal for Peru, Indiana. Map local non-emergency issues and generate reports for the responsible department." />
+  <meta property="og:title" content="Peru Community 311 - Citizen Issue Reporting" />
+  <meta property="og:description" content="Map non-emergency issues in Peru, IN and send reports to responsible municipal departments." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://fortepc.github.io/peru-community-311/" />
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -22,6 +27,7 @@
     }
     .category-card { transition: all 0.2s ease-in-out; }
     .category-card.active { border-color: #4f46e5; background-color: #f5f3ff; }
+    .category-card:focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }
 
     .custom-scrollbar::-webkit-scrollbar {
       width: 6px;
@@ -60,10 +66,11 @@
       </div>
     </div>
     
-    <!-- Disclaimer Banner -->
-    <div class="bg-amber-500/10 border-y border-amber-500/20 px-4 py-1.5 text-xs text-amber-200 text-center">
-      <i class="fa-solid fa-circle-info mr-1"></i>
-      <strong>Independent Tool:</strong> Peru Community 311 is run by local residents to generate structured municipal communications. It is not an official city agency.
+    <!-- Non-Emergency Disclaimer Banner -->
+    <div class="bg-amber-500/10 border-y border-amber-500/20 px-4 py-2 text-xs text-amber-200 text-center flex items-center justify-center flex-wrap gap-x-2">
+      <span><i class="fa-solid fa-triangle-exclamation mr-1 text-amber-400"></i><strong>Non-Emergency Only:</strong> If you see an immediate safety hazard, fire, active gas leak, downed live wire, or crime, <strong>call 911 immediately</strong>.</span>
+      <span class="text-amber-400/80 hidden sm:inline">&bull;</span>
+      <span class="text-amber-300/90">Independent community initiative, not an official city agency.</span>
     </div>
   </header>
 
@@ -71,7 +78,7 @@
   <main class="flex-grow max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-6">
     
     <!-- Map Panel (6 cols on Desktop) -->
-    <section class="lg:col-span-6 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+    <section class="lg:col-span-6 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col" aria-label="Interactive Map Location Step">
       <div class="p-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center text-sm">
         <span class="font-semibold text-gray-700">
           <i class="fa-solid fa-crosshairs text-indigo-600 mr-1"></i> Step 1: Click map to pin location
@@ -81,7 +88,7 @@
           <span id="location-status" class="text-xs text-gray-500 italic">Click anywhere on map</span>
           
           <!-- Info Icon & Trigger -->
-          <button type="button" id="osm-info-btn" onclick="toggleOsmTooltip(event)" class="text-gray-400 hover:text-indigo-600 transition focus:outline-none p-0.5">
+          <button type="button" id="osm-info-btn" onclick="toggleOsmTooltip(event)" class="text-gray-400 hover:text-indigo-600 transition focus:outline-none p-0.5" aria-label="About map data">
             <i class="fa-solid fa-circle-info text-xs"></i>
           </button>
 
@@ -104,20 +111,33 @@
         </div>
       </div>
 
-      
-      <div id="map" class="w-full flex-grow"></div>
-      <div class="p-3 bg-gray-50 border-t border-gray-200 text-xs text-gray-600 flex justify-between items-center">
-        <div>
-          <strong>Selected Location:</strong> <span id="address-display" class="text-gray-900 font-medium">Click map to select location</span>
+      <div id="map" class="w-full flex-grow" aria-label="Map showing Peru, Indiana"></div>
+
+      <!-- Selected Location Bar -->
+      <div class="p-3 bg-gray-50 border-t border-gray-200 text-xs text-gray-600 flex justify-between items-center flex-wrap gap-2">
+        <div class="flex items-center space-x-1.5 flex-grow min-w-0">
+          <strong class="flex-shrink-0 text-gray-700">Selected Location:</strong> 
+          <span id="address-display" class="text-gray-900 font-medium truncate" title="Click edit to refine address">Click map to select location</span>
+          <button type="button" id="edit-address-btn" class="text-indigo-600 hover:text-indigo-800 p-1 flex-shrink-0 transition" title="Refine address manually" aria-label="Refine address manually">
+            <i class="fa-solid fa-pen-to-square"></i>
+          </button>
         </div>
-        <button id="locate-me-btn" class="px-2.5 py-1 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-100 text-gray-700">
-          <i class="fa-solid fa-location-arrow mr-1 text-indigo-600"></i> My Location
+        <button id="locate-me-btn" type="button" class="flex-shrink-0 px-2.5 py-1 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-100 text-gray-700 transition flex items-center space-x-1">
+          <i class="fa-solid fa-location-arrow text-indigo-600" id="locate-icon"></i>
+          <span id="locate-text">My Location</span>
         </button>
+      </div>
+
+      <!-- Inline Address Edit Form (hidden by default) -->
+      <div id="address-edit-box" class="hidden p-2.5 bg-indigo-50/80 border-t border-indigo-100 flex items-center space-x-2 text-xs">
+        <input type="text" id="manual-address-input" class="flex-grow border border-gray-300 rounded px-2.5 py-1 text-xs focus:ring-1 focus:ring-indigo-500 bg-white" placeholder="Enter nearest address or intersection (e.g. 120 W 5th St, Peru, IN)" />
+        <button type="button" id="save-address-btn" class="px-2.5 py-1 bg-indigo-600 text-white rounded font-medium hover:bg-indigo-700 transition">Save</button>
+        <button type="button" id="cancel-address-btn" class="px-2 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">Cancel</button>
       </div>
     </section>
     
     <!-- Form Panel (6 cols on Desktop) -->
-    <section id="report-form-section" class="lg:col-span-6 bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col min-h-[550px]">
+    <section id="report-form-section" class="lg:col-span-6 bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col min-h-[550px]" aria-label="Issue Reporting Questionnaire">
       
       <div class="mb-3 flex items-center justify-between flex-shrink-0">
         <div>
@@ -126,15 +146,48 @@
           </h2>
           <p class="text-xs text-gray-500" id="step2-subtitle">Choose a category to display department questions.</p>
         </div>
-        <button id="change-category-btn" class="hidden text-xs bg-gray-100 hover:bg-gray-200 text-indigo-700 font-medium px-2.5 py-1 rounded border border-gray-300 transition">
+        <button id="change-category-btn" type="button" class="hidden text-xs bg-gray-100 hover:bg-gray-200 text-indigo-700 font-medium px-2.5 py-1 rounded border border-gray-300 transition">
           <i class="fa-solid fa-arrows-rotate mr-1"></i> Change Category
+        </button>
+      </div>
+
+      <!-- Category Search Bar -->
+      <div id="category-search-wrapper" class="mb-2 relative flex-shrink-0">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+        <input type="text" id="category-search" placeholder="Search issues (e.g. pothole, animal, water, light, tree, sign)..." class="w-full pl-8 pr-8 py-1.5 text-xs border border-gray-300 rounded-lg focus:ring-1 focus:ring-indigo-500 bg-white shadow-sm transition" aria-label="Search issue categories" />
+        <button type="button" id="clear-search-btn" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs p-1" aria-label="Clear search">
+          <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
       <!-- Category List Container with Visible Border and Custom Scrollbar -->
       <div class="relative flex-grow flex flex-col min-h-0 mb-4">
-        <div id="category-cards-container" class="custom-scrollbar grid grid-cols-1 gap-2.5 overflow-y-auto pr-1.5 p-2 bg-slate-50/60 border border-gray-200 rounded-lg flex-grow min-h-[220px] max-h-[500px] shadow-inner">
+        <div id="category-cards-container" class="custom-scrollbar grid grid-cols-1 gap-2.5 overflow-y-auto pr-1.5 p-2 bg-slate-50/60 border border-gray-200 rounded-lg flex-grow min-h-[220px] max-h-[500px] shadow-inner" role="region" aria-label="Category Selection List">
           <!-- Dynamically populated via JS -->
+        </div>
+        <div id="no-categories-msg" class="hidden p-4 text-center text-xs text-gray-500 italic bg-gray-50 border border-gray-200 rounded-lg">
+          No categories match your search. Try another keyword or select "Unlisted / Missing Category".
+        </div>
+      </div>
+
+      <!-- Acute Emergency Alert Box (shown when acute hazard is selected) -->
+      <div id="acute-emergency-box" class="hidden mb-3 p-3.5 bg-red-50 border-2 border-red-500 rounded-xl text-red-950 shadow-sm animate-pulse">
+        <div class="flex items-center space-x-2 font-bold text-red-700 text-xs sm:text-sm">
+          <i class="fa-solid fa-triangle-exclamation text-base text-red-600"></i>
+          <span>URGENT SAFETY HAZARD &mdash; CALL DIRECTLY</span>
+        </div>
+        <p id="emergency-alert-msg" class="text-xs text-red-800 mt-1 leading-normal">
+          Active emergencies (natural gas odor, sparking power lines, active water main break) require immediate dispatch. <strong>Do NOT send an email report</strong>, as municipal email is not monitored 24/7.
+        </p>
+        <div class="mt-2.5 flex flex-wrap gap-2" id="emergency-call-actions">
+          <a href="tel:911" class="inline-flex items-center space-x-1.5 bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-lg text-xs shadow-sm transition">
+            <i class="fa-solid fa-phone"></i>
+            <span>Call 911 (Immediate Threat)</span>
+          </a>
+          <a id="dept-emergency-call" href="#" class="hidden inline-flex items-center space-x-1.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold py-1.5 px-3 rounded-lg text-xs shadow-sm transition">
+            <i class="fa-solid fa-phone"></i>
+            <span id="dept-emergency-name">Call Department Dispatch</span>
+          </a>
         </div>
       </div>
 
@@ -146,7 +199,13 @@
           </h3>
           <span id="active-dept-tag" class="text-[11px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100"></span>
         </div>
-        <form id="dynamic-form" class="custom-scrollbar space-y-3 max-h-[300px] overflow-y-auto pr-1.5"></form>
+        <form id="dynamic-form" class="custom-scrollbar space-y-3 max-h-[300px] overflow-y-auto pr-1.5" onsubmit="event.preventDefault();"></form>
+      </div>
+
+      <!-- Form Validation Error Banner -->
+      <div id="validation-error-box" class="hidden mb-3 p-2.5 bg-amber-50 border border-amber-300 rounded-lg text-amber-800 text-xs flex items-center space-x-2">
+        <i class="fa-solid fa-circle-exclamation text-amber-600 flex-shrink-0"></i>
+        <span id="validation-error-msg">Please complete all required fields marked with * before sending.</span>
       </div>
 
       <!-- Dispatch Output / Actions Box -->
@@ -154,10 +213,16 @@
         <div class="text-xs font-bold text-gray-700 uppercase mb-2">Step 3: Send Report</div>
         
         <!-- Mailto Button -->
-        <a id="mailto-btn" href="#" target="_blank" class="w-full flex items-center justify-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-4 rounded-lg text-sm transition shadow-sm">
+        <a id="mailto-btn" href="#" class="w-full flex items-center justify-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-4 rounded-lg text-sm transition shadow-sm">
           <i class="fa-solid fa-paper-plane"></i>
           <span>Send Report via Email</span>
         </a>
+
+        <!-- Informational banner when email is not supported for category -->
+        <div id="no-email-notice" class="hidden p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-700 text-center font-medium">
+          <i class="fa-solid fa-circle-info mr-1 text-indigo-600"></i>
+          <span id="no-email-text">This department accepts reports via official web portal or phone.</span>
+        </div>
 
         <!-- Secondary Action Row -->
         <div class="grid grid-cols-2 gap-2">
@@ -180,7 +245,7 @@
   </main>
 
   <!-- Floating Mobile "Next" / Action Bar -->
-  <div id="mobile-next-btn" class="lg:hidden fixed bottom-4 right-4 z-[9999] transition-all">
+  <div id="mobile-next-btn" class="lg:hidden fixed bottom-4 right-4 z-[9999] transition-all duration-300">
     <button onclick="scrollToReportForm()" class="flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-5 rounded-full shadow-lg border border-indigo-500 text-sm">
       <i class="fa-solid fa-arrow-down"></i>
       <span>Scroll Down</span>
@@ -189,10 +254,10 @@
 
   <!-- Footer -->
   <footer class="bg-white border-t border-gray-200 py-3 text-center text-xs text-gray-500 mt-auto">
-    <div class="max-w-7xl mx-auto px-4 flex justify-between items-center flex-wrap">
+    <div class="max-w-7xl mx-auto px-4 flex justify-between items-center flex-wrap gap-2">
       <span>Peru Community 311 &bull; Open Source Civic Tech</span>
       <span>
-        <a href="https://github.com/fortepc/peru-community-311/" target="_blank" class="text-indigo-600 hover:underline">
+        <a href="https://github.com/fortepc/peru-community-311/" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:underline">
           <i class="fa-brands fa-github mr-1"></i> By FortePC on GitHub
         </a>
       </span>
@@ -206,17 +271,28 @@
     let selectedAddress = "Center of Peru, IN";
     let selectedCategoryId = null;
 
-    // Icon map for department cards
+    let reverseGeocodeTimer = null;
+    let reverseGeocodeAbort = null;
+
+    // Complete Icon map for all 14 categories (with backwards-compatible aliases)
     const categoryIcons = {
       street_sanitation: "fa-road",
+      traffic_signals_signs: "fa-traffic-light",
       traffic_department: "fa-traffic-light",
-      peru_utilities_water: "fa-droplet",
-      peru_utilities_electric: "fa-bolt",
+      foliage_hazard_tree: "fa-leaf",
+      stormwater_flooding_drain: "fa-cloud-showers-heavy",
       peru_utilities_stormwater: "fa-cloud-showers-heavy",
+      peru_utilities_water_sewer: "fa-droplet",
+      peru_utilities_water: "fa-droplet",
+      natural_gas_nipsco: "fa-fire-flame-simple",
+      animal_control: "fa-paw",
+      parks_recreation: "fa-tree",
+      peru_utilities_electric: "fa-bolt",
       railroad_crossing: "fa-train",
       building_code_enforcement: "fa-house-triangle-exclamation",
-      animal_control: "fa-paw",
-      parks_recreation: "fa-tree"
+      sidewalk_curb_ada: "fa-person-walking",
+      indot_state_highway: "fa-route",
+      unlisted_missing_category: "fa-circle-question"
     };
 
     const defaultEmailTemplate = `CIVIC REPORT: {category}
@@ -229,7 +305,7 @@ Coordinates: {mapsUrl}
 
 --------------------------------------------------
 Report generated via Peru Community 311 (open-source citizen portal)`;
-  const defaultEmailSubjectTemplate = "Civic Report: {category} - {location}";
+    const defaultEmailSubjectTemplate = "Civic Report: {category} - {location}";
 
     // Scroll Smoothly to Form Section on Mobile
     function scrollToReportForm() {
@@ -242,6 +318,7 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
       await loadTemplates();
       initMap();
       setupEventListeners();
+      setupMobileObserver();
     });
 
     // Fetch local templates.json with inline fallback
@@ -277,46 +354,72 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
       reverseGeocode(center.lat, center.lng);
     }
 
-    // Set map pin and trigger address lookup
+    // Set map pin and trigger debounced address lookup
     function setMarker(lat, lng) {
       selectedCoords = { lat, lng };
       marker.setLatLng([lat, lng]);
-      reverseGeocode(lat, lng);
+      debouncedReverseGeocode(lat, lng);
     }
 
-    // OpenStreetMap Reverse Geocoding
+    function debouncedReverseGeocode(lat, lng) {
+      clearTimeout(reverseGeocodeTimer);
+      reverseGeocodeTimer = setTimeout(() => {
+        reverseGeocode(lat, lng);
+      }, 350);
+    }
+
+    // OpenStreetMap Reverse Geocoding with AbortController to prevent race conditions
     async function reverseGeocode(lat, lng) {
       const display = document.getElementById("address-display");
       display.textContent = "Finding address...";
+
+      if (reverseGeocodeAbort) {
+        reverseGeocodeAbort.abort();
+      }
+      reverseGeocodeAbort = new AbortController();
+
       try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`, {
+          signal: reverseGeocodeAbort.signal,
+          headers: { "Accept": "application/json" }
+        });
+        if (!res.ok) throw new Error("Geocoding service unavailable");
         const data = await res.json();
         selectedAddress = data.display_name ? data.display_name.split(",").slice(0, 3).join(",") : `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
       } catch (e) {
+        if (e.name === "AbortError") return;
         selectedAddress = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
       }
       display.textContent = selectedAddress;
+      display.title = selectedAddress;
       updateDispatchOutput();
     }
 
-    // Render category list with optional descriptions
+    // Render category list with search & accessible buttons
     function renderCategoryCards() {
       const container = document.getElementById("category-cards-container");
       container.innerHTML = "";
 
       appConfig.categories.forEach((cat) => {
         const card = document.createElement("div");
-        card.className = "category-card border border-gray-200 rounded-lg p-3 cursor-pointer hover:border-indigo-300 hover:bg-gray-50 flex items-start space-x-3";
+        card.className = "category-card border border-gray-200 rounded-lg p-3 cursor-pointer hover:border-indigo-300 hover:bg-gray-50 flex items-start space-x-3 transition";
         card.dataset.id = cat.id;
+        card.setAttribute("role", "button");
+        card.setAttribute("tabindex", "0");
+        card.setAttribute("aria-pressed", "false");
 
         const iconClass = categoryIcons[cat.id] || "fa-circle-info";
         const descriptionHtml = cat.description 
           ? `<p class="text-[11px] text-gray-500 mt-1 leading-snug">${cat.description}</p>`
           : "";
-        const addressHtml = cat.destinations.address
+        const addressHtml = (cat.destinations && cat.destinations.address)
           ? `<div class="text-[10px] text-gray-500 mt-1.5 flex items-start space-x-1.5"><i class="fa-solid fa-location-dot text-gray-400 mt-px flex-shrink-0"></i><span class="min-w-0 break-words">Address: ${cat.destinations.address}</span></div>`
           : "";
         
+        const hasEmail = cat.destinations && cat.destinations.email;
+        const hasPhone = cat.destinations && cat.destinations.phone;
+        const hasWebform = cat.destinations && cat.destinations.webformUrl;
+
         card.innerHTML = `
           <div class="bg-indigo-50 text-indigo-600 p-2.5 rounded-lg text-sm flex-shrink-0 mt-0.5">
             <i class="fa-solid ${iconClass}"></i>
@@ -330,14 +433,21 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
             ${descriptionHtml}
             ${addressHtml}
             <div class="text-[10px] text-gray-400 mt-1.5 flex items-center space-x-3">
-              ${cat.destinations.email ? `<span><i class="fa-regular fa-envelope mr-1"></i>Email</span>` : ""}
-              ${cat.destinations.phone ? `<span><i class="fa-solid fa-phone mr-1"></i>${cat.destinations.phone}</span>` : ""}
-              ${cat.destinations.webformUrl ? `<span><i class="fa-solid fa-globe mr-1"></i>Webform</span>` : ""}
+              ${hasEmail ? `<span><i class="fa-regular fa-envelope mr-1"></i>Email</span>` : ""}
+              ${hasPhone ? `<span><i class="fa-solid fa-phone mr-1"></i>${cat.destinations.phone}</span>` : ""}
+              ${hasWebform ? `<span><i class="fa-solid fa-globe mr-1"></i>Webform</span>` : ""}
             </div>
           </div>
         `;
 
         card.addEventListener("click", () => selectCategory(cat.id));
+        card.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            selectCategory(cat.id);
+          }
+        });
+
         container.appendChild(card);
       });
     }
@@ -346,17 +456,23 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
     function selectCategory(categoryId) {
       selectedCategoryId = categoryId;
 
+      // Hide category search during active selection
+      document.getElementById("category-search-wrapper").classList.add("hidden");
+      document.getElementById("no-categories-msg").classList.add("hidden");
+
       // Filter category list visibility
       document.querySelectorAll(".category-card").forEach((card) => {
         const check = card.querySelector(".select-check");
         if (card.dataset.id === categoryId) {
           card.classList.add("active");
           card.classList.remove("hidden");
-          check.classList.remove("hidden");
+          card.setAttribute("aria-pressed", "true");
+          if (check) check.classList.remove("hidden");
         } else {
           card.classList.remove("active");
           card.classList.add("hidden");
-          check.classList.add("hidden");
+          card.setAttribute("aria-pressed", "false");
+          if (check) check.classList.add("hidden");
         }
       });
 
@@ -365,14 +481,25 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
       document.getElementById("step2-subtitle").textContent = "Active category selected below.";
 
       renderQuestionnaire(categoryId);
+
+      // Auto-scroll on mobile to the follow-up questions
+      if (window.innerWidth < 1024) {
+        document.getElementById("questionnaire-section").scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     }
 
-    // Reset category selection and show full category list again
+    // Reset category selection and restore full category list and search
     function resetCategorySelection() {
       selectedCategoryId = null;
 
+      document.getElementById("category-search-wrapper").classList.remove("hidden");
+      const searchInput = document.getElementById("category-search");
+      searchInput.value = "";
+      document.getElementById("clear-search-btn").classList.add("hidden");
+
       document.querySelectorAll(".category-card").forEach((card) => {
         card.classList.remove("active", "hidden");
+        card.setAttribute("aria-pressed", "false");
         const check = card.querySelector(".select-check");
         if (check) check.classList.add("hidden");
       });
@@ -380,33 +507,187 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
       document.getElementById("change-category-btn").classList.add("hidden");
       document.getElementById("questionnaire-section").classList.add("hidden");
       document.getElementById("dispatch-box").classList.add("hidden");
+      document.getElementById("acute-emergency-box").classList.add("hidden");
+      document.getElementById("validation-error-box").classList.add("hidden");
       document.getElementById("step2-subtitle").textContent = "Choose a category to display department questions.";
     }
 
     // Setup event listeners
     function setupEventListeners() {
-      document.getElementById("locate-me-btn").addEventListener("click", () => {
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition((pos) => {
+      // My Location Geolocation Handler with Feedback
+      const locateBtn = document.getElementById("locate-me-btn");
+      const locateIcon = document.getElementById("locate-icon");
+      const locateText = document.getElementById("locate-text");
+
+      locateBtn.addEventListener("click", () => {
+        if (!navigator.geolocation) {
+          alert("Geolocation is not supported by your browser. Please tap your location directly on the map.");
+          return;
+        }
+
+        locateBtn.disabled = true;
+        locateIcon.className = "fa-solid fa-spinner fa-spin text-indigo-600";
+        locateText.textContent = "Locating...";
+
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            locateBtn.disabled = false;
+            locateIcon.className = "fa-solid fa-location-arrow text-indigo-600";
+            locateText.textContent = "My Location";
             map.setView([pos.coords.latitude, pos.coords.longitude], 16);
             setMarker(pos.coords.latitude, pos.coords.longitude);
-          });
+          },
+          (err) => {
+            locateBtn.disabled = false;
+            locateIcon.className = "fa-solid fa-location-arrow text-indigo-600";
+            locateText.textContent = "My Location";
+            let msg = "Could not obtain device location.";
+            if (err.code === 1) msg = "Location permission denied. Please click on the map to place your pin.";
+            else if (err.code === 2) msg = "Location position unavailable. Please click on the map.";
+            else if (err.code === 3) msg = "Location request timed out. Please click on the map.";
+            alert(msg);
+          },
+          { timeout: 10000, enableHighAccuracy: true }
+        );
+      });
+
+      // Manual Address Refinement Toggle
+      const editBtn = document.getElementById("edit-address-btn");
+      const editBox = document.getElementById("address-edit-box");
+      const manualInput = document.getElementById("manual-address-input");
+      const saveBtn = document.getElementById("save-address-btn");
+      const cancelBtn = document.getElementById("cancel-address-btn");
+
+      editBtn.addEventListener("click", () => {
+        manualInput.value = selectedAddress;
+        editBox.classList.remove("hidden");
+        manualInput.focus();
+      });
+
+      saveBtn.addEventListener("click", () => {
+        const val = manualInput.value.trim();
+        if (val) {
+          selectedAddress = val;
+          const display = document.getElementById("address-display");
+          display.textContent = selectedAddress;
+          display.title = selectedAddress;
+          updateDispatchOutput();
+        }
+        editBox.classList.add("hidden");
+      });
+
+      cancelBtn.addEventListener("click", () => {
+        editBox.classList.add("hidden");
+      });
+
+      manualInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          saveBtn.click();
+        } else if (e.key === "Escape") {
+          cancelBtn.click();
         }
       });
 
+      // Category Search Input Filter
+      const searchInput = document.getElementById("category-search");
+      const clearSearchBtn = document.getElementById("clear-search-btn");
+      const noCategoriesMsg = document.getElementById("no-categories-msg");
+
+      searchInput.addEventListener("input", () => {
+        const query = searchInput.value.toLowerCase().trim();
+        clearSearchBtn.classList.toggle("hidden", query.length === 0);
+
+        let matchCount = 0;
+        document.querySelectorAll(".category-card").forEach((card) => {
+          if (selectedCategoryId) return;
+          const text = card.textContent.toLowerCase();
+          const matches = text.includes(query);
+          card.classList.toggle("hidden", !matches);
+          if (matches) matchCount++;
+        });
+
+        noCategoriesMsg.classList.toggle("hidden", matchCount > 0 || !query);
+      });
+
+      clearSearchBtn.addEventListener("click", () => {
+        searchInput.value = "";
+        clearSearchBtn.classList.add("hidden");
+        searchInput.dispatchEvent(new Event("input"));
+        searchInput.focus();
+      });
+
+      // Category Change Button
       document.getElementById("change-category-btn").addEventListener("click", resetCategorySelection);
 
+      // Email Dispatch Validation Check
+      const mailtoBtn = document.getElementById("mailto-btn");
+      mailtoBtn.addEventListener("click", (e) => {
+        if (!validateRequiredFields()) {
+          e.preventDefault();
+        }
+      });
+
+      // Copy Text Dispatch Validation Check
       document.getElementById("copy-btn").addEventListener("click", () => {
+        if (!validateRequiredFields()) return;
+
         const text = buildEmailBody();
-        navigator.clipboard.writeText(text).then(() => {
-          const btnText = document.getElementById("copy-text");
-          btnText.textContent = "Copied!";
-          setTimeout(() => (btnText.textContent = "Copy Text"), 2000);
-        });
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(() => {
+            showCopiedFeedback();
+          }).catch(() => {
+            fallbackCopyText(text);
+          });
+        } else {
+          fallbackCopyText(text);
+        }
       });
     }
 
-    // Render questionnaire form for selected category
+    function showCopiedFeedback() {
+      const btnText = document.getElementById("copy-text");
+      btnText.textContent = "Copied!";
+      setTimeout(() => (btnText.textContent = "Copy Text"), 2000);
+    }
+
+    function fallbackCopyText(text) {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try {
+        document.execCommand("copy");
+        showCopiedFeedback();
+      } catch (e) {
+        alert("Unable to copy to clipboard. Please copy text manually.");
+      }
+      document.body.removeChild(ta);
+    }
+
+    // Auto-hide floating mobile button when form section is visible
+    function setupMobileObserver() {
+      const mobileBtn = document.getElementById("mobile-next-btn");
+      const reportSection = document.getElementById("report-form-section");
+
+      if ("IntersectionObserver" in window) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              mobileBtn.classList.add("opacity-0", "pointer-events-none");
+            } else {
+              mobileBtn.classList.remove("opacity-0", "pointer-events-none");
+            }
+          });
+        }, { threshold: 0.15 });
+        observer.observe(reportSection);
+      }
+    }
+
+    // Render questionnaire form for selected category with accessible labels & enforced required attributes
     function renderQuestionnaire(categoryId) {
       const section = document.getElementById("questionnaire-section");
       const form = document.getElementById("dynamic-form");
@@ -423,14 +704,25 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
       // Render Dynamic Inputs
       category.questions.forEach((q) => {
         const wrapper = document.createElement("div");
+        const inputId = `q-${category.id}-${q.id}`;
+
         const label = document.createElement("label");
+        label.htmlFor = inputId;
         label.className = "block text-xs font-medium text-gray-700 mb-1";
-        label.textContent = q.label + (q.required ? " *" : "");
+        label.innerHTML = `${q.label} ${q.required ? '<span class="text-red-500 font-bold" title="Required field">*</span>' : ''}`;
 
         let input;
         if (q.type === "select") {
           input = document.createElement("select");
-          input.className = "w-full border border-gray-300 rounded-md p-2 text-xs focus:ring-1 focus:ring-indigo-500 bg-white";
+          input.className = "w-full border border-gray-300 rounded-md p-2 text-xs focus:ring-1 focus:ring-indigo-500 bg-white transition";
+          
+          if (!q.required) {
+            const emptyOpt = document.createElement("option");
+            emptyOpt.value = "";
+            emptyOpt.textContent = "-- Select an option (optional) --";
+            input.appendChild(emptyOpt);
+          }
+
           q.options.forEach((opt) => {
             const o = document.createElement("option");
             o.value = opt;
@@ -439,19 +731,34 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
           });
         } else if (q.type === "textarea") {
           input = document.createElement("textarea");
-          input.className = "w-full border border-gray-300 rounded-md p-2 text-xs focus:ring-1 focus:ring-indigo-500 h-20";
+          input.className = "w-full border border-gray-300 rounded-md p-2 text-xs focus:ring-1 focus:ring-indigo-500 h-20 transition";
           if (q.placeholder) input.placeholder = q.placeholder;
         } else {
           input = document.createElement("input");
           input.type = "text";
-          input.className = "w-full border border-gray-300 rounded-md p-2 text-xs focus:ring-1 focus:ring-indigo-500";
+          input.className = "w-full border border-gray-300 rounded-md p-2 text-xs focus:ring-1 focus:ring-indigo-500 transition";
           if (q.placeholder) input.placeholder = q.placeholder;
         }
 
+        input.id = inputId;
         input.dataset.questionId = q.id;
         input.dataset.questionLabel = q.label;
-        input.addEventListener("input", updateDispatchOutput);
-        input.addEventListener("change", updateDispatchOutput);
+        if (q.required) {
+          input.required = true;
+          input.dataset.required = "true";
+        }
+
+        // Live validation clearing and dispatch updates
+        input.addEventListener("input", () => {
+          input.classList.remove("border-red-500", "ring-1", "ring-red-500", "bg-red-50/40");
+          document.getElementById("validation-error-box").classList.add("hidden");
+          updateDispatchOutput();
+        });
+        input.addEventListener("change", () => {
+          input.classList.remove("border-red-500", "ring-1", "ring-red-500", "bg-red-50/40");
+          document.getElementById("validation-error-box").classList.add("hidden");
+          updateDispatchOutput();
+        });
 
         wrapper.appendChild(label);
         wrapper.appendChild(input);
@@ -463,13 +770,64 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
       updateDispatchOutput();
     }
 
+    // Validate all required inputs before email dispatch or copying
+    function validateRequiredFields() {
+      const form = document.getElementById("dynamic-form");
+      const requiredInputs = form.querySelectorAll("[data-required='true']");
+      let firstInvalid = null;
+      let hasError = false;
+
+      requiredInputs.forEach((input) => {
+        const val = input.value ? input.value.trim() : "";
+        if (!val) {
+          hasError = true;
+          input.classList.add("border-red-500", "ring-1", "ring-red-500", "bg-red-50/40");
+          if (!firstInvalid) firstInvalid = input;
+        } else {
+          input.classList.remove("border-red-500", "ring-1", "ring-red-500", "bg-red-50/40");
+        }
+      });
+
+      const errorBox = document.getElementById("validation-error-box");
+      if (hasError) {
+        errorBox.classList.remove("hidden");
+        if (firstInvalid) {
+          firstInvalid.focus();
+          firstInvalid.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        return false;
+      }
+
+      errorBox.classList.add("hidden");
+      return true;
+    }
+
+    // Acute Emergency Detection: Detects gas smell, water main breaks, downed lines
+    function isAcuteEmergency(category) {
+      if (category.id === "natural_gas_nipsco") return true;
+
+      const inputs = document.querySelectorAll("#dynamic-form [data-question-id]");
+      for (const input of inputs) {
+        const val = (input.value || "").toLowerCase();
+        if (
+          val.includes("evacuate") ||
+          val.includes("emergency (call") ||
+          val.includes("sparking wire") ||
+          val.includes("active water main break")
+        ) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     function getEmailTemplateData(category) {
       const answers = {};
       const answerLines = [];
       const inputs = document.querySelectorAll("#dynamic-form [data-question-id]");
       inputs.forEach((input) => {
         const label = input.dataset.questionLabel;
-        const val = input.value || "N/A";
+        const val = input.value ? input.value.trim() : "N/A";
         answers[input.dataset.questionId] = val;
         answerLines.push(`${label}:\n${val}`);
       });
@@ -496,7 +854,7 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
       });
     }
 
-    // Build the configured plain-text email body for both dispatch actions.
+    // Build plain-text email body
     function buildEmailBody() {
       if (!selectedCategoryId) return "";
       const category = appConfig.categories.find((c) => c.id === selectedCategoryId);
@@ -515,30 +873,56 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
       return renderEmailTemplate(template, category);
     }
 
-    // Update dispatch mailto links and external URLs
+    // Update dispatch mailto links, external URLs, and enforce emergency protections
     function updateDispatchOutput() {
       if (!selectedCategoryId) return;
 
       const category = appConfig.categories.find((c) => c.id === selectedCategoryId);
       if (!category) return;
 
-      const emailBody = buildEmailBody();
-
-      // Mailto Button
+      const emergency = isAcuteEmergency(category);
+      const emergencyBox = document.getElementById("acute-emergency-box");
+      const deptEmergencyCall = document.getElementById("dept-emergency-call");
+      const deptEmergencyName = document.getElementById("dept-emergency-name");
       const mailtoBtn = document.getElementById("mailto-btn");
-      if (category.destinations.email) {
-        const subject = encodeURIComponent(buildEmailSubject());
-        const body = encodeURIComponent(emailBody);
-        mailtoBtn.href = `mailto:${category.destinations.email}?subject=${subject}&body=${body}`;
-        mailtoBtn.classList.remove("opacity-50", "pointer-events-none");
+      const noEmailNotice = document.getElementById("no-email-notice");
+      const noEmailText = document.getElementById("no-email-text");
+
+      // Handle Acute Emergency State
+      if (emergency) {
+        emergencyBox.classList.remove("hidden");
+        if (category.destinations && category.destinations.phone) {
+          deptEmergencyCall.href = `tel:${category.destinations.phone.replace(/[^0-9]/g, "")}`;
+          deptEmergencyName.textContent = `Call 24/7 Dispatch: ${category.destinations.phone}`;
+          deptEmergencyCall.classList.remove("hidden");
+        } else {
+          deptEmergencyCall.classList.add("hidden");
+        }
+        // In acute emergencies: No email permitted!
+        mailtoBtn.classList.add("hidden");
+        noEmailText.textContent = "Email is disabled for acute emergencies. Call 911 or department dispatch immediately.";
+        noEmailNotice.classList.remove("hidden");
       } else {
-        mailtoBtn.href = "#";
-        mailtoBtn.classList.add("opacity-50", "pointer-events-none");
+        emergencyBox.classList.add("hidden");
+
+        // Normal dispatch mode
+        if (category.destinations && category.destinations.email) {
+          const emailBody = buildEmailBody();
+          const subject = encodeURIComponent(buildEmailSubject());
+          const body = encodeURIComponent(emailBody);
+          mailtoBtn.href = `mailto:${category.destinations.email}?subject=${subject}&body=${body}`;
+          mailtoBtn.classList.remove("hidden", "opacity-50", "pointer-events-none");
+          noEmailNotice.classList.add("hidden");
+        } else {
+          mailtoBtn.classList.add("hidden");
+          noEmailText.textContent = "This department receives reports via official web portal or phone.";
+          noEmailNotice.classList.remove("hidden");
+        }
       }
 
       // Phone Call Button
       const phoneBtn = document.getElementById("phone-btn");
-      if (category.destinations.phone) {
+      if (category.destinations && category.destinations.phone) {
         phoneBtn.href = `tel:${category.destinations.phone.replace(/[^0-9]/g, "")}`;
         phoneBtn.classList.remove("hidden");
       } else {
@@ -548,30 +932,33 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
       // Extra Webform & Social Links
       const extraLinks = document.getElementById("extra-links");
       extraLinks.innerHTML = "";
-      if (category.destinations.webformUrl) {
-        extraLinks.innerHTML += `<div><a href="${category.destinations.webformUrl}" target="_blank" class="text-indigo-600 hover:underline"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Official City Webform</a></div>`;
+      if (category.destinations && category.destinations.webformUrl) {
+        extraLinks.innerHTML += `<div><a href="${category.destinations.webformUrl}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:underline font-medium"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Official Department Webform / Portal</a></div>`;
       }
-      if (category.destinations.socialUrl) {
-        extraLinks.innerHTML += `<div><a href="${category.destinations.socialUrl}" target="_blank" class="text-indigo-600 hover:underline"><i class="fa-brands fa-facebook mr-1"></i> Department Facebook Page</a></div>`;
+      if (category.destinations && category.destinations.socialUrl) {
+        extraLinks.innerHTML += `<div><a href="${category.destinations.socialUrl}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:underline"><i class="fa-brands fa-facebook mr-1"></i> Department Page</a></div>`;
       }
     }
 
     // Default Fallback Config
     function getDefaultConfig() {
       return {
-        location: { city: "Peru", defaultCenter: { lat: 40.7537, lng: -86.0689 }, defaultZoom: 14 },
+        location: { city: "Peru", county: "Miami County", state: "IN", defaultCenter: { lat: 40.7537, lng: -86.0689 }, defaultZoom: 14 },
+        emailSubjectTemplate: defaultEmailSubjectTemplate,
+        emailTemplate: defaultEmailTemplate,
         categories: [
           {
             id: "default",
             name: "Other Issue",
             department: "Detailed Categories Failed to Load",
             description: "Default fallback category when custom config is unavailable.",
-            destinations: { phone: "(765) 555-2501" },
+            destinations: { phone: "(765) 472-2400" },
             questions: [{ id: "description", label: "Details", type: "textarea", required: true }]
           }
         ]
       };
     }
+
     // Toggle OpenStreetMap Info Tooltip on Mobile Tap
     function toggleOsmTooltip(e) {
       e.stopPropagation();
