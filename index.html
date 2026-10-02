@@ -240,7 +240,8 @@
         <section aria-label="Report details" class="grid grid-cols-1 sm:grid-cols-3 gap-3 border-b border-gray-200 pb-4 text-sm">
           <div><div class="text-xs font-semibold uppercase text-gray-500">Category</div><div id="modal-category" class="mt-1 font-medium text-gray-900"></div></div>
           <div><div class="text-xs font-semibold uppercase text-gray-500">Department</div><div id="modal-department" class="mt-1 font-medium text-gray-900"></div></div>
-          <div><div class="text-xs font-semibold uppercase text-gray-500">Location</div><div id="modal-location" class="mt-1 font-medium text-gray-900"></div></div>
+          <div><div class="text-xs font-semibold uppercase text-gray-500">Location</div><div id="modal-location" class="mt-1 font-medium text-gray-900 break-words"></div></div>
+          <div id="modal-answers" class="sm:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3"></div>
         </section>
 
         <section aria-labelledby="contact-options-heading" class="space-y-3">
@@ -249,31 +250,31 @@
             <span id="no-email-text">This department receives reports via official web portal or phone.</span>
           </div>
 
-          <div id="email-actions" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <a id="mailto-btn" href="#" class="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-lg text-sm text-center border border-indigo-600 transition">
-              <i class="fa-solid fa-paper-plane"></i><span>Send as email</span>
+          <div id="dispatch-actions" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <a id="mailto-btn" href="#" class="dispatch-action h-12 w-full min-w-0 flex items-center justify-center gap-2 rounded-lg border border-indigo-600 bg-indigo-600 px-3 text-xs text-center font-semibold leading-4 text-white transition hover:bg-indigo-700">
+              <i class="fa-solid fa-paper-plane flex-shrink-0"></i><span class="min-w-0">Send as email</span>
             </a>
-            <button id="copy-btn" type="button" class="flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-800 font-semibold py-3 px-4 rounded-lg text-sm text-center border border-gray-300 transition">
-              <i class="fa-solid fa-copy"></i><span id="copy-text">Copy report</span>
+            <a id="webform-btn" href="#" target="_blank" rel="noopener noreferrer" class="dispatch-action hidden h-12 w-full min-w-0 flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 text-xs text-center font-semibold leading-4 text-gray-800 transition hover:bg-gray-50">
+              <i class="fa-solid fa-arrow-up-right-from-square flex-shrink-0"></i><span class="min-w-0">Open official web portal</span>
+            </a>
+            <a id="phone-btn" href="#" class="dispatch-action hidden h-12 w-full min-w-0 flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 text-xs text-center font-semibold leading-4 text-gray-800 transition hover:bg-gray-50">
+              <i class="fa-solid fa-phone flex-shrink-0"></i><span id="phone-btn-text" class="min-w-0">Call department</span>
+            </a>
+            <a id="visit-office-btn" href="#" target="_blank" rel="noopener noreferrer" class="dispatch-action hidden h-12 w-full min-w-0 flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 text-xs text-center font-semibold leading-4 text-gray-800 transition hover:bg-gray-50">
+              <i class="fa-solid fa-location-dot flex-shrink-0"></i><span class="min-w-0">Visit to Office</span>
+            </a>
+            <a id="social-btn" href="#" target="_blank" rel="noopener noreferrer" class="dispatch-action hidden h-12 w-full min-w-0 flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 text-xs text-center font-semibold leading-4 text-gray-800 transition hover:bg-gray-50">
+              <i class="fa-solid fa-users flex-shrink-0"></i><span class="min-w-0">Open Department Social Page</span>
+            </a>
+            <button id="copy-btn" type="button" class="dispatch-action h-12 w-full min-w-0 flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 text-xs text-center font-semibold leading-4 text-gray-800 transition hover:bg-gray-50">
+              <i class="fa-solid fa-copy flex-shrink-0"></i><span id="copy-text" class="min-w-0">Copy report</span>
             </button>
           </div>
 
-          <div id="followup-actions" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <a id="webform-btn" href="#" target="_blank" rel="noopener noreferrer" class="hidden flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-800 font-semibold py-3 px-4 rounded-lg text-sm text-center border border-gray-300 transition">
-              <i class="fa-solid fa-arrow-up-right-from-square"></i><span>Open official web portal</span>
-            </a>
-            <a id="phone-btn" href="#" class="hidden flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-800 font-semibold py-3 px-4 rounded-lg text-sm text-center border border-gray-300 transition">
-              <i class="fa-solid fa-phone"></i><span id="phone-btn-text">Call department</span>
-            </a>
-            <a id="social-btn" href="#" target="_blank" rel="noopener noreferrer" class="hidden flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-800 font-semibold py-3 px-4 rounded-lg text-sm text-center border border-gray-300 transition">
-              <i class="fa-solid fa-users"></i><span>Open Department Social Page</span>
-            </a>
-          </div>
-
-          <div>
-            <h3 id="contact-options-heading" class="text-base font-bold text-gray-900">Contact information</h3>
+          <details class="pt-2 text-sm text-gray-700">
+            <summary id="contact-options-heading" class="cursor-pointer font-medium hover:text-indigo-700">Contact information</summary>
             <div id="report-contact-info" class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm"></div>
-          </div>
+          </details>
 
           <details class="pt-2 text-sm text-gray-700">
             <summary class="cursor-pointer font-medium hover:text-indigo-700">Preview report text</summary>
@@ -1059,6 +1060,44 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
       });
     }
 
+    function orderDispatchActions(category) {
+      const container = document.getElementById("dispatch-actions");
+      const buttonsByDestination = {
+        email: document.getElementById("mailto-btn"),
+        webformUrl: document.getElementById("webform-btn"),
+        phone: document.getElementById("phone-btn"),
+        address: document.getElementById("visit-office-btn"),
+        socialUrl: document.getElementById("social-btn")
+      };
+      const orderedButtons = Object.keys(category.destinations || {})
+        .map((key) => buttonsByDestination[key])
+        .filter(Boolean);
+
+      Object.values(buttonsByDestination).forEach((button) => {
+        if (!orderedButtons.includes(button)) orderedButtons.push(button);
+      });
+      orderedButtons.push(document.getElementById("copy-btn"));
+      container.append(...orderedButtons);
+    }
+
+    function renderReportAnswers() {
+      const container = document.getElementById("modal-answers");
+      container.innerHTML = "";
+
+      document.querySelectorAll("#dynamic-form [data-question-id]").forEach((input) => {
+        const item = document.createElement("div");
+        item.className = "min-w-0";
+        const label = document.createElement("div");
+        label.className = "text-xs font-semibold text-gray-500";
+        label.textContent = input.dataset.questionLabel;
+        const answer = document.createElement("div");
+        answer.className = "mt-1 whitespace-pre-wrap break-words text-gray-900";
+        answer.textContent = input.value ? input.value.trim() : "N/A";
+        item.append(label, answer);
+        container.appendChild(item);
+      });
+    }
+
     // Update dispatch mailto links, external URLs, and enforce emergency protections
     function updateDispatchOutput() {
       if (!selectedCategoryId) return;
@@ -1071,15 +1110,27 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
       const deptEmergencyCall = document.getElementById("dept-emergency-call");
       const deptEmergencyName = document.getElementById("dept-emergency-name");
       const mailtoBtn = document.getElementById("mailto-btn");
+      const copyBtn = document.getElementById("copy-btn");
       const noEmailNotice = document.getElementById("no-email-notice");
       const noEmailText = document.getElementById("no-email-text");
-      const emailActions = document.getElementById("email-actions");
 
       document.getElementById("modal-category").textContent = category.name;
       document.getElementById("modal-department").textContent = category.department;
       document.getElementById("modal-location").textContent = selectedAddress;
       document.getElementById("report-preview").textContent = buildEmailBody();
+      renderReportAnswers();
       renderContactInfo(category);
+      orderDispatchActions(category);
+
+      const address = category.destinations && category.destinations.address;
+      const visitOfficeBtn = document.getElementById("visit-office-btn");
+      if (typeof address === "string" && /\d/.test(address)) {
+        visitOfficeBtn.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address.trim())}`;
+        visitOfficeBtn.classList.remove("hidden");
+      } else {
+        visitOfficeBtn.href = "#";
+        visitOfficeBtn.classList.add("hidden");
+      }
 
       // Handle Acute Emergency State
       if (emergency) {
@@ -1093,7 +1144,7 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
         }
         // In acute emergencies: No email permitted!
         mailtoBtn.classList.add("hidden");
-        emailActions.classList.add("hidden");
+        copyBtn.classList.add("hidden");
         noEmailText.textContent = "Email is disabled for acute emergencies. Call 911 or department dispatch immediately.";
         noEmailNotice.classList.remove("hidden");
       } else {
@@ -1106,11 +1157,11 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
           const body = encodeURIComponent(emailBody);
           mailtoBtn.href = `mailto:${category.destinations.email}?subject=${subject}&body=${body}`;
           mailtoBtn.classList.remove("hidden");
-          emailActions.classList.remove("hidden");
+          copyBtn.classList.remove("hidden");
           noEmailNotice.classList.add("hidden");
         } else {
           mailtoBtn.classList.add("hidden");
-          emailActions.classList.add("hidden");
+          copyBtn.classList.add("hidden");
           noEmailText.textContent = "This department receives reports via official web portal or phone.";
           noEmailNotice.classList.remove("hidden");
         }
