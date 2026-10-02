@@ -1,6 +1,6 @@
 # Peru Community 311
 
-Peru Community 311 is an open-source, citizen-built civic reporting portal for Peru, Indiana. Residents can map non-emergency issues and prepare reports for the department or service responsible.
+This repository contains the configured Peru, Indiana deployment of Peru Community 311. Its map defaults, issue categories, agency contacts, emergency guidance, and report templates are specific to Peru and Miami County. It is not a blank or ready-to-deploy template for another town; communities reusing the code should replace and verify the deployment-specific configuration before publishing.
 
 > **Disclaimer:** Peru Community 311 is an independent community initiative. It is not owned, operated, or managed by the City of Peru or Miami County government offices.
 
@@ -9,13 +9,36 @@ Peru Community 311 is an open-source, citizen-built civic reporting portal for P
 1. Pin an issue on the Leaflet map or use the device's location.
 2. Choose an issue category and complete its questionnaire.
 3. Select **Review & Report** to review the report and the category's available department contact information.
-4. Submit the report to the department by email, official web portal, or phone. This version does not save reports to this website or submit them to an agency.
+4. Contact the responsible agency using the listed email, official web portal, or phone. This version does not save reports to this website or submit them to an agency.
 
-The browser emits a `report-action` custom event when someone chooses **Send as email**, opens an official web portal, or calls a department. Its `detail` contains `action` (`send_email`, `open_webform`, or `call_department`), `categoryId`, and a `reportDraftId` shared by actions taken in the same report dialog. This event is an integration point for future analytics; no actions or reports are currently stored.
+The selected location, category, and questionnaire answers are reflected in the page URL so a draft can be shared or reopened. Anyone with that URL can see those values, so do not include sensitive information in a draft.
 
-## Configure `templates.json`
+The browser emits a `report-action` custom event when someone chooses **Send as email**, opens an official web portal, or calls a department. Its `detail` contains `action` (`send_email`, `open_webform`, or `call_department`), `categoryId`, and a `reportDraftId` shared by actions taken in the same report dialog. This is only an integration point: actions and reports are not stored or counted by this deployment. Opening an email, form, or phone link also does not confirm that the agency received a report.
 
-The app loads `templates.json` when it starts. Edit this file to change the map defaults, categories, questions, and report destinations.
+## Repository Structure
+
+- `index.html` contains the single-page map, questionnaire, report preview, and contact-action flow.
+- `templates.json` contains this deployment's map defaults, categories, contacts, questions, and email templates. The app fetches it when the page loads.
+- `README.md` documents this deployment, the configuration format, and how to adapt a fork.
+- `LICENSE` contains the project's license.
+
+The site is static and has no report database or server-side processing. Preview it through a local web server, such as `python3 -m http.server 8000`, then open `http://localhost:8000/`. Opening `index.html` directly as a `file:` URL may prevent the browser from fetching `templates.json`.
+
+## Fork for Another Community
+
+1. Fork this repository and treat its Peru-specific content as example data, not as information for your community.
+2. In `templates.json`, replace `location` with your service area's city, county, state, default map center, and zoom.
+3. Replace the `categories` with locally relevant issues. For each one, verify its department, destinations, questions, and emergency rules directly with the responsible agency.
+4. Replace the top-level and category-specific email subject/body templates with wording appropriate for your agencies. See the configuration reference below for supported fields and placeholders.
+5. In `index.html`, update the site name, city-specific wording, independent-project disclaimer, page title and descriptions, and `og:url` for the fork's published URL. Review any remaining Peru-specific text in the page.
+6. Test the fork with and without email destinations, with required and optional questions, and with emergency categories. Verify every contact link and generated message before sharing it publicly.
+7. Publish the static files with GitHub Pages, then open the published site to confirm `templates.json` loads and the share-preview metadata points to the fork's URL.
+
+Retain the visible disclaimer that the site is independent unless the deploying organization has authorization to represent itself differently. Map tiles and reverse geocoding use OpenStreetMap services; follow the applicable attribution and usage policies for your deployment.
+
+## `templates.json` Configuration Reference
+
+The app loads `templates.json` when it starts. Edit this file to change the map defaults, categories, questions, and report destinations. Keep this deployment-specific file separate from the reusable page logic when adapting the project.
 
 ### Location Defaults
 
