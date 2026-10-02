@@ -270,6 +270,7 @@
     let selectedCoords = { lat: 40.7537, lng: -86.0689 };
     let selectedAddress = "Center of Peru, IN";
     let selectedCategoryId = null;
+    let applyingUrlState = false;
 
     let reverseGeocodeTimer = null;
     let reverseGeocodeAbort = null;
@@ -321,11 +322,89 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
 
     // Application Initialization
     document.addEventListener("DOMContentLoaded", async () => {
+      const initialParams = new URLSearchParams(window.location.search);
       await loadTemplates();
       initMap();
       setupEventListeners();
       setupMobileObserver();
+      applyURLState(initialParams);
     });
+
+    function applyURLState(params) {
+      applyingUrlState = true;
+
+      const latValue = params.get("lat");
+      const lngValue = params.get("lng");
+      const lat = Number(latValue);
+      const lng = Number(lngValue);
+      const hasCoordinates = params.has("lat") && params.has("lng") &&
+        latValue.trim() !== "" && lngValue.trim() !== "" &&
+        Number.isFinite(lat) && Number.isFinite(lng) &&
+        lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+
+      if (hasCoordinates) {
+        map.setView([lat, lng], 16);
+        setMarker(lat, lng);
+      }
+
+      const requestedCategory = params.get("cat");
+      if (requestedCategory !== null) {
+        const requestedIndex = Number(requestedCategory);
+        const category = appConfig.categories.find((item) => String(item.id) === requestedCategory) ||
+          (Number.isInteger(requestedIndex) && requestedIndex > 0 ? appConfig.categories[requestedIndex - 1] : null);
+        if (category) selectCategory(category.id);
+      }
+
+      const form = document.getElementById("dynamic-form");
+      if (selectedCategoryId !== null) {
+        params.forEach((value, key) => {
+          if (key === "lat" || key === "lng" || key === "cat") return;
+          const input = Array.from(form.elements).find((element) =>
+            element.name === key || element.id === key || element.dataset.field === key
+          );
+          if (input) input.value = value;
+        });
+        updateDispatchOutput();
+      }
+
+      applyingUrlState = false;
+      syncStateToURL();
+    }
+
+    function syncStateToURL() {
+      if (applyingUrlState) return;
+
+      const url = new URL(window.location.href);
+      const params = url.searchParams;
+      params.delete("lat");
+      params.delete("lng");
+      params.delete("cat");
+
+      const knownQuestionKeys = new Set();
+      appConfig.categories.forEach((category) => {
+        category.questions.forEach((question) => {
+          knownQuestionKeys.add(String(question.id));
+          knownQuestionKeys.add(`q-${category.id}-${question.id}`);
+          if (question.name) knownQuestionKeys.add(question.name);
+          if (question.field) knownQuestionKeys.add(question.field);
+        });
+      });
+      knownQuestionKeys.forEach((key) => params.delete(key));
+
+      params.set("lat", selectedCoords.lat.toFixed(6));
+      params.set("lng", selectedCoords.lng.toFixed(6));
+      if (selectedCategoryId !== null) params.set("cat", selectedCategoryId);
+
+      if (selectedCategoryId !== null) {
+        document.querySelectorAll("#dynamic-form input, #dynamic-form select, #dynamic-form textarea").forEach((input) => {
+          const key = input.name || input.dataset.field || input.dataset.questionId;
+          if (key && input.value.trim()) params.set(key, input.value);
+        });
+      }
+
+      const query = params.toString();
+      window.history.replaceState(null, "", `${url.pathname}${query ? `?${query}` : ""}${url.hash}`);
+    }
 
     // Fetch local templates.json with inline fallback
     async function loadTemplates() {
@@ -364,7 +443,9 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
     function setMarker(lat, lng) {
       selectedCoords = { lat, lng };
       marker.setLatLng([lat, lng]);
+      if (reverseGeocodeAbort) reverseGeocodeAbort.abort();
       debouncedReverseGeocode(lat, lng);
+      syncStateToURL();
     }
 
     function debouncedReverseGeocode(lat, lng) {
@@ -487,6 +568,7 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
       document.getElementById("step2-subtitle").textContent = "Active category selected below.";
 
       renderQuestionnaire(categoryId);
+      syncStateToURL();
 
       // Auto-scroll on mobile to the follow-up questions
       if (window.innerWidth < 1024) {
@@ -516,6 +598,7 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
       document.getElementById("acute-emergency-box").classList.add("hidden");
       document.getElementById("validation-error-box").classList.add("hidden");
       document.getElementById("step2-subtitle").textContent = "Choose a category to display department questions.";
+      syncStateToURL();
     }
 
     // Setup event listeners
@@ -747,7 +830,9 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
         }
 
         input.id = inputId;
+        input.name = q.id;
         input.dataset.questionId = q.id;
+        input.dataset.field = q.id;
         input.dataset.questionLabel = q.label;
         if (q.required) {
           input.required = true;
@@ -759,11 +844,13 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
           input.classList.remove("border-red-500", "ring-1", "ring-red-500", "bg-red-50/40");
           document.getElementById("validation-error-box").classList.add("hidden");
           updateDispatchOutput();
+          syncStateToURL();
         });
         input.addEventListener("change", () => {
           input.classList.remove("border-red-500", "ring-1", "ring-red-500", "bg-red-50/40");
           document.getElementById("validation-error-box").classList.add("hidden");
           updateDispatchOutput();
+          syncStateToURL();
         });
 
         wrapper.appendChild(label);
