@@ -1,5 +1,5 @@
 # Peru Community 311
-
+https://fortepc.github.io/peru-community-311/
 This repository contains the configured Peru, Indiana deployment of Peru Community 311. Its map defaults, issue categories, agency contacts, emergency guidance, and report templates are specific to Peru and Miami County. It is not a blank or ready-to-deploy template for another town; communities reusing the code should replace and verify the deployment-specific configuration before publishing.
 
 > **Disclaimer:** Peru Community 311 is an independent community initiative. It is not owned, operated, or managed by the City of Peru or Miami County government offices.
