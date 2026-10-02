@@ -8,7 +8,10 @@ Peru Community 311 is an open-source, citizen-built civic reporting portal for P
 
 1. Pin an issue on the Leaflet map or use the device's location.
 2. Choose an issue category and complete its questionnaire.
-3. Send a prefilled report by email, copy its text, call a department, or open the configured web or social link.
+3. Select **Review & Report** to review the report and the category's available department contact information.
+4. Submit the report to the department by email, official web portal, or phone. This version does not save reports to this website or submit them to an agency.
+
+The browser emits a `report-action` custom event when someone chooses **Send as email**, opens an official web portal, or calls a department. Its `detail` contains `action` (`send_email`, `open_webform`, or `call_department`), `categoryId`, and a `reportDraftId` shared by actions taken in the same report dialog. This event is an integration point for future analytics; no actions or reports are currently stored.
 
 ## Configure `templates.json`
 
@@ -115,7 +118,7 @@ When adding a question, give it a unique `id` and make sure select questions hav
 
 ## Email Message Templates
 
-The top-level `emailSubjectTemplate` controls the mailto subject, and `emailTemplate` controls the message body used by both **Send Report via Email** and **Copy Text**. A category can optionally set `emailSubjectTemplate` and/or `emailTemplate` to override either setting. The default subject is `Civic Report: {category} - {location}`. In JSON strings, write `\n` in the body template where a line break should appear.
+The top-level `emailSubjectTemplate` controls the mailto subject, and `emailTemplate` controls the message body used by both **Send as email** and **Copy report**. A category can optionally set `emailSubjectTemplate` and/or `emailTemplate` to override either setting. The default subject is `Civic Report: {category} - {location}`. In JSON strings, write `\n` in the body template where a line break should appear.
 
 Available placeholders:
 
