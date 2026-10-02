@@ -505,7 +505,6 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
         
         const hasEmail = cat.destinations && cat.destinations.email;
         const hasPhone = cat.destinations && cat.destinations.phone;
-        const hasWebform = cat.destinations && cat.destinations.webformUrl;
 
         card.innerHTML = `
           <div class="bg-indigo-50 text-indigo-600 p-2.5 rounded-lg text-sm flex-shrink-0 mt-0.5">
@@ -520,9 +519,8 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
             ${descriptionHtml}
             ${addressHtml}
             <div class="text-[10px] text-gray-400 mt-1.5 flex items-center space-x-3">
-              ${hasEmail ? `<span><i class="fa-regular fa-envelope mr-1"></i>Email</span>` : ""}
+              ${hasEmail ? `<span><i class="fa-regular fa-envelope mr-1"></i>${cat.destinations.email}</span>` : ""}
               ${hasPhone ? `<span><i class="fa-solid fa-phone mr-1"></i>${cat.destinations.phone}</span>` : ""}
-              ${hasWebform ? `<span><i class="fa-solid fa-globe mr-1"></i>Webform</span>` : ""}
             </div>
           </div>
         `;
