@@ -1,5 +1,5 @@
 # Peru Community 311
-https://fortepc.github.io/peru-community-311/
+
 This repository contains the configured Peru, Indiana deployment of Peru Community 311. Its map defaults, issue categories, agency contacts, emergency guidance, and report templates are specific to Peru and Miami County. It is not a blank or ready-to-deploy template for another town; communities reusing the code should replace and verify the deployment-specific configuration before publishing.
 
 > **Disclaimer:** Peru Community 311 is an independent community initiative. It is not owned, operated, or managed by the City of Peru or Miami County government offices.
@@ -18,21 +18,24 @@ The browser emits a `report-action` custom event when someone chooses **Send as 
 ## Repository Structure
 
 - `index.html` contains the single-page map, questionnaire, report preview, and contact-action flow.
+- `configurator.html` is a standalone editor for importing and exporting `templates.json`. Category details, contacts, emergency guidance, questions, and jurisdiction polygons can be edited there. Jurisdiction is support for a planned feature; the current `index.html` does not yet filter categories by the selected report location. If jurisdiction is supplied in the templates.json future version of the index.html file will only display that reporting category if the map pin is within tht polygon.
 - `templates.json` contains this deployment's map defaults, categories, contacts, questions, and email templates. The app fetches it when the page loads.
-- `README.md` documents this deployment, the configuration format, and how to adapt a fork.
+- `README.md` "You are here" it's a document detailing the project.
 - `LICENSE` contains the project's license.
 
-The site is static and has no report database or server-side processing. Preview it through a local web server, such as `python3 -m http.server 8000`, then open `http://localhost:8000/`. Opening `index.html` directly as a `file:` URL may prevent the browser from fetching `templates.json`.
 
 ## Fork for Another Community
 
 1. Fork this repository and treat its Peru-specific content as example data, not as information for your community.
-2. In `templates.json`, replace `location` with your service area's city, county, state, default map center, and zoom.
-3. Replace the `categories` with locally relevant issues. For each one, verify its department, destinations, questions, and emergency rules directly with the responsible agency.
-4. Replace the top-level and category-specific email subject/body templates with wording appropriate for your agencies. See the configuration reference below for supported fields and placeholders.
-5. In `index.html`, update the site name, city-specific wording, independent-project disclaimer, page title and descriptions, and `og:url` for the fork's published URL. Review any remaining Peru-specific text in the page.
-6. Test the fork with and without email destinations, with required and optional questions, and with emergency categories. Verify every contact link and generated message before sharing it publicly.
-7. Publish the static files with GitHub Pages, then open the published site to confirm `templates.json` loads and the share-preview metadata points to the fork's URL.
+2. Open `configurator.html` in a browser. Import the included `templates.json` to adapt this example, or start with a blank configuration to build your categories from scratch. The editor works as a standalone file and does not upload your configuration.
+3. In **Site settings**, enter your service area's city, county, state, map center, and default zoom.
+4. Use the category editor to add, remove, or update locally relevant categories. Verify each department, destination, question, and emergency rule directly with the responsible agency.
+5. Set the top-level and any category-specific email subject and body templates for your agencies. See the configuration reference below for supported fields and placeholders.
+6. Optionally draw jurisdiction polygons for categories that may later be limited by report location. Polygon metadata is supported by the configurator, but the current `index.html` does not yet filter categories by jurisdiction.
+7. Download the generated `templates.json` from the configurator and place it in the repository root, replacing the Peru example configuration.
+8. In `index.html`, update the site name, city-specific wording, independent-project disclaimer, page title and descriptions, and `og:url` for the fork's published URL. Review any remaining Peru-specific text in the page.
+9. Test the fork with and without email destinations, with required and optional questions, and with emergency categories. Verify every contact link and generated message before sharing it publicly.
+10. Publish the static files with GitHub Pages, then open the published site to confirm `templates.json` loads and the share-preview metadata points to the fork's URL.
 
 Retain the visible disclaimer that the site is independent unless the deploying organization has authorization to represent itself differently. Map tiles and reverse geocoding use OpenStreetMap services; follow the applicable attribution and usage policies for your deployment.
 
@@ -75,12 +78,32 @@ Each object in the top-level `categories` array describes one report option. Add
 - `description`: Short explanation shown in the category list.
 - `destinations`: Contact and follow-up links for this category.
 - `questions`: The fields residents answer for this category.
+- `jurisdiction`: Optional polygon metadata for a planned location-based category filter.
 - `emailSubjectTemplate`: Optional subject template that overrides the top-level setting for this category.
 - `emailTemplate`: Optional message-body template that overrides the top-level setting for this category.
 
 The `destinations` object supports `email`, `phone`, `webformUrl`, `socialUrl`, and `address`. The email button uses `email`; the call button uses `phone`; and the extra links use `webformUrl` and `socialUrl`. Use `null` for a destination that is not available. A configured `address` is shown on the category card as location/contact information; confirm with the destination whether it accepts in-person reports.
 
 Categories can also optionally include an `emergency` object to trigger the flashing emergency mode in the app. Use `enabled: true` for categories that should always trigger emergency mode, or provide a `keywords` array for answer text that should trigger the alert when selected. The app will still use the category's phone number for the emergency call button.
+
+### Jurisdiction Polygons
+
+The standalone `configurator.html` editor can draw one or more polygons for a category. It stores them as GeoJSON Polygon geometries under `jurisdiction.polygons`; coordinates use GeoJSON order, `[longitude, latitude]`, and each boundary ring repeats its first coordinate at the end:
+
+```json
+{
+   "jurisdiction": {
+      "polygons": [
+         {
+            "type": "Polygon",
+            "coordinates": [[[-86.07, 40.75], [-86.06, 40.75], [-86.06, 40.76], [-86.07, 40.75]]]
+         }
+      ]
+   }
+}
+```
+
+Each item in `polygons` is a separate service area. This is configuration support for a planned feature; the current `index.html` does not yet filter categories by the selected report location. The configurator itself works offline using its coordinate grid; when online, it can load Leaflet.Draw with OpenStreetMap street tiles or Esri satellite tiles. Map tiles are fetched from those providers, but template data is not uploaded.
 
 Here is an example category object to add to the `categories` array. Replace the sample contact details with verified information:
 
