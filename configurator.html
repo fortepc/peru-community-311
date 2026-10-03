@@ -369,6 +369,7 @@
 							<div class="settings-grid">
 								${field("Category ID", "id", category.id)}${field("Name", "name", category.name)}
 								${field("Department", "department", category.department)}${field("Description", "description", category.description, "textarea", 'class="span-2"')}
+								<label class="field"><span>Category icon</span><input data-category-field="icon" type="text" value="${escapeHtml(category.icon ?? "")}" placeholder="fa-circle-info"><small>Font Awesome solid icon class, such as fa-road. Defaults to fa-circle-info.</small></label>
 							</div>
 						</section>
 						<section class="subsection"><div class="subsection-head"><div><h4>Contact destinations</h4><p>Leave an unavailable contact blank.</p></div></div>
@@ -713,7 +714,7 @@
 			}
 
 			function addCategory() {
-				config.categories.push({ id: `new_category_${config.categories.length + 1}`, name: "New category", department: "", description: "", destinations: { email: null, phone: null, webformUrl: null, socialUrl: null, address: null }, questions: [] });
+				config.categories.push({ id: `new_category_${config.categories.length + 1}`, name: "New category", department: "", description: "", icon: "fa-circle-info", destinations: { email: null, phone: null, webformUrl: null, socialUrl: null, address: null }, questions: [] });
 				activeCategory = config.categories.length - 1;
 				drawing = false;
 				draftPoints = [];

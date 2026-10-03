@@ -24,7 +24,7 @@ Publish the site over HTTPS, then open it in the phone's browser. On Android, us
 - `index.html` contains the single-page map, questionnaire, report preview, and contact-action flow.
 - `manifest.webmanifest`, `service-worker.js`, and `icons/` provide the installable web app metadata, cached app shell, and home-screen icons.
 - `configurator.html` is a standalone editor for importing and exporting `templates.json`. Category details, contacts, emergency guidance, questions, and jurisdiction polygons can be edited there. Jurisdiction is support for a planned feature; the current `index.html` does not yet filter categories by the selected report location. If jurisdiction is supplied in the templates.json future version of the index.html file will only display that reporting category if the map pin is within tht polygon.
-- `templates.json` contains this deployment's map defaults, categories, contacts, questions, and email templates. The app fetches it when the page loads.
+- `templates.json` contains this deployment's map defaults, categories, contacts, questions, category icons, and email templates. The app fetches it when the page loads.
 - `README.md` "You are here" it's a document detailing the project.
 - `LICENSE` contains the project's license.
 
@@ -77,10 +77,11 @@ For example, this configuration opens the map near Peru at zoom level 14:
 
 Each object in the top-level `categories` array describes one report option. Add a new object to the array or edit an existing one. Each category can contain:
 
-- `id`: Stable identifier for the category. Keep it unique; category-specific email templates and icon selection use it.
+- `id`: Stable identifier for the category. Keep it unique; category-specific email templates use it.
 - `name`: User-facing category name.
 - `department`: Department or organization shown as responsible.
 - `description`: Short explanation shown in the category list.
+- `icon`: Optional Font Awesome solid icon class, such as `fa-road`. If omitted or invalid, the app uses `fa-circle-info`.
 - `destinations`: Contact and follow-up links for this category.
 - `questions`: The fields residents answer for this category.
 - `jurisdiction`: Optional polygon metadata for a planned location-based category filter.
@@ -118,6 +119,7 @@ Here is an example category object to add to the `categories` array. Replace the
    "name": "Street Surface Issues",
    "department": "Street Department",
    "description": "Report potholes and debris on public streets.",
+   "icon": "fa-road",
    "emergency": {
       "keywords": ["active water main break", "sparking wire"]
    },

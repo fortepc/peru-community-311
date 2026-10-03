@@ -326,27 +326,6 @@
     let reverseGeocodeTimer = null;
     let reverseGeocodeAbort = null;
 
-    // todo - move icon specifying templates.json for easier customization
-    const categoryIcons = {
-      street_sanitation: "fa-road",
-      traffic_signals_signs: "fa-traffic-light",
-      traffic_department: "fa-traffic-light",
-      foliage_hazard_tree: "fa-leaf",
-      stormwater_flooding_drain: "fa-cloud-showers-heavy",
-      peru_utilities_stormwater: "fa-cloud-showers-heavy",
-      peru_utilities_water_sewer: "fa-droplet",
-      peru_utilities_water: "fa-droplet",
-      natural_gas_nipsco: "fa-fire-flame-simple",
-      animal_control: "fa-paw",
-      parks_recreation: "fa-tree",
-      peru_utilities_electric: "fa-bolt",
-      railroad_crossing: "fa-train",
-      building_code_enforcement: "fa-house-triangle-exclamation",
-      sidewalk_curb_ada: "fa-person-walking",
-      indot_state_highway: "fa-route",
-      unlisted_missing_category: "fa-circle-question"
-    };
-
     const defaultEmailTemplate = `CIVIC REPORT: {category}
 Department: {department}
 Location: {location}
@@ -578,7 +557,7 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
         card.setAttribute("tabindex", "0");
         card.setAttribute("aria-pressed", "false");
 
-        const iconClass = categoryIcons[cat.id] || "fa-circle-info";
+        const iconClass = typeof cat.icon === "string" && /^fa-[a-z0-9-]+$/.test(cat.icon) ? cat.icon : "fa-circle-info";
         const descriptionHtml = cat.description 
           ? `<p class="text-[11px] text-gray-500 mt-1 leading-snug">${cat.description}</p>`
           : "";

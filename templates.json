@@ -17,6 +17,7 @@
       "name": "1. Street Surface & Debris (Potholes, Roadkill, Obstructions)",
       "department": "Street & Sanitation Department (Brian Stillings, Commissioner)",
       "description": "Report potholes, asphalt damage, roadkill removal on street/alley, fallen road debris, or missed trash collection.",
+      "icon": "fa-road",
       "destinations": {
         "email": "mayorsadmin@cityofperu.org",
         "webformUrl": "https://www.cityofperu.org/egov/apps/action/center.egov?view=form;page=1;id=33",
@@ -65,6 +66,7 @@
       "name": "2. Traffic Signals, Signs & Road Control Devices",
       "department": "Traffic Department (Todd Wolfe, Department Head)",
       "description": "Report broken or dark traffic lights, knocked-down stop/yield signs, missing street markers, or damaged signal poles.",
+      "icon": "fa-traffic-light",
       "destinations": {
         "email": "trafficdept@cityofperu.org",
         "webformUrl": "https://www.cityofperu.org/",
@@ -100,6 +102,7 @@
       "name": "3. Hazardous Trees, Foliage & Sign Visibility Obstructions",
       "department": "Peru Street Dept / Utility Line Trim / Parks Dept",
       "description": "Report overgrown branches blocking stop signs/sightlines, fallen limbs blocking roads, or tree branches threatening power/telecom wires.",
+      "icon": "fa-leaf",
       "destinations": {
         "email": "mayorsadmin@cityofperu.org",
         "webformUrl": "https://www.cityofperu.org/",
@@ -145,6 +148,7 @@
       "name": "4. Storm Drains, Flooding & Railroad Underpass (Broadway Tunnel)",
       "department": "Peru Utilities - Stormwater & Drainage",
       "description": "Report clogged storm drain catch basins, standing water at the Broadway Tunnel underpass, or localized street flooding.",
+      "icon": "fa-cloud-showers-heavy",
       "destinations": {
         "email": null,
         "webformUrl": "https://www.peruutilities.com/my-account-1/report-a-problem/",
@@ -180,6 +184,7 @@
       "name": "5. Water Main Leaks, Running Water & Sewage Odors",
       "department": "Peru Utilities - Division of Water Management",
       "description": "Report gushing water leaks, water bubbling from street/curb, low pressure, discolored water, or raw sewage backup/smell.",
+      "icon": "fa-droplet",
       "emergency": {
         "keywords": [
           "active water main break",
@@ -232,6 +237,7 @@
       "name": "6. Natural Gas Smell or Pipeline Hazard (NIPSCO)",
       "department": "NIPSCO Gas Emergency Dispatch",
       "description": "Report suspected natural gas leaks or rotten egg odors. IF YOU SMELL GAS INSIDE OR NEAR BUILDINGS, EVACUATE IMMEDIATELY AND CALL 911.",
+      "icon": "fa-fire-flame-simple",
       "emergency": {
         "enabled": true
       },
@@ -269,6 +275,7 @@
       "name": "7. Animal Care & Control (Loose, Injured, or Stray Animals)",
       "department": "Peru Animal Care & Control (Greg Douglass, Officer)",
       "description": "Report stray dogs running loose, aggressive or nuisance animals, injured wildlife, or lost/found pets.",
+      "icon": "fa-paw",
       "destinations": {
         "email": "gdouglass@cityofperu.org",
         "webformUrl": null,
@@ -311,6 +318,7 @@
       "name": "8. Parks & Recreation Facilities (Damage, Vandalism, Playgrounds)",
       "department": "Peru Parks Department (Cliff Helvie, Superintendent)",
       "description": "Report broken playground equipment, damaged park shelters, trash overflow in parks, or vandalism at Maconaquah Park & municipal facilities.",
+      "icon": "fa-tree",
       "destinations": {
         "email": "chelvie@cityofperu.org",
         "webformUrl": "https://www.cityofperu.org/",
@@ -353,6 +361,7 @@
       "name": "9. Electric Power Outage & Street Light Outages",
       "department": "Peru Utilities Line Department (Michael Biesenbach, T&D Supt)",
       "description": "Report street light outages, flickering neighborhood lights, damaged utility poles, or localized electric outages.",
+      "icon": "fa-bolt",
       "destinations": {
         "email": null,
         "webformUrl": "https://www.peruutilities.com/my-account-1/report-a-problem/",
@@ -394,6 +403,7 @@
       "name": "10. Blocked Railroad Crossing (Stopped Trains)",
       "department": "Federal Railroad Administration (FRA) & Local Dispatch",
       "description": "Report stopped or blocking trains at local grade crossings directly to Federal Railroad Administration safety tracking.",
+      "icon": "fa-train",
       "destinations": {
         "email": null,
         "phone": "(765) 473-5522",
@@ -443,6 +453,7 @@
       "name": "11. High Grass, Blight, Junk Vehicles & Code Violations",
       "department": "Building & Zoning Dept (Bruce Carson, Comm. / Bill Sheets, Code Enf.)",
       "description": "Report tall grass (>8 inches), junk/blight accumulation in yards, abandoned/inoperable vehicles, or unsafe structures.",
+      "icon": "fa-house-triangle-exclamation",
       "destinations": {
         "email": "bcarson@cityofperu.org",
         "webformUrl": "https://peru.portal.iworq.net/PERU/new-case/400/530",
@@ -490,6 +501,7 @@
       "name": "12. Sidewalks, Trip Hazards & ADA Curb Aprons",
       "department": "Peru Street & Building Departments",
       "description": "Report buckled or cracked sidewalks, severe tripping hazards, sunken curb ramps, or blocked public walkways.",
+      "icon": "fa-person-walking",
       "destinations": {
         "email": "mayorsadmin@cityofperu.org",
         "webformUrl": "https://www.cityofperu.org/egov/apps/action/center.egov?view=form;page=1;id=33",
@@ -524,6 +536,7 @@
       "name": "13. State Highway Issue (US 24, US 31, SR 19, SR 124)",
       "department": "Indiana Dept of Transportation (INDOT Fort Wayne District)",
       "description": "Report issues on state routes (US 24, US 31, SR 19, SR 124) directly to INDOT, as they are outside municipal jurisdiction.",
+      "icon": "fa-route",
       "destinations": {
         "email": null,
         "webformUrl": "https://indot.carsprogram.org/",
@@ -570,6 +583,7 @@
       "name": "14. Unlisted / Missing Category (Report to Site Admin)",
       "department": "Peru Community 311 - Site Maintainer & Civic Tech Team",
       "description": "Can't find a matching department above? Send a report to the site admin so we can direct you to the correct agency or update templates.json.",
+      "icon": "fa-circle-question",
       "destinations": {
         "email": "jeffers.david93@gmail.com",
         "webformUrl": "https://github.com/fortepc/peru-community-311/issues/new",
