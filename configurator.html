@@ -116,20 +116,48 @@
 		.nav-head h3 { margin: 0; font-size: 16px; line-height: 1.3; font-weight: 700; }
 		.category-list { max-height: min(65vh, 660px); overflow: auto; padding: 7px; }
 		.category-item {
-			display: block;
+			display: flex;
+			align-items: center;
+			gap: 3px;
 			width: 100%;
-			padding: 10px;
-			text-align: left;
+			padding: 4px;
 			color: var(--ink);
 			background: transparent;
 			border: 0;
 			border-left: 3px solid transparent;
-			border-radius: 2px;
+			border-radius: 4px;
 		}
 		.category-item:hover { background: #f9fafb; }
 		.category-item.active { background: var(--ui-indigo-soft); border-left-color: var(--ui-indigo); }
-		.category-item strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
-		.category-item span { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
+		.category-select {
+			flex: 1;
+			min-width: 0;
+			padding: 6px;
+			text-align: left;
+			color: inherit;
+			background: transparent;
+			border: 0;
+			border-radius: 3px;
+		}
+		.category-select:focus-visible, .order-button:focus-visible { outline: 2px solid var(--ui-indigo); outline-offset: 1px; }
+		.category-select strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+		.category-select span { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
+		.category-order { display: flex; flex-direction: column; gap: 2px; }
+		.order-button {
+			display: grid;
+			width: 25px;
+			height: 22px;
+			place-items: center;
+			padding: 0;
+			background: #fff;
+			border: 1px solid var(--line);
+			border-radius: 4px;
+		}
+		.order-button:hover:not(:disabled) { background: var(--ui-indigo-soft); border-color: #c7d2fe; }
+		.order-button:disabled { opacity: .35; cursor: not-allowed; }
+		.order-arrow { width: 0; height: 0; border-right: 4px solid transparent; border-left: 4px solid transparent; }
+		.order-arrow.up { border-bottom: 5px solid #4b5563; }
+		.order-arrow.down { border-top: 5px solid #4b5563; }
 		.empty-nav { padding: 18px 12px; color: var(--muted); font-size: 12px; }
 		.category-panel { min-height: 520px; }
 		.category-panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 19px 21px; border-bottom: 1px solid var(--line); }
@@ -306,9 +334,15 @@
 					return;
 				}
 				list.innerHTML = config.categories.map((category, index) => `
-					<button type="button" class="category-item ${index === activeCategory ? "active" : ""}" data-category-index="${index}" aria-current="${index === activeCategory ? "true" : "false"}">
-						<strong>${escapeHtml(category.name || "Untitled category")}</strong><span>${escapeHtml(category.department || "No department assigned")}</span>
-					</button>`).join("");
+					<div class="category-item ${index === activeCategory ? "active" : ""}">
+						<button type="button" class="category-select" data-select-category="${index}" aria-pressed="${index === activeCategory}">
+							<strong>${escapeHtml(category.name || "Untitled category")}</strong><span>${escapeHtml(category.department || "No department assigned")}</span>
+						</button>
+						<div class="category-order" aria-label="Reorder category">
+							<button type="button" class="order-button" data-action="move-category-up" data-category-index="${index}" aria-label="Move ${escapeHtml(category.name || "Untitled category")} up" title="Move up" ${index === 0 ? "disabled" : ""}><span class="order-arrow up" aria-hidden="true"></span></button>
+							<button type="button" class="order-button" data-action="move-category-down" data-category-index="${index}" aria-label="Move ${escapeHtml(category.name || "Untitled category")} down" title="Move down" ${index === config.categories.length - 1 ? "disabled" : ""}><span class="order-arrow down" aria-hidden="true"></span></button>
+						</div>
+					</div>`).join("");
 			}
 
 			function field(label, prop, value, type = "text", extra = "") {
@@ -688,6 +722,17 @@
 				setStatus("Added a category. Update its ID, details, and contacts.");
 			}
 
+			function moveCategory(index, offset) {
+				const nextIndex = index + offset;
+				if (nextIndex < 0 || nextIndex >= config.categories.length) return;
+				[config.categories[index], config.categories[nextIndex]] = [config.categories[nextIndex], config.categories[index]];
+				if (activeCategory === index) activeCategory = nextIndex;
+				else if (activeCategory === nextIndex) activeCategory = index;
+				renderCategoryList();
+				renderCategoryEditor();
+				setStatus("Category order updated.");
+			}
+
 			function addPolygon() {
 				if (draftPoints.length < 3) {
 					setStatus("A polygon needs at least three boundary points.", true);
@@ -825,9 +870,9 @@
 			});
 
 			document.addEventListener("click", (event) => {
-				const categoryButton = event.target.closest("[data-category-index]");
+				const categoryButton = event.target.closest("[data-select-category]");
 				if (categoryButton) {
-					activeCategory = Number(categoryButton.dataset.categoryIndex);
+					activeCategory = Number(categoryButton.dataset.selectCategory);
 					drawing = false;
 					draftPoints = [];
 					renderCategoryList();
@@ -836,6 +881,11 @@
 				}
 				const action = event.target.closest("[data-action]")?.dataset.action;
 				if (!action) return;
+				if (action === "move-category-up" || action === "move-category-down") {
+					const index = Number(event.target.closest("[data-category-index]").dataset.categoryIndex);
+					moveCategory(index, action === "move-category-up" ? -1 : 1);
+					return;
+				}
 				if (action === "add-first") addCategory();
 				if (action === "delete-category") {
 					config.categories.splice(activeCategory, 1);
