@@ -15,9 +15,14 @@ The selected location, category, and questionnaire answers are reflected in the 
 
 The browser emits a `report-action` custom event when someone chooses **Send as email**, opens an official web portal, or calls a department. Its `detail` contains `action` (`send_email`, `open_webform`, or `call_department`), `categoryId`, and a `reportDraftId` shared by actions taken in the same report dialog. This is only an integration point: actions and reports are not stored or counted by this deployment. Opening an email, form, or phone link also does not confirm that the agency received a report.
 
+## Install on a Phone
+
+Publish the site over HTTPS, then open it in the phone's browser. On Android, use the browser's **Install app** or **Add to Home screen** option. On iPhone or iPad, open the Share menu in Safari and choose **Add to Home Screen**. The app shell is cached after the first successful visit, but the live map, address lookup, and externally hosted libraries still require an internet connection.
+
 ## Repository Structure
 
 - `index.html` contains the single-page map, questionnaire, report preview, and contact-action flow.
+- `manifest.webmanifest`, `service-worker.js`, and `icons/` provide the installable web app metadata, cached app shell, and home-screen icons.
 - `configurator.html` is a standalone editor for importing and exporting `templates.json`. Category details, contacts, emergency guidance, questions, and jurisdiction polygons can be edited there. Jurisdiction is support for a planned feature; the current `index.html` does not yet filter categories by the selected report location. If jurisdiction is supplied in the templates.json future version of the index.html file will only display that reporting category if the map pin is within tht polygon.
 - `templates.json` contains this deployment's map defaults, categories, contacts, questions, and email templates. The app fetches it when the page loads.
 - `README.md` "You are here" it's a document detailing the project.

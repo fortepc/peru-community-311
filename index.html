@@ -3,6 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Peru Community 311" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
   <title>Peru Community 311 - Citizen Issue Reporting</title>
   <meta name="description" content="Independent community-built civic reporting portal for Peru, Indiana. Map local non-emergency issues and prepare reports for the responsible department." />
   <meta property="og:title" content="Peru Community 311 - Citizen Issue Reporting" />
@@ -370,6 +377,11 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
       setupEventListeners();
       setupMobileObserver();
       applyURLState(initialParams);
+      if ("serviceWorker" in navigator && window.isSecureContext) {
+        navigator.serviceWorker.register("./service-worker.js").catch((error) => {
+          console.error("Unable to register the app service worker.", error);
+        });
+      }
     });
 
     function applyURLState(params) {
