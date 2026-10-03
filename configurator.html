@@ -1,0 +1,954 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="color-scheme" content="light">
+	<title>Community 311 | Template Workshop</title>
+	<style>
+		:root {
+			color-scheme: light;
+			--ui-ink: #111827;
+			--ui-muted: #6b7280;
+			--ui-line: #e5e7eb;
+			--ui-page: #f3f4f6;
+			--ui-panel: #ffffff;
+			--ui-slate: #0f172a;
+			--ui-indigo: #4f46e5;
+			--ui-indigo-hover: #4338ca;
+			--ui-indigo-soft: #eef2ff;
+			--ui-radius-sm: 6px;
+			--ui-radius-lg: 12px;
+			--ui-shadow: 0 1px 2px rgb(15 23 42 / 6%);
+			--ink: var(--ui-ink);
+			--muted: var(--ui-muted);
+			--line: var(--ui-line);
+			--paper: var(--ui-page);
+			--panel: var(--ui-panel);
+			--map-accent: #f97316;
+			--shadow: var(--ui-shadow);
+		}
+		* { box-sizing: border-box; }
+		body {
+			margin: 0;
+			color: var(--ink);
+			background: var(--paper);
+			font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+		}
+		button, input, textarea, select { font: inherit; }
+		button { cursor: pointer; }
+		.topbar {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 20px;
+			padding: 12px max(16px, calc((100vw - 1216px) / 2));
+			color: #ffffff;
+			background: var(--ui-slate);
+			box-shadow: 0 2px 5px rgb(15 23 42 / 18%);
+		}
+		.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+		.brand-mark {
+			display: grid;
+			width: 40px;
+			height: 40px;
+			place-items: center;
+			color: #ffffff;
+			background: var(--ui-indigo);
+			border-radius: 8px;
+			font-weight: 900;
+			font-size: 15px;
+		}
+		h1, h2, h3, p { margin-top: 0; }
+		h1 { margin-bottom: 1px; font-size: 20px; line-height: 1.2; font-weight: 700; }
+		.brand p { margin: 0; color: #9ca3af; font-size: 12px; }
+		.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+		.button {
+			min-height: 39px;
+			padding: 8px 13px;
+			border: 1px solid var(--line);
+			border-radius: var(--ui-radius-sm);
+			color: var(--ink);
+			background: white;
+			font-size: 13px;
+			font-weight: 600;
+			transition: background .15s ease, transform .15s ease;
+		}
+		.button:hover { background: #f9fafb; transform: translateY(-1px); }
+		.button.primary { color: white; background: var(--ui-indigo); border-color: var(--ui-indigo); }
+		.button.primary:hover { background: var(--ui-indigo-hover); }
+		.button.danger { color: #b91c1c; border-color: #fecaca; }
+		.button.small { min-height: 32px; padding: 5px 9px; font-size: 12px; }
+		.button:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+		main { width: min(1280px, 100%); margin: 0 auto; padding: 22px 16px 44px; }
+		.intro { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 16px; }
+		.eyebrow { margin: 0 0 4px; color: var(--ui-indigo); font-size: 11px; font-weight: 700; text-transform: uppercase; }
+		.intro h2 { margin: 0; font-size: 25px; line-height: 1.2; font-weight: 700; }
+		.intro-note { max-width: 390px; margin: 0; color: var(--muted); font-size: 13px; }
+		.status { min-height: 22px; margin: 0 0 14px; color: var(--ui-muted); font-size: 13px; }
+		.status.error { color: #b91c1c; }
+				.config-panel, .category-panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--ui-radius-lg); box-shadow: var(--shadow); }
+		.config-panel { padding: 20px; margin-bottom: 20px; }
+		.section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+		.section-heading h3 { margin: 0; font-size: 18px; line-height: 1.25; font-weight: 700; }
+		.section-heading p { margin: 0; color: var(--muted); font-size: 12px; }
+		.settings-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px 15px; }
+		.field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+		.field > span, .field-label { color: #374151; font-size: 12px; font-weight: 600; }
+		.field input, .field textarea, .field select {
+			width: 100%;
+			min-height: 39px;
+			padding: 8px 10px;
+			color: var(--ink);
+			background: #fff;
+			border: 1px solid #cbd4ca;
+			border-radius: 6px;
+			outline: none;
+		}
+		.field textarea { min-height: 86px; resize: vertical; line-height: 1.45; }
+		.field input:focus, .field textarea:focus, .field select:focus { border-color: var(--ui-indigo); box-shadow: 0 0 0 3px rgb(79 70 229 / 14%); }
+		.field small { color: var(--muted); font-size: 11px; }
+		.span-2 { grid-column: span 2; }
+		.span-4 { grid-column: 1 / -1; }
+		.editor-layout { display: grid; grid-template-columns: 275px minmax(0, 1fr); align-items: start; gap: 18px; }
+		.category-nav { position: sticky; top: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--ui-radius-lg); box-shadow: var(--shadow); }
+		.nav-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 13px; border-bottom: 1px solid var(--line); }
+		.nav-head h3 { margin: 0; font-size: 16px; line-height: 1.3; font-weight: 700; }
+		.category-list { max-height: min(65vh, 660px); overflow: auto; padding: 7px; }
+		.category-item {
+			display: block;
+			width: 100%;
+			padding: 10px;
+			text-align: left;
+			color: var(--ink);
+			background: transparent;
+			border: 0;
+			border-left: 3px solid transparent;
+			border-radius: 2px;
+		}
+		.category-item:hover { background: #f9fafb; }
+		.category-item.active { background: var(--ui-indigo-soft); border-left-color: var(--ui-indigo); }
+		.category-item strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+		.category-item span { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
+		.empty-nav { padding: 18px 12px; color: var(--muted); font-size: 12px; }
+		.category-panel { min-height: 520px; }
+		.category-panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 19px 21px; border-bottom: 1px solid var(--line); }
+		.category-panel-head h3 { margin: 0 0 3px; font-size: 20px; line-height: 1.25; font-weight: 700; }
+		.category-panel-head p { margin: 0; color: var(--muted); font-size: 12px; }
+		.category-content { padding: 20px 21px 24px; }
+		.subsection { padding: 18px 0; border-bottom: 1px solid var(--line); }
+		.subsection:first-child { padding-top: 0; }
+		.subsection:last-child { border-bottom: 0; padding-bottom: 0; }
+		.subsection-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 13px; }
+		.subsection-head h4 { margin: 0; font-size: 14px; }
+		.subsection-head p { margin: 2px 0 0; color: var(--muted); font-size: 11px; }
+		.question-list { display: grid; gap: 10px; }
+		.question { padding: 13px; background: #f9fafb; border: 1px solid var(--line); border-radius: 8px; }
+		.question-grid { display: grid; grid-template-columns: 1fr 1fr 150px auto; align-items: end; gap: 10px; }
+		.question-options { margin-top: 10px; }
+		.checkline { display: flex; align-items: center; gap: 8px; min-height: 39px; color: #374151; font-size: 12px; font-weight: 600; }
+		.checkline input { accent-color: var(--ui-indigo); width: 16px; height: 16px; }
+		.jurisdiction-copy { max-width: 670px; margin: -3px 0 13px; color: var(--muted); font-size: 12px; }
+		.map-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-bottom: 9px; }
+		.map-tools .field { width: 148px; margin-left: auto; }
+		.map-wrap { overflow: hidden; background: #f9fafb; border: 1px solid var(--line); border-radius: 8px; }
+		#jurisdiction-map { display: block; width: 100%; height: auto; min-height: 240px; touch-action: manipulation; }
+		#leaflet-map { display: none; width: 100%; height: min(55vh, 460px); min-height: 300px; background: #e9eee5; }
+		.leaflet-map-wrap { overflow: hidden; background: #f9fafb; border: 1px solid var(--line); border-radius: 8px; }
+		.map-view-buttons { display: inline-flex; gap: 0; }
+		.map-view-buttons .button { border-radius: 0; }
+		.map-view-buttons .button + .button { margin-left: -1px; }
+		.map-view-buttons .button:first-child { border-radius: 3px 0 0 3px; }
+		.map-view-buttons .button:last-child { border-radius: 0 3px 3px 0; }
+		.map-view-buttons .button.selected { color: white; background: var(--ui-indigo); border-color: var(--ui-indigo); z-index: 1; }
+		.map-grid { stroke: #d1d5db; stroke-width: 1; stroke-dasharray: 3 7; }
+		.map-label { fill: #6b7280; font: 11px ui-sans-serif, system-ui, sans-serif; }
+		.map-outline { fill: #f3f4f6; stroke: #d1d5db; stroke-width: 1; }
+		.map-polygon { fill: rgb(249 115 22 / 20%); stroke: var(--map-accent); stroke-width: 3; }
+		.map-polygon { fill: var(--polygon-color, var(--map-accent)); fill-opacity: .2; stroke: var(--polygon-color, var(--map-accent)); stroke-width: 3; }
+		.map-current { fill: var(--ui-indigo); stroke: #fff; stroke-width: 2; }
+		.map-point { fill: #fff; stroke: var(--map-accent); stroke-width: 3; }
+		.map-drawing { fill: rgb(249 115 22 / 10%); stroke: var(--map-accent); stroke-width: 3; stroke-dasharray: 7 5; }
+		.map-hint { margin: 8px 0 0; color: var(--muted); font-size: 11px; }
+		.polygon-list { display: grid; gap: 5px; margin-top: 11px; }
+		.polygon-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 7px 9px; background: #f9fafb; border: 1px solid var(--line); border-radius: 6px; font-size: 11px; }
+				.polygon-swatch { display: inline-block; width: 10px; height: 10px; margin-right: 7px; border-radius: 50%; vertical-align: -1px; }
+		.empty-editor { display: grid; min-height: 500px; place-content: center; padding: 36px; text-align: center; }
+		.empty-editor .empty-icon { margin: 0 auto 14px; display: grid; width: 58px; height: 58px; place-items: center; color: #fff; background: var(--ui-indigo); border-radius: 8px; font-size: 26px; font-weight: 700; }
+		.empty-editor h3 { margin: 0 0 8px; font-size: 20px; line-height: 1.25; font-weight: 700; }
+		.empty-editor p { max-width: 380px; margin: 0 auto 17px; color: var(--muted); font-size: 13px; }
+		footer { padding: 16px 0 0; color: var(--muted); text-align: center; font-size: 11px; }
+		@media (max-width: 900px) {
+			.settings-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+			.editor-layout { grid-template-columns: 220px minmax(0, 1fr); gap: 12px; }
+			.question-grid { grid-template-columns: 1fr 1fr; }
+		}
+		@media (max-width: 650px) {
+			.topbar { align-items: flex-start; flex-direction: column; padding: 15px; }
+			.actions { width: 100%; }
+			.actions .button { flex: 1; }
+			main { padding: 23px 12px 34px; }
+			.intro { align-items: flex-start; flex-direction: column; }
+			.config-panel { padding: 15px; }
+			.settings-grid { grid-template-columns: 1fr 1fr; gap: 11px; }
+			.editor-layout { grid-template-columns: 1fr; }
+			.category-nav { position: static; }
+			.category-list { display: flex; max-height: 170px; overflow: auto; }
+			.category-item { flex: 0 0 200px; border-left: 0; border-bottom: 3px solid transparent; }
+			.category-item.active { border-bottom-color: var(--ui-indigo); }
+			.category-panel-head, .category-content { padding-left: 14px; padding-right: 14px; }
+			.category-panel-head { align-items: flex-start; }
+			.question-grid { grid-template-columns: 1fr; }
+			.question-grid .remove-question { justify-self: start; }
+			.map-tools .field { width: 100%; margin: 4px 0 0; }
+			.section-heading { align-items: flex-start; flex-direction: column; }
+			.span-2 { grid-column: span 2; }
+		}
+	</style>
+</head>
+<body>
+	<header class="topbar">
+		<div class="brand">
+			<div class="brand-mark" aria-hidden="true">311</div>
+			<div><h1>Peru Community 311</h1><p>Template configuration editor</p></div>
+		</div>
+		<div class="actions">
+			<button class="button" id="import-button" type="button">Import JSON</button>
+			<button class="button" id="copy-button" type="button">Copy JSON</button>
+			<button class="button primary" id="export-button" type="button">Download templates.json</button>
+			<input id="import-file" type="file" accept=".json,application/json" hidden>
+		</div>
+	</header>
+
+	<main>
+		<div class="intro">
+			<div><p class="eyebrow">Configuration editor</p><h2>Build your report templates.</h2></div>
+			<p class="intro-note">Import your current <strong>templates.json</strong>, edit it offline, then download the updated file. Your configuration stays local; online map layers use public tile services.</p>
+		</div>
+		<p id="status" class="status" role="status" aria-live="polite">Start with a blank configuration or import an existing templates.json file.</p>
+
+		<section class="config-panel" aria-labelledby="settings-title">
+			<div class="section-heading"><h3 id="settings-title">Site settings</h3><p>Location defaults and report email templates</p></div>
+			<div class="settings-grid" id="settings-grid"></div>
+		</section>
+
+		<div class="editor-layout">
+			<aside class="category-nav" aria-label="Report categories">
+				<div class="nav-head"><h3>Categories <span id="category-count">0</span></h3><button class="button primary small" id="add-category" type="button">+ Add</button></div>
+				<div class="category-list" id="category-list"></div>
+			</aside>
+			<section class="category-panel" id="category-editor" aria-label="Category editor"></section>
+		</div>
+		<footer>Single-file editor</footer>
+	</main>
+
+	<script>
+		(() => {
+			const blankConfig = () => ({
+				location: { city: "", county: "", state: "", defaultCenter: { lat: 40.7537, lng: -86.0689 }, defaultZoom: 14 },
+				emailSubjectTemplate: "Civic Report: {category} - {location}",
+				emailTemplate: "CIVIC REPORT: {category}\nDepartment: {department}\nLocation: {location}\nCoordinates: {mapsUrl}\n\n{answers}",
+				categories: []
+			});
+			let config = blankConfig();
+			let activeCategory = -1;
+			let drawing = false;
+			let draftPoints = [];
+			let mapRadiusMiles = 2.5;
+			let onlineMapReady = false;
+			let leafletMap = null;
+			let polygonLayer = null;
+			let streetTiles = null;
+			let satelliteTiles = null;
+			let activeTileLayer = "streets";
+			let mapView = "streets";
+			let drawHandler = null;
+			let editHandler = null;
+			let editingPolygons = false;
+			let onlineMapAttempted = false;
+			const polygonColors = ["#2563eb", "#059669", "#d97706", "#dc2626", "#7c3aed", "#0891b2", "#db2777", "#65a30d"];
+
+			const $ = (selector, root = document) => root.querySelector(selector);
+			const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+			const currentCategory = () => config.categories[activeCategory] || null;
+			const setStatus = (message, error = false) => {
+				const status = $("#status");
+				status.textContent = message;
+				status.classList.toggle("error", error);
+			};
+			const numericValue = (input, fallback = 0) => input.value.trim() === "" ? fallback : Number(input.value);
+			const safeArray = (value) => Array.isArray(value) ? value : [];
+
+			function renderSettings() {
+				const location = config.location || (config.location = {});
+				const center = location.defaultCenter || (location.defaultCenter = { lat: 40.7537, lng: -86.0689 });
+				const fields = [
+					["City", "location.city", location.city, "text"],
+					["County", "location.county", location.county, "text"],
+					["State / region", "location.state", location.state, "text"],
+					["Default zoom", "location.defaultZoom", location.defaultZoom, "number"],
+					["Center latitude", "location.defaultCenter.lat", center.lat, "number"],
+					["Center longitude", "location.defaultCenter.lng", center.lng, "number"],
+					["Email subject template", "emailSubjectTemplate", config.emailSubjectTemplate, "text", "span-2"],
+					["Email body template", "emailTemplate", config.emailTemplate, "textarea", "span-4"]
+				];
+				$("#settings-grid").innerHTML = fields.map(([label, path, value, type, span = ""]) => `
+					<label class="field ${span}"><span>${label}</span>${type === "textarea"
+						? `<textarea data-setting="${path}">${escapeHtml(value ?? "")}</textarea>`
+						: `<input data-setting="${path}" type="${type}" value="${escapeHtml(value ?? "")}" step="any">`}</label>`).join("");
+			}
+
+			function renderCategoryList() {
+				$("#category-count").textContent = config.categories.length;
+				const list = $("#category-list");
+				if (!config.categories.length) {
+					list.innerHTML = '<div class="empty-nav">No categories yet. Add one to begin.</div>';
+					return;
+				}
+				list.innerHTML = config.categories.map((category, index) => `
+					<button type="button" class="category-item ${index === activeCategory ? "active" : ""}" data-category-index="${index}" aria-current="${index === activeCategory ? "true" : "false"}">
+						<strong>${escapeHtml(category.name || "Untitled category")}</strong><span>${escapeHtml(category.department || "No department assigned")}</span>
+					</button>`).join("");
+			}
+
+			function field(label, prop, value, type = "text", extra = "") {
+				const control = type === "textarea"
+					? `<textarea data-category-field="${prop}" ${extra}>${escapeHtml(value ?? "")}</textarea>`
+					: `<input data-category-field="${prop}" type="${type}" value="${escapeHtml(value ?? "")}" ${type === "number" ? 'step="any"' : ""} ${extra}>`;
+				return `<label class="field"><span>${label}</span>${control}</label>`;
+			}
+
+			function renderCategoryEditor() {
+				const category = currentCategory();
+				const editor = $("#category-editor");
+				if (!category) {
+					editor.innerHTML = `<div class="empty-editor"><div class="empty-icon" aria-hidden="true">+</div><h3>No category selected</h3><p>Add a category or import an existing templates.json file to start editing report templates.</p><button type="button" class="button primary" data-action="add-first">Add a category</button></div>`;
+					return;
+				}
+				const destinations = category.destinations || (category.destinations = {});
+				const emergency = category.emergency || {};
+				const questions = safeArray(category.questions);
+				editor.innerHTML = `
+					<div class="category-panel-head"><div><p class="eyebrow">Category ${activeCategory + 1} of ${config.categories.length}</p><h3>${escapeHtml(category.name || "New category")}</h3><p>Category details, destinations, questions, and optional jurisdiction</p></div><button type="button" class="button danger small" data-action="delete-category">Delete category</button></div>
+					<div class="category-content">
+						<section class="subsection"><div class="subsection-head"><div><h4>Category details</h4><p>Stable IDs are used in report links; keep them unique.</p></div></div>
+							<div class="settings-grid">
+								${field("Category ID", "id", category.id)}${field("Name", "name", category.name)}
+								${field("Department", "department", category.department)}${field("Description", "description", category.description, "textarea", 'class="span-2"')}
+							</div>
+						</section>
+						<section class="subsection"><div class="subsection-head"><div><h4>Contact destinations</h4><p>Leave an unavailable contact blank.</p></div></div>
+							<div class="settings-grid">
+								${field("Email", "destinations.email", destinations.email)}${field("Phone", "destinations.phone", destinations.phone)}
+								${field("Web form URL", "destinations.webformUrl", destinations.webformUrl)}${field("Social URL", "destinations.socialUrl", destinations.socialUrl)}
+								${field("Mailing / office address", "destinations.address", destinations.address, "textarea", 'class="span-2"')}
+							</div>
+						</section>
+						<section class="subsection"><div class="subsection-head"><div><h4>Emergency guidance</h4><p>Optional alert behavior for this category.</p></div></div>
+							<div class="settings-grid">
+								<label class="checkline"><input type="checkbox" data-emergency-enabled ${emergency.enabled === true ? "checked" : ""}>Always show emergency alert</label>
+								<label class="field span-2"><span>Trigger keywords</span><textarea data-emergency-keywords placeholder="One phrase per line">${escapeHtml(safeArray(emergency.keywords).join("\n"))}</textarea><small>Matches report answers in the app.</small></label>
+								${field("Category email subject override", "emailSubjectTemplate", category.emailSubjectTemplate, "text")}
+								<label class="field span-2"><span>Category email body override</span><textarea data-category-field="emailTemplate">${escapeHtml(category.emailTemplate ?? "")}</textarea><small>Leave blank to use the site-wide message.</small></label>
+							</div>
+						</section>
+						<section class="subsection"><div class="subsection-head"><div><h4>Follow-up questions</h4><p>Question IDs must be unique within this category.</p></div><button type="button" class="button small" data-action="add-question">+ Add question</button></div>
+							<div class="question-list">${questions.map((question, index) => renderQuestion(question, index)).join("") || '<p class="map-hint">No questions yet.</p>'}</div>
+						</section>
+						<section class="subsection"><div class="subsection-head"><div><h4>Jurisdiction</h4><p>Optional polygon coverage for future location-based category filtering.</p></div></div>
+							<p class="jurisdiction-copy">Draw one or more service-area polygons. Exported values are GeoJSON Polygon objects in <strong>longitude, latitude</strong> order, grouped under <code>jurisdiction.polygons</code>.</p>
+							<div class="map-tools">
+								<button type="button" class="button small primary" data-action="draw-polygon">${drawing ? "Drawing..." : "Draw polygon"}</button>
+								<button type="button" class="button small" data-action="finish-polygon" ${drawing ? "" : "disabled"}>Finish polygon</button>
+								<button type="button" class="button small" data-action="undo-point" ${draftPoints.length ? "" : "disabled"}>Undo point</button>
+								<button type="button" class="button small" data-action="edit-polygons" ${canUseLeafletMap() && safeArray(category.jurisdiction?.polygons).length ? "" : "disabled"}>Edit vertices</button>
+								<button type="button" class="button small" data-action="save-polygon-edits" disabled>Save edits</button>
+								<label class="field"><span>Canvas radius (miles)</span><input type="number" min="0.1" max="100" step="0.1" value="${mapRadiusMiles}" data-map-radius></label>
+							</div>
+							<div class="map-tools map-online-tools" hidden>
+								<div class="map-view-buttons" role="group" aria-label="Map view">
+									<button type="button" class="button small selected" data-map-view="streets">Street map</button>
+									<button type="button" class="button small" data-map-view="satellite">Satellite</button>
+								</div>
+								<span class="map-hint">Online tiles load only when available.</span>
+							</div>
+							<div class="map-wrap"><svg id="jurisdiction-map" viewBox="0 0 800 460" role="img" aria-label="Offline jurisdiction polygon drawing canvas"><g id="map-content"></g></svg></div>
+							<div class="leaflet-map-wrap"><div id="leaflet-map" aria-label="Online map for drawing jurisdiction polygons"></div></div>
+							<p class="map-hint" id="map-help">${drawing ? "Click the canvas to add boundary points, then finish the polygon." : "The orange marker is the configured default map center. Set the center under Site settings; this canvas uses a local coordinate grid and needs no map service."}</p>
+							<div class="polygon-list" id="polygon-list"></div>
+						</section>
+					</div>`;
+				renderMap();
+				renderPolygonList();
+				syncMapViews();
+				if (canUseLeafletMap()) mountLeafletMap();
+			}
+
+			function renderQuestion(question, index) {
+				const type = ["select", "text", "textarea"].includes(question.type) ? question.type : "text";
+				return `<div class="question" data-question-index="${index}">
+					<div class="question-grid">
+						${field("Question ID", `questions.${index}.id`, question.id)}
+						${field("Label", `questions.${index}.label`, question.label)}
+						<label class="field"><span>Input type</span><select data-category-field="questions.${index}.type"><option value="text" ${type === "text" ? "selected" : ""}>Text</option><option value="textarea" ${type === "textarea" ? "selected" : ""}>Long text</option><option value="select" ${type === "select" ? "selected" : ""}>Select list</option></select></label>
+						<button type="button" class="button danger small remove-question" data-action="delete-question" data-question-index="${index}">Remove</button>
+						<label class="checkline"><input type="checkbox" data-question-required="${index}" ${question.required ? "checked" : ""}>Required</label>
+						${field("Placeholder", `questions.${index}.placeholder`, question.placeholder, "text", 'class="span-2"')}
+					</div>
+					${type === "select" ? `<label class="field question-options"><span>Options - one per line</span><textarea data-question-options="${index}" placeholder="Pothole, Debris, Other">${escapeHtml(safeArray(question.options).join("\n"))}</textarea></label>` : ""}
+				</div>`;
+			}
+
+			function geoToPoint(latitude, longitude) {
+				const center = config.location?.defaultCenter || { lat: 40.7537, lng: -86.0689 };
+				const miles = Math.max(0.1, Number(mapRadiusMiles) || 2.5);
+				const cosLatitude = Math.max(0.15, Math.cos(Number(center.lat) * Math.PI / 180));
+				const lngRange = miles / (69.172 * cosLatitude);
+				const latRange = miles / 69;
+				return {
+					x: 400 + ((Number(longitude) - Number(center.lng)) / lngRange) * 370,
+					y: 230 - ((Number(latitude) - Number(center.lat)) / latRange) * 200
+				};
+			}
+
+			function pointToGeo(x, y) {
+				const center = config.location?.defaultCenter || { lat: 40.7537, lng: -86.0689 };
+				const miles = Math.max(0.1, Number(mapRadiusMiles) || 2.5);
+				const cosLatitude = Math.max(0.15, Math.cos(Number(center.lat) * Math.PI / 180));
+				return {
+					lat: Number(center.lat) + ((230 - y) / 200) * (miles / 69),
+					lng: Number(center.lng) + ((x - 400) / 370) * (miles / (69.172 * cosLatitude))
+				};
+			}
+
+			function pathForRing(ring) {
+				return safeArray(ring).map((coordinate, index) => {
+					if (!Array.isArray(coordinate) || coordinate.length < 2) return "";
+					const point = geoToPoint(coordinate[1], coordinate[0]);
+					return `${index ? "L" : "M"}${point.x.toFixed(2)},${point.y.toFixed(2)}`;
+				}).join(" ") + " Z";
+			}
+
+			function colorForPolygon(index) {
+				return polygonColors[index] || `hsl(${Math.round((index * 137.508) % 360)} 68% 42%)`;
+			}
+
+			function canUseLeafletMap() {
+				return onlineMapReady && navigator.onLine;
+			}
+
+			function renderMap() {
+				const group = $("#map-content");
+				if (!group) return;
+				const center = config.location?.defaultCenter || { lat: 40.7537, lng: -86.0689 };
+				const grid = [];
+				for (let x = 30; x <= 770; x += 74) grid.push(`<line class="map-grid" x1="${x}" y1="24" x2="${x}" y2="436"/>`);
+				for (let y = 46; y <= 414; y += 61) grid.push(`<line class="map-grid" x1="30" y1="${y}" x2="770" y2="${y}"/>`);
+				const polygons = safeArray(currentCategory()?.jurisdiction?.polygons).map((polygon, index) => {
+					const ring = polygon?.type === "Polygon" ? polygon.coordinates?.[0] : null;
+					return Array.isArray(ring) && ring.length > 2 ? `<path class="map-polygon" style="--polygon-color:${colorForPolygon(index)}" d="${pathForRing(ring)}"/>` : "";
+				}).join("");
+				const draftPath = draftPoints.length ? `<path class="${drawing ? "map-drawing" : "map-polygon"}" d="${draftPoints.map((point, index) => `${index ? "L" : "M"}${point.x},${point.y}`).join(" ")}${drawing ? "" : " Z"}"/>${draftPoints.map((point) => `<circle class="map-point" cx="${point.x}" cy="${point.y}" r="5"/>`).join("")}` : "";
+				const marker = geoToPoint(Number(center.lat), Number(center.lng));
+				group.innerHTML = `${grid.join("")}<rect class="map-outline" x="31" y="25" width="738" height="410" fill="none"/><text class="map-label" x="38" y="18">LOCAL COORDINATE GRID - ${Number(center.lat).toFixed(4)}, ${Number(center.lng).toFixed(4)}</text>${polygons}${draftPath}<circle class="map-current" cx="${marker.x}" cy="${marker.y}" r="7"/>`;
+			}
+
+			function renderPolygonList() {
+				const list = $("#polygon-list");
+				if (!list) return;
+				const polygons = safeArray(currentCategory()?.jurisdiction?.polygons);
+				list.innerHTML = polygons.map((polygon, index) => `<div class="polygon-row"><span><i class="polygon-swatch" style="background:${colorForPolygon(index)}"></i><strong>Polygon ${index + 1}</strong> - ${safeArray(polygon?.coordinates?.[0]).length} boundary points</span><button type="button" class="button danger small" data-action="delete-polygon" data-polygon-index="${index}">Remove</button></div>`).join("") || '<div class="map-hint">No jurisdiction polygons. Without polygons, the category has no jurisdiction restriction.</div>';
+			}
+
+			function syncMapViews() {
+				const offlineWrap = $(".map-wrap", $("#category-editor"));
+				const leafletWrap = $(".leaflet-map-wrap", $("#category-editor"));
+				const viewControls = $(".map-online-tools", $("#category-editor"));
+				if (!offlineWrap || !leafletWrap || !viewControls) return;
+				const showOnline = canUseLeafletMap();
+				viewControls.hidden = !showOnline;
+				offlineWrap.style.display = showOnline ? "none" : "block";
+				leafletWrap.style.display = showOnline ? "block" : "none";
+				$("#leaflet-map").style.display = showOnline ? "block" : "none";
+				const radiusField = $("[data-map-radius]", $("#category-editor"))?.closest(".field");
+				if (radiusField) radiusField.hidden = showOnline;
+				document.querySelectorAll("[data-map-view]").forEach((button) => button.classList.toggle("selected", button.dataset.mapView === mapView));
+				const help = $("#map-help");
+				if (help) {
+					help.textContent = showOnline
+						? "Street and satellite tiles are provided by OpenStreetMap and Esri. Attribution is shown on the map. Drag existing vertices to reshape a polygon; drag a midpoint to add a vertex."
+						: drawing ? "Offline map fallback: click three or more boundary points, then finish the polygon." : "The online map is unavailable. This coordinate grid is shown automatically as a drawing fallback.";
+				}
+			}
+
+			function loadScript(url) {
+				return new Promise((resolve, reject) => {
+					const script = document.createElement("script");
+					script.src = url;
+					script.onload = () => resolve();
+					script.onerror = () => reject(new Error(`Could not load ${url}`));
+					document.head.append(script);
+				});
+			}
+
+			function loadStyle(url) {
+				const link = document.createElement("link");
+				link.rel = "stylesheet";
+				link.href = url;
+				document.head.append(link);
+			}
+
+			async function loadOnlineMapLibraries() {
+				if (onlineMapAttempted || !navigator.onLine) return;
+				onlineMapAttempted = true;
+				try {
+					loadStyle("https://unpkg.com/leaflet@1.9.4/dist/leaflet.css");
+					loadStyle("https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css");
+					await loadScript("https://unpkg.com/leaflet@1.9.4/dist/leaflet.js");
+					await loadScript("https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js");
+					onlineMapReady = true;
+					mapView = "streets";
+					renderCategoryEditor();
+					setStatus("Online map ready. Street and satellite views are available.");
+				} catch {
+					onlineMapReady = false;
+					onlineMapAttempted = false;
+					syncMapViews();
+					setStatus("Online map unavailable. Using the coordinate-grid drawing fallback.");
+				}
+			}
+
+			function mountLeafletMap() {
+				const element = $("#leaflet-map");
+				if (!element || !canUseLeafletMap() || !window.L) return;
+				if (editHandler) editHandler.disable();
+				editHandler = null;
+				editingPolygons = false;
+				if (leafletMap) leafletMap.remove();
+				const center = config.location?.defaultCenter || { lat: 40.7537, lng: -86.0689 };
+				leafletMap = L.map(element, { zoomControl: true }).setView([Number(center.lat), Number(center.lng)], Number(config.location?.defaultZoom) || 14);
+				streetTiles = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+					maxZoom: 19,
+					attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+				});
+				satelliteTiles = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+					maxZoom: 19,
+					attribution: "Tiles &copy; Esri"
+				});
+				(activeTileLayer === "satellite" ? satelliteTiles : streetTiles).addTo(leafletMap);
+				polygonLayer = L.featureGroup().addTo(leafletMap);
+				safeArray(currentCategory()?.jurisdiction?.polygons).forEach((polygon, index) => {
+					try {
+						if (polygon?.type !== "Polygon" || !Array.isArray(polygon.coordinates)) return;
+						const latLngs = polygon.coordinates.map((ring) => ring.map(([longitude, latitude]) => [latitude, longitude]));
+						const layer = L.polygon(latLngs, { color: colorForPolygon(index), weight: 3, fillColor: colorForPolygon(index), fillOpacity: 0.2 });
+						layer._jurisdictionIndex = index;
+						polygonLayer.addLayer(layer);
+					} catch { /* Ignore malformed imported polygon data in the preview. */ }
+				});
+				leafletMap.on(L.Draw.Event.CREATED, (event) => {
+					const geometry = event.layer.toGeoJSON().geometry;
+					if (geometry.type === "Polygon") {
+						const category = currentCategory();
+						category.jurisdiction = category.jurisdiction || {};
+						category.jurisdiction.polygons = safeArray(category.jurisdiction.polygons);
+						const index = category.jurisdiction.polygons.length;
+						event.layer._jurisdictionIndex = index;
+						event.layer.setStyle({ color: colorForPolygon(index), fillColor: colorForPolygon(index), weight: 3, fillOpacity: 0.2 });
+						category.jurisdiction.polygons.push(geometry);
+						polygonLayer.addLayer(event.layer);
+						drawing = false;
+						draftPoints = [];
+						renderPolygonList();
+						updateMapToolButtons();
+						setStatus("Polygon added as a GeoJSON Polygon.");
+					}
+				});
+				leafletMap.on(L.Draw.Event.EDITED, (event) => {
+					const polygons = currentCategory()?.jurisdiction?.polygons;
+					if (!Array.isArray(polygons)) return;
+					event.layers.eachLayer((layer) => {
+						const index = layer._jurisdictionIndex;
+						if (Number.isInteger(index) && layer.toGeoJSON().geometry.type === "Polygon") polygons[index] = layer.toGeoJSON().geometry;
+					});
+					renderPolygonList();
+					setStatus("Polygon edits saved to the configuration.");
+				});
+				leafletMap.on(L.Draw.Event.DRAWSTOP, () => {
+					drawing = false;
+					drawHandler = null;
+					updateMapToolButtons();
+				});
+				leafletMap.on(L.Draw.Event.EDITSTOP, () => {
+					editingPolygons = false;
+					editHandler = null;
+					updateMapToolButtons();
+				});
+				syncMapViews();
+				if (polygonLayer.getLayers().length) leafletMap.fitBounds(polygonLayer.getBounds(), { padding: [24, 24], maxZoom: 16 });
+				requestAnimationFrame(() => leafletMap?.invalidateSize());
+			}
+
+			function updateMapToolButtons() {
+				const drawButton = $('[data-action="draw-polygon"]');
+				const finishButton = $('[data-action="finish-polygon"]');
+				const undoButton = $('[data-action="undo-point"]');
+				const editButton = $('[data-action="edit-polygons"]');
+				const saveEditsButton = $('[data-action="save-polygon-edits"]');
+				if (drawButton) drawButton.textContent = drawing ? "Drawing..." : "Draw polygon";
+				if (finishButton) finishButton.disabled = !drawing;
+				if (undoButton) undoButton.disabled = canUseLeafletMap() ? !drawing : draftPoints.length === 0;
+				if (editButton) {
+					editButton.disabled = !canUseLeafletMap() || !polygonLayer?.getLayers().length || editingPolygons;
+					editButton.textContent = editingPolygons ? "Editing vertices..." : "Edit vertices";
+				}
+				if (saveEditsButton) saveEditsButton.disabled = !editingPolygons;
+			}
+
+			function startPolygonEditing() {
+				if (!canUseLeafletMap() || !leafletMap || !polygonLayer?.getLayers().length) return;
+				if (drawHandler) drawHandler.disable();
+				editHandler = new L.EditToolbar.Edit(leafletMap, {
+					featureGroup: polygonLayer,
+					selectedPathOptions: { maintainColor: true, opacity: 0.8, fillOpacity: 0.12 }
+				});
+				editHandler.enable();
+				editingPolygons = true;
+				updateMapToolButtons();
+				setStatus("Drag a vertex to reshape a boundary. Drag a midpoint handle to insert a new vertex.");
+			}
+
+			function savePolygonEdits() {
+				if (!editHandler) return;
+				editHandler.save();
+				editHandler.disable();
+				editingPolygons = false;
+				editHandler = null;
+				updateMapToolButtons();
+			}
+
+			function setTileLayer(layerName) {
+				if (!canUseLeafletMap() || !leafletMap) return;
+				const next = layerName === "satellite" ? satelliteTiles : streetTiles;
+				const previous = layerName === "satellite" ? streetTiles : satelliteTiles;
+				if (leafletMap.hasLayer(previous)) leafletMap.removeLayer(previous);
+				if (!leafletMap.hasLayer(next)) next.addTo(leafletMap);
+				activeTileLayer = layerName;
+				mapView = layerName;
+				syncMapViews();
+				requestAnimationFrame(() => leafletMap?.invalidateSize());
+			}
+
+			function finishDrawing() {
+				if (canUseLeafletMap() && drawHandler) {
+					drawHandler.completeShape();
+					return;
+				}
+				addPolygon();
+			}
+
+			function writeCategoryField(path, value) {
+				const category = currentCategory();
+				if (!category) return;
+				const parts = path.split(".");
+				let target = category;
+				for (const part of parts.slice(0, -1)) {
+					if (/^\d+$/.test(part)) target = target[Number(part)];
+					else target = target[part] || (target[part] = {});
+					if (!target) return;
+				}
+				const key = parts[parts.length - 1];
+				if (parts[0] === "questions" && parts[2] === "type") {
+					const question = category.questions?.[Number(parts[1])];
+					if (!question) return;
+					question.type = value;
+					if (value !== "select") delete question.options;
+					else if (!Array.isArray(question.options)) question.options = [];
+					renderCategoryEditor();
+					return;
+				}
+				if (value === "") {
+					if (parts[0] === "questions" && parts[2] === "placeholder") delete target[key];
+					else if (parts.length === 1) delete target[key];
+					else if (parts[0] === "destinations") target[key] = null;
+					else delete target[key];
+				} else if (parts[0] === "destinations") target[key] = value;
+				else target[key] = value;
+				if (path === "name" || path === "department") renderCategoryList();
+				if (path === "id" || path === "name") $(".category-panel-head h3").textContent = category.name || "New category";
+			}
+
+			function addCategory() {
+				config.categories.push({ id: `new_category_${config.categories.length + 1}`, name: "New category", department: "", description: "", destinations: { email: null, phone: null, webformUrl: null, socialUrl: null, address: null }, questions: [] });
+				activeCategory = config.categories.length - 1;
+				drawing = false;
+				draftPoints = [];
+				renderCategoryList();
+				renderCategoryEditor();
+				setStatus("Added a category. Update its ID, details, and contacts.");
+			}
+
+			function addPolygon() {
+				if (draftPoints.length < 3) {
+					setStatus("A polygon needs at least three boundary points.", true);
+					return;
+				}
+				const coordinates = draftPoints.map((point) => {
+					const geo = pointToGeo(point.x, point.y);
+					return [Number(geo.lng.toFixed(7)), Number(geo.lat.toFixed(7))];
+				});
+				coordinates.push([...coordinates[0]]);
+				const category = currentCategory();
+				category.jurisdiction = category.jurisdiction || {};
+				category.jurisdiction.polygons = safeArray(category.jurisdiction.polygons);
+				category.jurisdiction.polygons.push({ type: "Polygon", coordinates: [coordinates] });
+				drawing = false;
+				draftPoints = [];
+				renderCategoryEditor();
+				setStatus("Polygon added as a GeoJSON Polygon.");
+			}
+
+			function mapCoordinates(event, svg) {
+				const point = svg.createSVGPoint();
+				point.x = event.clientX;
+				point.y = event.clientY;
+				const transformed = point.matrixTransform(svg.getScreenCTM().inverse());
+				return { x: Math.max(30, Math.min(770, transformed.x)), y: Math.max(25, Math.min(435, transformed.y)) };
+			}
+
+			function updateQuestion(index, key, value) {
+				const question = currentCategory()?.questions?.[index];
+				if (!question) return;
+				if (value === "" && key === "placeholder") delete question[key];
+				else question[key] = value;
+			}
+
+			function importText(text) {
+				const parsed = JSON.parse(text);
+				if (!parsed || typeof parsed !== "object" || !parsed.location || !Array.isArray(parsed.categories)) throw new Error("Expected an object with a location and categories array.");
+				config = parsed;
+				if (!config.location.defaultCenter) config.location.defaultCenter = { lat: 40.7537, lng: -86.0689 };
+				activeCategory = config.categories.length ? 0 : -1;
+				drawing = false;
+				draftPoints = [];
+				renderAll();
+				setStatus(`Imported configuration with ${config.categories.length} categories. Review changes, then download templates.json.`);
+			}
+
+			function downloadJson() {
+				const blob = new Blob([`${JSON.stringify(config, null, 2)}\n`], { type: "application/json" });
+				const url = URL.createObjectURL(blob);
+				const anchor = document.createElement("a");
+				anchor.href = url;
+				anchor.download = "templates.json";
+				document.body.append(anchor);
+				anchor.click();
+				anchor.remove();
+				URL.revokeObjectURL(url);
+				setStatus("Downloaded templates.json.");
+			}
+
+			async function copyJson() {
+				const text = JSON.stringify(config, null, 2);
+				try {
+					await navigator.clipboard.writeText(text);
+					setStatus("Configuration JSON copied to clipboard.");
+				} catch {
+					const area = document.createElement("textarea");
+					area.value = text;
+					area.style.position = "fixed";
+					area.style.opacity = "0";
+					document.body.append(area);
+					area.select();
+					const copied = document.execCommand("copy");
+					area.remove();
+					setStatus(copied ? "Configuration JSON copied to clipboard." : "Clipboard access is unavailable. Download the JSON instead.", !copied);
+				}
+			}
+
+			function renderAll() {
+				renderSettings();
+				renderCategoryList();
+				renderCategoryEditor();
+			}
+
+			document.addEventListener("input", (event) => {
+				const setting = event.target.dataset.setting;
+				if (setting) {
+					const parts = setting.split(".");
+					let target = config;
+					for (const part of parts.slice(0, -1)) target = target[part] || (target[part] = {});
+					const key = parts[parts.length - 1];
+					target[key] = event.target.type === "number" ? numericValue(event.target, 0) : event.target.value;
+					if (setting.startsWith("location.defaultCenter.")) renderMap();
+					return;
+				}
+				if (event.target.dataset.categoryField) {
+					const path = event.target.dataset.categoryField;
+					const value = event.target.type === "number" ? numericValue(event.target, 0) : event.target.value;
+					writeCategoryField(path, value);
+					return;
+				}
+				if (event.target.dataset.questionOptions !== undefined) {
+					const index = Number(event.target.dataset.questionOptions);
+					currentCategory().questions[index].options = event.target.value.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+					return;
+				}
+				if (event.target.dataset.emergencyKeywords !== undefined) {
+					const emergency = currentCategory().emergency || (currentCategory().emergency = {});
+					const keywords = event.target.value.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+					if (keywords.length) emergency.keywords = keywords;
+					else delete emergency.keywords;
+					if (!emergency.enabled && !emergency.keywords) delete currentCategory().emergency;
+					return;
+				}
+				if (event.target.dataset.mapRadius !== undefined) {
+					mapRadiusMiles = Math.max(0.1, Number(event.target.value) || 2.5);
+					renderMap();
+				}
+			});
+
+			document.addEventListener("change", (event) => {
+				if (event.target.dataset.emergencyEnabled !== undefined) {
+					const category = currentCategory();
+					category.emergency = category.emergency || {};
+					if (event.target.checked) category.emergency.enabled = true;
+					else delete category.emergency.enabled;
+					if (!category.emergency.keywords?.length) delete category.emergency.keywords;
+					if (!Object.keys(category.emergency).length) delete category.emergency;
+					return;
+				}
+				if (event.target.dataset.questionRequired !== undefined) {
+					const question = currentCategory()?.questions?.[Number(event.target.dataset.questionRequired)];
+					if (question) question.required = event.target.checked;
+				}
+			});
+
+			document.addEventListener("click", (event) => {
+				const categoryButton = event.target.closest("[data-category-index]");
+				if (categoryButton) {
+					activeCategory = Number(categoryButton.dataset.categoryIndex);
+					drawing = false;
+					draftPoints = [];
+					renderCategoryList();
+					renderCategoryEditor();
+					return;
+				}
+				const action = event.target.closest("[data-action]")?.dataset.action;
+				if (!action) return;
+				if (action === "add-first") addCategory();
+				if (action === "delete-category") {
+					config.categories.splice(activeCategory, 1);
+					activeCategory = config.categories.length ? Math.min(activeCategory, config.categories.length - 1) : -1;
+					drawing = false;
+					draftPoints = [];
+					renderCategoryList();
+					renderCategoryEditor();
+					setStatus("Category removed.");
+				}
+				if (action === "add-question") {
+					currentCategory().questions = safeArray(currentCategory().questions);
+					currentCategory().questions.push({ id: `question_${currentCategory().questions.length + 1}`, label: "New question", type: "text", required: false });
+					renderCategoryEditor();
+					setStatus("Question added.");
+				}
+				if (action === "delete-question") {
+					currentCategory().questions.splice(Number(event.target.closest("[data-question-index]")?.dataset.questionIndex), 1);
+					renderCategoryEditor();
+					setStatus("Question removed.");
+				}
+				if (action === "draw-polygon") {
+					if (editingPolygons) savePolygonEdits();
+					if (canUseLeafletMap()) {
+						drawing = true;
+						const nextColor = colorForPolygon(currentCategory().jurisdiction?.polygons?.length || 0);
+						drawHandler = new L.Draw.Polygon(leafletMap, { shapeOptions: { color: nextColor, fillColor: nextColor, fillOpacity: 0.2 } });
+						drawHandler.enable();
+						updateMapToolButtons();
+						setStatus("Click polygon vertices on the map, then double-click or choose Finish polygon.");
+					} else {
+						drawing = true;
+						draftPoints = [];
+						renderCategoryEditor();
+						setStatus("Click three or more points on the map canvas.");
+					}
+				}
+				if (action === "edit-polygons") startPolygonEditing();
+				if (action === "save-polygon-edits") savePolygonEdits();
+				if (action === "finish-polygon") finishDrawing();
+				if (action === "undo-point") {
+					if (canUseLeafletMap() && drawHandler) drawHandler.deleteLastVertex();
+					else {
+						draftPoints.pop();
+						renderCategoryEditor();
+					}
+				}
+				if (action === "delete-polygon") {
+					const category = currentCategory();
+					const index = Number(event.target.dataset.polygonIndex);
+					const polygons = category.jurisdiction.polygons;
+					const layer = polygonLayer?.getLayers().find((item) => item._jurisdictionIndex === index);
+					if (layer) polygonLayer.removeLayer(layer);
+					polygons.splice(index, 1);
+					polygonLayer?.getLayers().forEach((item, nextIndex) => {
+						item._jurisdictionIndex = nextIndex;
+						item.setStyle({ color: colorForPolygon(nextIndex), fillColor: colorForPolygon(nextIndex) });
+					});
+					if (!polygons.length) delete category.jurisdiction;
+					renderCategoryEditor();
+					setStatus("Polygon removed.");
+				}
+			});
+
+			document.addEventListener("click", (event) => {
+				const viewButton = event.target.closest("[data-map-view]");
+				if (!viewButton) return;
+				const nextView = viewButton.dataset.mapView;
+				mapView = nextView;
+				setTileLayer(nextView);
+			});
+
+			document.addEventListener("click", (event) => {
+				const svg = event.target.closest("#jurisdiction-map");
+				if (!drawing || !svg || canUseLeafletMap()) return;
+				const point = mapCoordinates(event, svg);
+				const previous = draftPoints[draftPoints.length - 1];
+				if (!previous || Math.hypot(previous.x - point.x, previous.y - point.y) > 3) draftPoints.push(point);
+				renderMap();
+				const undo = $('[data-action="undo-point"]');
+				if (undo) undo.disabled = false;
+			});
+
+			$("#import-button").addEventListener("click", () => $("#import-file").click());
+			$("#import-file").addEventListener("change", async (event) => {
+				const file = event.target.files[0];
+				if (!file) return;
+				try { importText(await file.text()); }
+				catch (error) { setStatus(`Could not import JSON: ${error.message}`, true); }
+				event.target.value = "";
+			});
+			$("#copy-button").addEventListener("click", copyJson);
+			$("#export-button").addEventListener("click", downloadJson);
+			$("#add-category").addEventListener("click", addCategory);
+			window.addEventListener("offline", () => {
+				if (drawHandler) drawHandler.disable();
+				if (editHandler) savePolygonEdits();
+				renderMap();
+				syncMapViews();
+				updateMapToolButtons();
+				setStatus("Connection lost. Using the coordinate-grid drawing fallback.");
+			});
+			window.addEventListener("online", () => {
+				if (!onlineMapReady) {
+					loadOnlineMapLibraries();
+					return;
+				}
+				if (currentCategory()) mountLeafletMap();
+				syncMapViews();
+			});
+			renderAll();
+			loadOnlineMapLibraries();
+		})();
+	</script>
+</body>
+</html>
