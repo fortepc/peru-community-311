@@ -67,9 +67,10 @@
         </div>
       </div>
       <div class="mt-2 sm:mt-0 flex items-center space-x-2">
-        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-          <i class="fa-solid fa-circle-check mr-1 text-[10px]"></i> Open Source 311
-        </span>
+        <button id="install-app-btn" type="button" class="inline-flex items-center gap-2 rounded-md border border-white/20 bg-white/10 px-3 py-2 text-sm font-semibold text-white transition hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white">
+          <i class="fa-solid fa-download" aria-hidden="true"></i>
+          <span>Install app</span>
+        </button>
       </div>
     </div>
     
@@ -320,6 +321,7 @@
     let selectedCategoryId = null;
     let reportDraftId = null;
     let applyingUrlState = false;
+    let deferredInstallPrompt = null;
 
     let reverseGeocodeTimer = null;
     let reverseGeocodeAbort = null;
@@ -362,6 +364,33 @@ Report generated via Peru Community 311 (open-source citizen portal)`;
       "sparking wire",
       "active water main break"
     ];
+
+    const installAppButton = document.getElementById("install-app-btn");
+
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      deferredInstallPrompt = event;
+    });
+
+    window.addEventListener("appinstalled", () => {
+      deferredInstallPrompt = null;
+      installAppButton.classList.add("hidden");
+    });
+
+    if (window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone) {
+      installAppButton.classList.add("hidden");
+    }
+
+    installAppButton.addEventListener("click", async () => {
+      if (!deferredInstallPrompt) {
+        alert("To install this app, open your browser menu and choose 'Install app' or 'Add to Home Screen'.");
+        return;
+      }
+
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+    });
 
     // Scroll Smoothly to Form Section on Mobile
     function scrollToReportForm() {
