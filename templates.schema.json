@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fortepc.github.io/peru-community-311/templates.schema.json",
+  "title": "Community 311 Templates Configuration",
+  "description": "Configuration schema for Community 311 civic reporting templates, categories, and destinations.",
+  "type": "object",
+  "required": [
+    "location",
+    "emailSubjectTemplate",
+    "emailTemplate",
+    "categories"
+  ],
+  "properties": {
+    "location": {
+      "type": "object",
+      "description": "Geographical scope and initial map settings for the service area.",
+      "required": ["city", "county", "state", "defaultCenter", "defaultZoom"],
+      "properties": {
+        "city": { "type": "string", "description": "City name." },
+        "county": { "type": "string", "description": "County or parish name." },
+        "state": { "type": "string", "description": "State or province abbreviation/name." },
+        "defaultCenter": {
+          "type": "object",
+          "description": "Default latitude and longitude coordinates for centering the map.",
+          "required": ["lat", "lng"],
+          "properties": {
+            "lat": { "type": "number", "minimum": -90, "maximum": 90 },
+            "lng": { "type": "number", "minimum": -180, "maximum": 180 }
+          }
+        },
+        "defaultZoom": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20,
+          "description": "Default Leaflet zoom level (typically 12-16)."
+        }
+      }
+    },
+    "emailSubjectTemplate": {
+      "type": "string",
+      "description": "Site-wide default email subject template supporting {category} and {location} variables."
+    },
+    "emailTemplate": {
+      "type": "string",
+      "description": "Site-wide default email body template supporting {category}, {department}, {location}, {mapsUrl}, and {answers} placeholders."
+    },
+    "categories": {
+      "type": "array",
+      "description": "List of report categories available for citizen selection.",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "department", "questions"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$",
+            "description": "Unique stable identifier for URL permalinks and template overrides."
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the category shown in the list."
+          },
+          "department": {
+            "type": "string",
+            "description": "Responsible agency or department name."
+          },
+          "description": {
+            "type": "string",
+            "description": "Short explanation of what issues fall under this category."
+          },
+          "icon": {
+            "type": "string",
+            "pattern": "^fa-[a-z0-9-]+$",
+            "description": "Font Awesome solid icon class name (e.g., 'fa-road', 'fa-droplet')."
+          },
+          "destinations": {
+            "type": "object",
+            "description": "Contact methods for dispatching citizen reports to this department.",
+            "properties": {
+              "email": {
+                "type": ["string", "null"],
+                "description": "Target email address for email dispatch, or null if unmonitored."
+              },
+              "phone": {
+                "type": ["string", "null"],
+                "description": "Phone number for voice dispatch or immediate emergency calls."
+              },
+              "webformUrl": {
+                "type": ["string", "null"],
+                "description": "Official municipal portal or webform URL."
+              },
+              "socialUrl": {
+                "type": ["string", "null"],
+                "description": "Department social media or informational page URL."
+              },
+              "address": {
+                "type": ["string", "null"],
+                "description": "Physical office address for in-person reporting or office visits."
+              }
+            }
+          },
+          "emergency": {
+            "type": "object",
+            "description": "Emergency detection settings for acute safety hazards.",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "If true, immediately triggers emergency alert regardless of questionnaire answers."
+              },
+              "keywords": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Keywords or phrases in questionnaire answers that trigger acute emergency warnings."
+              }
+            }
+          },
+          "emailSubjectTemplate": {
+            "type": "string",
+            "description": "Optional category-specific override for the email subject line."
+          },
+          "emailTemplate": {
+            "type": "string",
+            "description": "Optional category-specific override for the email body text."
+          },
+          "jurisdiction": {
+            "type": "object",
+            "description": "Optional GeoJSON boundary polygons limiting where this category applies.",
+            "properties": {
+              "polygons": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": { "type": "string", "enum": ["Polygon"] },
+                    "coordinates": { "type": "array" }
+                  }
+                }
+              }
+            }
+          },
+          "questions": {
+            "type": "array",
+            "description": "Follow-up questions presented to the citizen when this category is selected.",
+            "items": {
+              "type": "object",
+              "required": ["id", "label", "type", "required"],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Unique identifier within the category's questionnaire."
+                },
+                "label": {
+                  "type": "string",
+                  "description": "Prompt or question text shown to the user."
+                },
+                "type": {
+                  "type": "string",
+                  "enum": ["select", "text", "textarea"],
+                  "description": "Type of input control."
+                },
+                "required": {
+                  "type": "boolean",
+                  "description": "Whether an answer must be provided before reporting."
+                },
+                "placeholder": {
+                  "type": "string",
+                  "description": "Helper hint text for text or textarea inputs."
+                },
+                "options": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "description": "Choices for 'select' type questions."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

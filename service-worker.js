@@ -1,7 +1,9 @@
-const CACHE_NAME = "peru-community-311-v1";
+const CACHE_NAME = "peru-community-311-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
+  "./styles.css",
+  "./app.js",
   "./templates.json",
   "./manifest.webmanifest",
   "./icons/icon-192.png",

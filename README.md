@@ -1,5 +1,9 @@
 # Peru Community 311
 
+## Live Deployment
+
+https://fortepc.github.io/peru-community-311/
+
 This repository contains the configured Peru, Indiana deployment of Peru Community 311. Its map defaults, issue categories, agency contacts, emergency guidance, and report templates are specific to Peru and Miami County. It is not a blank or ready-to-deploy template for another town; communities reusing the code should replace and verify the deployment-specific configuration before publishing.
 
 > **Disclaimer:** Peru Community 311 is an independent community initiative. It is not owned, operated, or managed by the City of Peru or Miami County government offices.
@@ -21,10 +25,13 @@ Publish the site over HTTPS, then open it in the phone's browser. On Android, us
 
 ## Repository Structure
 
-- `index.html` contains the single-page map, questionnaire, report preview, and contact-action flow.
+- `index.html` contains the markup for the map, category picker, questionnaire, and report preview modal.
+- `styles.css` contains custom layout styling, map container responsiveness, accessible focus styles, and print layout rules.
+- `app.js` contains the application logic, geolocation, Leaflet map setup, dynamic questionnaire rendering, URL sync, and dispatch formatting.
 - `manifest.webmanifest`, `service-worker.js`, and `icons/` provide the installable web app metadata, cached app shell, and home-screen icons.
-- `configurator.html` is a standalone editor for importing and exporting `templates.json`. Category details, contacts, emergency guidance, questions, and jurisdiction polygons can be edited there. Jurisdiction is support for a planned feature; the current `index.html` does not yet filter categories by the selected report location. If jurisdiction is supplied in the templates.json future version of the index.html file will only display that reporting category if the map pin is within tht polygon.
+- `configurator.html` is a standalone editor for importing and exporting `templates.json`. Category details, contacts, emergency guidance, questions, and jurisdiction polygons can be edited there. Jurisdiction is support for a planned feature; the current `index.html` does not yet filter categories by the selected report location. If jurisdiction is supplied in the templates.json, future versions of the index.html file will only display that reporting category if the map pin is within that polygon.
 - `templates.json` contains this deployment's map defaults, categories, contacts, questions, category icons, and email templates. The app fetches it when the page loads.
+- `templates.schema.json` is the formal JSON Schema specification for validating `templates.json`.
 - `README.md` "You are here" it's a document detailing the project.
 - `LICENSE` contains the project's license.
 

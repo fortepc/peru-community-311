@@ -278,8 +278,34 @@
 				emailTemplate: "CIVIC REPORT: {category}\nDepartment: {department}\nLocation: {location}\nCoordinates: {mapsUrl}\n\n{answers}",
 				categories: []
 			});
-			let config = blankConfig();
-			let activeCategory = -1;
+
+			const AUTOSAVE_KEY = "peru_311_config_autosave";
+			let autosaveTimer = null;
+			function triggerAutosave() {
+				clearTimeout(autosaveTimer);
+				autosaveTimer = setTimeout(() => {
+					try {
+						localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(config));
+					} catch (e) {}
+				}, 400);
+			}
+
+			function getSavedDraft() {
+				try {
+					const saved = localStorage.getItem(AUTOSAVE_KEY);
+					if (saved) {
+						const parsed = JSON.parse(saved);
+						if (parsed && parsed.location && Array.isArray(parsed.categories)) {
+							return parsed;
+						}
+					}
+				} catch (e) {}
+				return null;
+			}
+
+			const savedDraft = getSavedDraft();
+			let config = savedDraft || blankConfig();
+			let activeCategory = config.categories.length ? 0 : -1;
 			let drawing = false;
 			let draftPoints = [];
 			let mapRadiusMiles = 2.5;
@@ -363,7 +389,7 @@
 				const emergency = category.emergency || {};
 				const questions = safeArray(category.questions);
 				editor.innerHTML = `
-					<div class="category-panel-head"><div><p class="eyebrow">Category ${activeCategory + 1} of ${config.categories.length}</p><h3>${escapeHtml(category.name || "New category")}</h3><p>Category details, destinations, questions, and optional jurisdiction</p></div><button type="button" class="button danger small" data-action="delete-category">Delete category</button></div>
+					<div class="category-panel-head"><div><p class="eyebrow">Category ${activeCategory + 1} of ${config.categories.length}</p><h3>${escapeHtml(category.name || "New category")}</h3><p>Category details, destinations, questions, and optional jurisdiction</p></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><button type="button" class="button small" data-action="duplicate-category">Duplicate</button><button type="button" class="button danger small" data-action="delete-category">Delete category</button></div></div>
 					<div class="category-content">
 						<section class="subsection"><div class="subsection-head"><div><h4>Category details</h4><p>Stable IDs are used in report links; keep them unique.</p></div></div>
 							<div class="settings-grid">
@@ -711,6 +737,7 @@
 				else target[key] = value;
 				if (path === "name" || path === "department") renderCategoryList();
 				if (path === "id" || path === "name") $(".category-panel-head h3").textContent = category.name || "New category";
+				triggerAutosave();
 			}
 
 			function addCategory() {
@@ -720,6 +747,7 @@
 				draftPoints = [];
 				renderCategoryList();
 				renderCategoryEditor();
+				triggerAutosave();
 				setStatus("Added a category. Update its ID, details, and contacts.");
 			}
 
@@ -731,6 +759,7 @@
 				else if (activeCategory === nextIndex) activeCategory = index;
 				renderCategoryList();
 				renderCategoryEditor();
+				triggerAutosave();
 				setStatus("Category order updated.");
 			}
 
@@ -778,6 +807,7 @@
 				drawing = false;
 				draftPoints = [];
 				renderAll();
+				triggerAutosave();
 				setStatus(`Imported configuration with ${config.categories.length} categories. Review changes, then download templates.json.`);
 			}
 
@@ -827,17 +857,20 @@
 					const key = parts[parts.length - 1];
 					target[key] = event.target.type === "number" ? numericValue(event.target, 0) : event.target.value;
 					if (setting.startsWith("location.defaultCenter.")) renderMap();
+					triggerAutosave();
 					return;
 				}
 				if (event.target.dataset.categoryField) {
 					const path = event.target.dataset.categoryField;
 					const value = event.target.type === "number" ? numericValue(event.target, 0) : event.target.value;
 					writeCategoryField(path, value);
+					triggerAutosave();
 					return;
 				}
 				if (event.target.dataset.questionOptions !== undefined) {
 					const index = Number(event.target.dataset.questionOptions);
 					currentCategory().questions[index].options = event.target.value.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+					triggerAutosave();
 					return;
 				}
 				if (event.target.dataset.emergencyKeywords !== undefined) {
@@ -846,6 +879,7 @@
 					if (keywords.length) emergency.keywords = keywords;
 					else delete emergency.keywords;
 					if (!emergency.enabled && !emergency.keywords) delete currentCategory().emergency;
+					triggerAutosave();
 					return;
 				}
 				if (event.target.dataset.mapRadius !== undefined) {
@@ -862,11 +896,13 @@
 					else delete category.emergency.enabled;
 					if (!category.emergency.keywords?.length) delete category.emergency.keywords;
 					if (!Object.keys(category.emergency).length) delete category.emergency;
+					triggerAutosave();
 					return;
 				}
 				if (event.target.dataset.questionRequired !== undefined) {
 					const question = currentCategory()?.questions?.[Number(event.target.dataset.questionRequired)];
 					if (question) question.required = event.target.checked;
+					triggerAutosave();
 				}
 			});
 
@@ -888,6 +924,21 @@
 					return;
 				}
 				if (action === "add-first") addCategory();
+				if (action === "duplicate-category") {
+					const original = currentCategory();
+					if (original) {
+						const clone = JSON.parse(JSON.stringify(original));
+						clone.id = `${original.id || "category"}_copy`;
+						clone.name = `${original.name || "Category"} (Copy)`;
+						config.categories.splice(activeCategory + 1, 0, clone);
+						activeCategory = activeCategory + 1;
+						renderCategoryList();
+						renderCategoryEditor();
+						triggerAutosave();
+						setStatus("Category duplicated. Remember to update the Category ID.");
+					}
+					return;
+				}
 				if (action === "delete-category") {
 					config.categories.splice(activeCategory, 1);
 					activeCategory = config.categories.length ? Math.min(activeCategory, config.categories.length - 1) : -1;
@@ -895,17 +946,20 @@
 					draftPoints = [];
 					renderCategoryList();
 					renderCategoryEditor();
+					triggerAutosave();
 					setStatus("Category removed.");
 				}
 				if (action === "add-question") {
 					currentCategory().questions = safeArray(currentCategory().questions);
 					currentCategory().questions.push({ id: `question_${currentCategory().questions.length + 1}`, label: "New question", type: "text", required: false });
 					renderCategoryEditor();
+					triggerAutosave();
 					setStatus("Question added.");
 				}
 				if (action === "delete-question") {
 					currentCategory().questions.splice(Number(event.target.closest("[data-question-index]")?.dataset.questionIndex), 1);
 					renderCategoryEditor();
+					triggerAutosave();
 					setStatus("Question removed.");
 				}
 				if (action === "draw-polygon") {

@@ -1,0 +1,143 @@
+/**
+ * Peru Community 311 - Custom Stylesheet
+ * 
+ * Note: Most layout and utility styling in this application uses Tailwind CSS.
+ * This stylesheet contains custom element styling, responsive map adjustments,
+ * scrollbars, focus accessibility states, and print layout rules.
+ * 
+ * You can edit this file directly in any text editor without needing a build step.
+ */
+
+/* ==========================================================================
+   1. Interactive Map Container
+   ========================================================================== */
+
+/* On desktop, keep the map height proportionate to the viewport */
+#map {
+  height: calc(100vh - 220px);
+  min-height: 350px;
+}
+
+/* On mobile / tablet screens, give the map a fixed comfortable height */
+@media (max-width: 1024px) {
+  #map {
+    height: 380px;
+  }
+}
+
+/* ==========================================================================
+   2. Category Cards & Selection States
+   ========================================================================== */
+
+.category-card {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Highlight the active card with indigo theme */
+.category-card.active {
+  border-color: #4f46e5;
+  background-color: #f5f3ff;
+}
+
+/* Clear focus outline for keyboard navigation (WCAG AA compliance) */
+.category-card:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   3. Custom Scrollbars (Webkit / Chromium / Safari / Firefox)
+   ========================================================================== */
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ==========================================================================
+   4. Screen Reader Only Utility
+   ========================================================================== */
+
+/* Visually hide content while keeping it accessible to screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ==========================================================================
+   5. Print Stylesheet
+   ========================================================================== */
+
+/* Clean presentation when printing or saving as PDF from browser */
+@media print {
+  /* Hide non-printable navigation, buttons, map, and chrome */
+  header,
+  footer,
+  #mobile-next-btn,
+  #install-app-btn,
+  #category-search-wrapper,
+  #change-category-btn,
+  #save-report-btn,
+  #dispatch-actions,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Make sure the report modal or main report text displays cleanly on white paper */
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    font-size: 12pt;
+    padding: 0;
+    margin: 0;
+  }
+
+  main {
+    max-width: 100% !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+
+  dialog#report-modal {
+    position: static !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  #report-preview {
+    border: 1px solid #ccc !important;
+    background-color: #fafafa !important;
+    color: #111 !important;
+    white-space: pre-wrap !important;
+    font-size: 10pt !important;
+  }
+}
