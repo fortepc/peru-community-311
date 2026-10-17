@@ -122,7 +122,7 @@ The standalone `configurator.html` editor can draw one or more inclusion polygon
 }
 ```
 
-Each item in `polygons` is a separate service area. `excludedPolygons` override the inclusion rule and are used for private roads, gated roads, or other areas the category should never appear for. The app applies this logic: if a category has no jurisdiction, it always shows; if it has only excluded polygons, it shows unless the pin is inside one; if it has allowed polygons, it only shows when the pin is inside them; if it has both, the pin must be inside an allowed polygon and not inside an excluded polygon.
+Each item in `polygons` is a separate service area. `excludedPolygons` override the inclusion rule and are used for private roads, gated roads, or other areas the category should never appear for. Polygon names are optional configurator labels and do not appear in the public app. The app applies this logic: if a category has no jurisdiction, it always shows; if it has only excluded polygons, it shows unless the pin is inside one; if it has allowed polygons, it only shows when the pin is inside them; if it has both, the pin must be inside an allowed polygon and not inside an excluded polygon.
 
 Here is an example category object to add to the `categories` array. Replace the sample contact details with verified information:
 

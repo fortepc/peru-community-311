@@ -9,25 +9,21 @@
     },
     "defaultZoom": 14
   },
-  "emailSubjectTemplate": "Civic Report: {category} - {location}",
+  "emailSubjectTemplate": "Report: {category} - {location}",
   "emailTemplate": "CIVIC REPORT: {category}\nDepartment: {department}\nLocation: {location}\nCoordinates: {mapsUrl}\n--------------------------------------------------\n\n{answers}\n\n--------------------------------------------------\nReport generated via Peru Community 311 (open-source citizen portal)",
   "categories": [
     {
       "id": "street_sanitation",
-      "name": "1. Street Surface & Debris (Potholes, Roadkill, Obstructions)",
+      "name": "Street Surface & Debris (Potholes, Roadkill, Obstructions)",
       "department": "Street & Sanitation Department (Brian Stillings, Commissioner)",
       "description": "Report potholes, asphalt damage, roadkill removal on street/alley, fallen road debris, or missed trash collection.",
-      "icon": "fa-road",
+      "icon": "road-circle-xmark",
       "destinations": {
-        "email": "mayorsadmin@cityofperu.org",
+        "email": "brians@cityofperu.org",
         "webformUrl": "https://www.cityofperu.org/egov/apps/action/center.egov?view=form;page=1;id=33",
         "phone": "(765) 472-2501",
         "address": "351 E Canal St, Peru, IN 46970",
-        "socialUrl": "https://www.facebook.com/CityofPeruIndiana"
-      },
-      "jurisdiction": {
-        "polygons": [],
-        "excludedPolygons": []
+        "socialUrl": null
       },
       "questions": [
         {
@@ -39,10 +35,8 @@
             "Pothole / Deep Asphalt Crater",
             "Deceased Animal Removal (Roadkill on Public Street)",
             "Roadway Obstruction / Fallen Cargo / Debris",
-            "Alley Obstruction / Illegal Alley Dumping",
-            "Sinking / Cracked Pavement",
-            "Trash / Recycling Collection Issue",
-            "Snow / Ice Removal Request"
+            "Snow / Ice Removal Request",
+            "Other"
           ]
         },
         {
@@ -61,13 +55,91 @@
           "label": "Location Details & Description",
           "type": "textarea",
           "required": false,
-          "placeholder": "e.g. Deep pothole or roadkill in eastbound lane near 200 W Canal St."
+          "placeholder": "Dead animal in the northbound lane, needs removed"
         }
-      ]
+      ],
+      "jurisdiction": {
+        "excludedPolygons": [
+          {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [
+                  -86.07183,
+                  40.762248
+                ],
+                [
+                  -86.071744,
+                  40.763523
+                ],
+                [
+                  -86.068525,
+                  40.763515
+                ],
+                [
+                  -86.068504,
+                  40.761752
+                ],
+                [
+                  -86.070092,
+                  40.76176
+                ],
+                [
+                  -86.070102,
+                  40.762304
+                ],
+                [
+                  -86.07183,
+                  40.762248
+                ]
+              ]
+            ]
+          },
+          {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [
+                  -86.08449,
+                  40.76048
+                ],
+                [
+                  -86.084318,
+                  40.758156
+                ],
+                [
+                  -86.083889,
+                  40.757928
+                ],
+                [
+                  -86.080885,
+                  40.758936
+                ],
+                [
+                  -86.080606,
+                  40.758627
+                ],
+                [
+                  -86.077924,
+                  40.759537
+                ],
+                [
+                  -86.078868,
+                  40.761634
+                ],
+                [
+                  -86.08449,
+                  40.76048
+                ]
+              ]
+            ]
+          }
+        ]
+      }
     },
     {
       "id": "traffic_signals_signs",
-      "name": "2. Traffic Signals, Signs & Road Control Devices",
+      "name": "Traffic Signals, Signs & Road Control Devices",
       "department": "Traffic Department (Todd Wolfe, Department Head)",
       "description": "Report broken or dark traffic lights, knocked-down stop/yield signs, missing street markers, or damaged signal poles.",
       "icon": "fa-traffic-light",
@@ -103,7 +175,7 @@
     },
     {
       "id": "foliage_hazard_tree",
-      "name": "3. Hazardous Trees, Foliage & Sign Visibility Obstructions",
+      "name": "Hazardous Trees, Foliage & Sign Visibility Obstructions",
       "department": "Peru Street Dept / Utility Line Trim / Parks Dept",
       "description": "Report overgrown branches blocking stop signs/sightlines, fallen limbs blocking roads, or tree branches threatening power/telecom wires.",
       "icon": "fa-leaf",
@@ -149,7 +221,7 @@
     },
     {
       "id": "stormwater_flooding_drain",
-      "name": "4. Storm Drains, Flooding & Railroad Underpass (Broadway Tunnel)",
+      "name": "Storm Drains, Flooding & Railroad Underpass (Broadway Tunnel)",
       "department": "Peru Utilities - Stormwater & Drainage",
       "description": "Report clogged storm drain catch basins, standing water at the Broadway Tunnel underpass, or localized street flooding.",
       "icon": "fa-cloud-showers-heavy",
@@ -185,7 +257,7 @@
     },
     {
       "id": "peru_utilities_water_sewer",
-      "name": "5. Water Main Leaks, Running Water & Sewage Odors",
+      "name": "Water Main Leaks, Running Water & Sewage Odors",
       "department": "Peru Utilities - Division of Water Management",
       "description": "Report gushing water leaks, water bubbling from street/curb, low pressure, discolored water, or raw sewage backup/smell.",
       "icon": "fa-droplet",
@@ -238,7 +310,7 @@
     },
     {
       "id": "natural_gas_nipsco",
-      "name": "6. Natural Gas Smell or Pipeline Hazard (NIPSCO)",
+      "name": "Natural Gas Smell or Pipeline Hazard (NIPSCO)",
       "department": "NIPSCO Gas Emergency Dispatch",
       "description": "Report suspected natural gas leaks or rotten egg odors. IF YOU SMELL GAS INSIDE OR NEAR BUILDINGS, EVACUATE IMMEDIATELY AND CALL 911.",
       "icon": "fa-fire-flame-simple",
@@ -276,7 +348,7 @@
     },
     {
       "id": "animal_control",
-      "name": "7. Animal Care & Control (Loose, Injured, or Stray Animals)",
+      "name": "Animal Care & Control (Loose, Injured, or Stray Animals)",
       "department": "Peru Animal Care & Control (Greg Douglass, Officer)",
       "description": "Report stray dogs running loose, aggressive or nuisance animals, injured wildlife, or lost/found pets.",
       "icon": "fa-paw",
@@ -306,7 +378,12 @@
           "label": "Species",
           "type": "select",
           "required": true,
-          "options": ["Dog", "Cat", "Wildlife", "Other"]
+          "options": [
+            "Dog",
+            "Cat",
+            "Wildlife",
+            "Other"
+          ]
         },
         {
           "id": "details",
@@ -319,7 +396,7 @@
     },
     {
       "id": "parks_recreation",
-      "name": "8. Parks & Recreation Facilities (Damage, Vandalism, Playgrounds)",
+      "name": "Parks & Recreation Facilities (Damage, Vandalism, Playgrounds)",
       "department": "Peru Parks Department (Cliff Helvie, Superintendent)",
       "description": "Report broken playground equipment, damaged park shelters, trash overflow in parks, or vandalism at Maconaquah Park & municipal facilities.",
       "icon": "fa-tree",
@@ -362,7 +439,7 @@
     },
     {
       "id": "peru_utilities_electric",
-      "name": "9. Electric Power Outage & Street Light Outages",
+      "name": "Electric Power Outage & Street Light Outages",
       "department": "Peru Utilities Line Department (Michael Biesenbach, T&D Supt)",
       "description": "Report street light outages, flickering neighborhood lights, damaged utility poles, or localized electric outages.",
       "icon": "fa-bolt",
@@ -404,7 +481,7 @@
     },
     {
       "id": "railroad_crossing",
-      "name": "10. Blocked Railroad Crossing (Stopped Trains)",
+      "name": "Blocked Railroad Crossing (Stopped Trains)",
       "department": "Federal Railroad Administration (FRA) & Local Dispatch",
       "description": "Report stopped or blocking trains at local grade crossings directly to Federal Railroad Administration safety tracking.",
       "icon": "fa-train",
@@ -454,7 +531,7 @@
     },
     {
       "id": "building_code_enforcement",
-      "name": "11. High Grass, Blight, Junk Vehicles & Code Violations",
+      "name": "High Grass, Blight, Junk Vehicles & Code Violations",
       "department": "Building & Zoning Dept (Bruce Carson, Comm. / Bill Sheets, Code Enf.)",
       "description": "Report tall grass (>8 inches), junk/blight accumulation in yards, abandoned/inoperable vehicles, or unsafe structures.",
       "icon": "fa-house-triangle-exclamation",
@@ -502,7 +579,7 @@
     },
     {
       "id": "sidewalk_curb_ada",
-      "name": "12. Sidewalks, Trip Hazards & ADA Curb Aprons",
+      "name": "Sidewalks, Trip Hazards & ADA Curb Aprons",
       "department": "Peru Street & Building Departments",
       "description": "Report buckled or cracked sidewalks, severe tripping hazards, sunken curb ramps, or blocked public walkways.",
       "icon": "fa-person-walking",
@@ -537,7 +614,7 @@
     },
     {
       "id": "indot_state_highway",
-      "name": "13. State Highway Issue (US 24, US 31, SR 19, SR 124)",
+      "name": "State Highway Issue (US 24, US 31, SR 19, SR 124)",
       "department": "Indiana Dept of Transportation (INDOT Fort Wayne District)",
       "description": "Report issues on state routes (US 24, US 31, SR 19, SR 124) directly to INDOT, as they are outside municipal jurisdiction.",
       "icon": "fa-route",
@@ -584,7 +661,7 @@
     },
     {
       "id": "unlisted_missing_category",
-      "name": "14. Unlisted / Missing Category (Report to Site Admin)",
+      "name": "Unlisted / Missing Category (Report to Site Admin)",
       "department": "Peru Community 311 - Site Maintainer & Civic Tech Team",
       "description": "Can't find a matching department above? Send a report to the site admin so we can direct you to the correct agency or update templates.json.",
       "icon": "fa-circle-question",

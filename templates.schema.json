@@ -133,6 +133,7 @@
                   "type": "object",
                   "properties": {
                     "type": { "type": "string", "enum": ["Polygon"] },
+                    "name": { "type": "string", "description": "Optional label shown only in the configurator." },
                     "coordinates": { "type": "array" }
                   }
                 }
@@ -144,6 +145,7 @@
                   "type": "object",
                   "properties": {
                     "type": { "type": "string", "enum": ["Polygon"] },
+                    "name": { "type": "string", "description": "Optional label shown only in the configurator." },
                     "coordinates": { "type": "array" }
                   }
                 }
