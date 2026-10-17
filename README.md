@@ -88,7 +88,7 @@ Each object in the top-level `categories` array describes one report option. Add
 - `name`: User-facing category name.
 - `department`: Department or organization shown as responsible.
 - `description`: Short explanation shown in the category list.
-- `icon`: Optional Font Awesome solid icon class, such as `fa-road`. If omitted or invalid, the app uses `fa-circle-info`.
+- `icon`: Optional Font Awesome icon name/classes or a Font Awesome `<i>`, layered HTML, or SVG snippet. Font Awesome classes, safe inline styling (including color, size, transform, and flip), and `data-fa-*` attributes are retained. Other markup and unsafe styles/references are discarded. The site currently loads Font Awesome 6.4 Free; Pro-only glyphs/families require switching to a licensed Pro stylesheet or kit.
 - `destinations`: Contact and follow-up links for this category.
 - `questions`: The fields residents answer for this category.
 - `jurisdiction`: Optional polygon metadata for location-based category visibility. Supported fields are `polygons` for allowed service areas and `excludedPolygons` for areas to hide when the selected pin falls inside them.

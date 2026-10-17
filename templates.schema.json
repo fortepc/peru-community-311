@@ -70,8 +70,7 @@
           },
           "icon": {
             "type": "string",
-            "pattern": "^fa-[a-z0-9-]+$",
-            "description": "Font Awesome solid icon class name (e.g., 'fa-road', 'fa-droplet')."
+            "description": "Font Awesome icon name/classes or an <i>, layered HTML, or SVG snippet. Font Awesome classes, safe inline style properties, and data-fa attributes are retained. Pro glyphs require a licensed Pro stylesheet or kit."
           },
           "destinations": {
             "type": "object",

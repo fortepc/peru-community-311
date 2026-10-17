@@ -13,19 +13,52 @@
   "emailTemplate": "CIVIC REPORT: {category}\nDepartment: {department}\nLocation: {location}\nCoordinates: {mapsUrl}\n--------------------------------------------------\n\n{answers}\n\n--------------------------------------------------\nReport generated via Peru Community 311 (open-source citizen portal)",
   "categories": [
     {
-      "id": "wabash-flats",
-      "name": "Wabash Flats Issue",
-      "department": "River Valley Communities LLC",
-      "description": "Report Issues ",
+      "id": "wabash-flats-road",
+      "name": "Wabash Flats Road Issue",
+      "department": "River Valley Communities LLC,  Jim Griebel",
+      "description": "Report potholes, asphalt damage, roadkill removal on street/alley, fallen road debris, or missed trash collection.",
       "icon": "fa-city",
       "destinations": {
         "email": "jgriebel0234@gmail.com",
+        "webformUrl": null,
         "phone": "(513) 218-0083",
-        "webformUrl": "https://www.bbb.org/us/oh/cincinnati/profile/manufactured-home-rental/river-valley-communities-0292-90022746",
-        "socialUrl": null,
-        "address": "6310 E. Kemper Rd # 125\nCincinnati, OH 45241"
+        "address": "6310 E. Kemper Rd # 125\nCincinnati, OH 45241",
+        "socialUrl": null
       },
-      "questions": [],
+      "questions": [
+        {
+          "id": "issue_type",
+          "label": "Type of Roadway / Surface Hazard",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Pothole / Deep Asphalt Crater",
+            "Deceased Animal Removal (Roadkill on Public Street)",
+            "Roadway Obstruction / Fallen Cargo / Debris",
+            "Snow / Ice Removal Request",
+            "Other"
+          ]
+        },
+        {
+          "id": "traffic_impact",
+          "label": "Traffic Impact",
+          "type": "select",
+          "required": true,
+          "options": [
+            "No - Traffic moving normally",
+            "Partially - Drivers must slow down or swerve",
+            "Completely - Lane or alley completely blocked"
+          ],
+          "placeholder": "No - Traffic moving normally"
+        },
+        {
+          "id": "details",
+          "label": "Location Details & Description",
+          "type": "textarea",
+          "required": true,
+          "placeholder": "Dead animal in the northbound lane, needs removed"
+        }
+      ],
       "jurisdiction": {
         "polygons": [
           {
@@ -33,32 +66,32 @@
             "coordinates": [
               [
                 [
-                  -86.071792,
-                  40.763544
+                  -86.071846,
+                  40.763538
                 ],
                 [
-                  -86.068541,
-                  40.763523
+                  -86.071835,
+                  40.762221
                 ],
                 [
-                  -86.068461,
-                  40.761736
+                  -86.070119,
+                  40.762237
                 ],
                 [
-                  -86.070102,
-                  40.761736
+                  -86.070097,
+                  40.76173
                 ],
                 [
-                  -86.070129,
-                  40.762276
+                  -86.068493,
+                  40.76175
                 ],
                 [
-                  -86.071787,
-                  40.762248
+                  -86.068563,
+                  40.763521
                 ],
                 [
-                  -86.071792,
-                  40.763544
+                  -86.071846,
+                  40.763538
                 ]
               ]
             ],

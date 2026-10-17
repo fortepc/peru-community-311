@@ -82,6 +82,87 @@ function categoryMatchesJurisdiction(category, lat, lng) {
   return !inExcluded;
 }
 
+function getCategoryIconMarkup(icon) {
+  const defaultIcon = "fa-circle-info";
+  if (typeof icon !== "string" || !icon.trim()) return `<i class="fa-solid ${defaultIcon}"></i>`;
+
+  const escapeAttribute = (value) => String(value).replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  })[character]);
+  const allowedStyleProperties = new Set([
+    "color", "fill", "font-size", "font-weight", "line-height", "opacity", "stroke", "stroke-width", "transform", "transform-origin", "vertical-align", "width", "height"
+  ]);
+  const safeStyle = (styleDeclaration) => {
+    const safeRules = [];
+    for (let index = 0; index < styleDeclaration.length; index += 1) {
+      const property = styleDeclaration[index].toLowerCase();
+      const value = styleDeclaration.getPropertyValue(property).trim();
+      const isFontAwesomeVariable = /^--fa-[a-z0-9-]+$/.test(property);
+      if (!value || /url\s*\(|expression\s*\(|javascript:|[<>;{}]/i.test(value)) continue;
+      if (isFontAwesomeVariable || (allowedStyleProperties.has(property) && window.CSS?.supports(property, value))) {
+        safeRules.push(`${property}:${value}`);
+      }
+    }
+    return safeRules.join(";");
+  };
+  const escapeText = (value) => value.replace(/[&<>]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[character]);
+  const safeClasses = (element) => Array.from(element.classList).filter((token) =>
+    /^(?:fa(?:-[a-z0-9-]+)?|svg-inline--fa)$/.test(token)
+  );
+  const serializeIconElement = (element) => {
+    const tag = element.tagName.toLowerCase();
+    const allowedTags = new Set(["i", "span", "div", "svg", "g", "path", "defs", "mask", "clippath", "rect", "circle", "ellipse", "line", "polygon", "polyline", "use", "title"]);
+    if (!allowedTags.has(tag) || (tag === "div" && !element.classList.contains("fa-layers"))) return "";
+
+    const attributes = [];
+    const classes = safeClasses(element);
+    if (classes.length) attributes.push(`class="${escapeAttribute(classes.join(" "))}"`);
+    const style = safeStyle(element.style);
+    if (style) attributes.push(`style="${escapeAttribute(style)}"`);
+
+    for (const attribute of element.attributes) {
+      const name = attribute.name.toLowerCase();
+      const value = attribute.value;
+      const isAccessibilityAttribute = ["aria-hidden", "role", "title", "focusable"].includes(name);
+      const isFontAwesomeData = /^data-fa-[a-z0-9-]+$/.test(name);
+      const isSvgAttribute = [
+        "viewbox", "xmlns", "fill-rule", "clip-rule", "stroke-width", "stroke-linecap", "stroke-linejoin",
+        "d", "transform", "cx", "cy", "r", "rx", "ry", "x", "y", "x1", "x2", "y1", "y2", "width", "height", "points",
+        "preserveaspectratio", "opacity", "fill-opacity", "stroke-opacity", "id", "data-prefix", "data-icon"
+      ].includes(name);
+      const isLocalReference = ["href", "xlink:href"].includes(name) && /^#[a-zA-Z0-9_-]+$/.test(value);
+      const isSvgPaint = ["fill", "stroke"].includes(name) && (value === "none" || value === "currentColor" || window.CSS?.supports("color", value));
+      const isSvgPaintReference = ["fill", "stroke", "mask", "clip-path"].includes(name) && /^url\(#[a-zA-Z0-9_-]+\)$/.test(value);
+      if (name === "class" || name === "style") continue;
+      if (isAccessibilityAttribute || isFontAwesomeData || isSvgAttribute || isLocalReference || isSvgPaint || isSvgPaintReference) {
+        attributes.push(`${name}="${escapeAttribute(value)}"`);
+      }
+    }
+
+    const children = Array.from(element.childNodes).map((node) => {
+      if (node.nodeType === Node.TEXT_NODE) return escapeText(node.textContent || "");
+      if (node.nodeType === Node.ELEMENT_NODE) return serializeIconElement(node);
+      return "";
+    }).join("");
+    return `<${tag}${attributes.length ? ` ${attributes.join(" ")}` : ""}>${children}</${tag}>`;
+  };
+
+  if (icon.includes("<")) {
+    const parsed = new DOMParser().parseFromString(icon, "text/html");
+    const iconElement = parsed.body.querySelector("svg, i, .fa-layers, span[class]");
+    const markup = iconElement && serializeIconElement(iconElement);
+    return markup || `<i class="fa-solid ${defaultIcon}"></i>`;
+  }
+
+  const classes = icon.trim().split(/\s+/).map((token) => token.startsWith("fa-") || token === "fa" ? token : `fa-${token}`)
+    .filter((token) => /^(?:fa(?:-[a-z0-9-]+)?)$/.test(token));
+  const familyToken = /^(?:fa|fa-(?:solid|regular|brands|light|thin|duotone|sharp|classic|kit)(?:-[a-z0-9-]+)?)$/;
+  const utilityToken = /^fa-(?:fw|spin|pulse|beat|bounce|fade|flip|shake|border|inverse|stack|xs|sm|lg|xl|2xs|2xl|rotate-[a-z0-9-]+|flip-[a-z0-9-]+)$/;
+  if (!classes.some((token) => !familyToken.test(token) && !utilityToken.test(token))) classes.push(defaultIcon);
+  if (!classes.some((token) => familyToken.test(token))) classes.push("fa-solid");
+  return `<i class="${escapeAttribute([...new Set(classes)].join(" "))}"></i>`;
+}
+
 // =============================================================================
 // Helper: Screen Reader Live Announcements
 // =============================================================================
@@ -355,7 +436,7 @@ function renderCategoryCards() {
     card.setAttribute("tabindex", "0");
     card.setAttribute("aria-selected", "false");
 
-    const iconClass = typeof cat.icon === "string" && /^fa-[a-z0-9-]+$/.test(cat.icon) ? cat.icon : "fa-circle-info";
+    const iconMarkup = getCategoryIconMarkup(cat.icon);
     const descriptionHtml = cat.description 
       ? `<p class="text-[11px] text-gray-500 mt-1 leading-snug">${cat.description}</p>`
       : "";
@@ -368,7 +449,7 @@ function renderCategoryCards() {
 
     card.innerHTML = `
       <div class="bg-indigo-50 text-indigo-600 p-2.5 rounded-lg text-sm flex-shrink-0 mt-0.5" aria-hidden="true">
-        <i class="fa-solid ${iconClass}"></i>
+        ${iconMarkup}
       </div>
       <div class="flex-grow min-w-0">
         <div class="flex items-center justify-between">
