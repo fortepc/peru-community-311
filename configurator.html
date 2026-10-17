@@ -309,6 +309,7 @@
 			let drawing = false;
 			let draftPoints = [];
 			let mapRadiusMiles = 2.5;
+			let jurisdictionTarget = "polygons";
 			let onlineMapReady = false;
 			let leafletMap = null;
 			let polygonLayer = null;
@@ -332,6 +333,13 @@
 			};
 			const numericValue = (input, fallback = 0) => input.value.trim() === "" ? fallback : Number(input.value);
 			const safeArray = (value) => Array.isArray(value) ? value : [];
+			const normalizeJurisdiction = (category) => {
+				if (!category || !category.jurisdiction) return;
+				const jurisdiction = category.jurisdiction;
+				jurisdiction.polygons = safeArray(jurisdiction.polygons);
+				jurisdiction.excludedPolygons = safeArray(jurisdiction.excludedPolygons);
+				if (!jurisdiction.polygons.length && !jurisdiction.excludedPolygons.length) delete category.jurisdiction;
+			};
 
 			function renderSettings() {
 				const location = config.location || (config.location = {});
@@ -417,12 +425,19 @@
 							<div class="question-list">${questions.map((question, index) => renderQuestion(question, index)).join("") || '<p class="map-hint">No questions yet.</p>'}</div>
 						</section>
 						<section class="subsection"><div class="subsection-head"><div><h4>Jurisdiction</h4><p>Optional polygon coverage for future location-based category filtering.</p></div></div>
-							<p class="jurisdiction-copy">Draw one or more service-area polygons. Exported values are GeoJSON Polygon objects in <strong>longitude, latitude</strong> order, grouped under <code>jurisdiction.polygons</code>.</p>
+							<p class="jurisdiction-copy">Draw one or more allowed service-area polygons and, if needed, excluded polygons for areas such as private roads, gated communities, or non-city rights-of-way. Exported values remain GeoJSON Polygon objects in <strong>longitude, latitude</strong> order.</p>
 							<div class="map-tools">
+								<label class="field" style="width:190px; margin-right:4px;">
+									<span>Polygon target</span>
+									<select data-jurisdiction-target>
+										<option value="polygons" ${jurisdictionTarget === "polygons" ? "selected" : ""}>Allowed areas</option>
+										<option value="excludedPolygons" ${jurisdictionTarget === "excludedPolygons" ? "selected" : ""}>Excluded areas</option>
+									</select>
+								</label>
 								<button type="button" class="button small primary" data-action="draw-polygon">${drawing ? "Drawing..." : "Draw polygon"}</button>
 								<button type="button" class="button small" data-action="finish-polygon" ${drawing ? "" : "disabled"}>Finish polygon</button>
 								<button type="button" class="button small" data-action="undo-point" ${draftPoints.length ? "" : "disabled"}>Undo point</button>
-								<button type="button" class="button small" data-action="edit-polygons" ${canUseLeafletMap() && safeArray(category.jurisdiction?.polygons).length ? "" : "disabled"}>Edit vertices</button>
+								<button type="button" class="button small" data-action="edit-polygons" ${canUseLeafletMap() && (safeArray(category.jurisdiction?.polygons).length || safeArray(category.jurisdiction?.excludedPolygons).length) ? "" : "disabled"}>Edit vertices</button>
 								<button type="button" class="button small" data-action="save-polygon-edits" disabled>Save edits</button>
 								<label class="field"><span>Canvas radius (miles)</span><input type="number" min="0.1" max="100" step="0.1" value="${mapRadiusMiles}" data-map-radius></label>
 							</div>
@@ -505,9 +520,16 @@
 				const grid = [];
 				for (let x = 30; x <= 770; x += 74) grid.push(`<line class="map-grid" x1="${x}" y1="24" x2="${x}" y2="436"/>`);
 				for (let y = 46; y <= 414; y += 61) grid.push(`<line class="map-grid" x1="30" y1="${y}" x2="770" y2="${y}"/>`);
-				const polygons = safeArray(currentCategory()?.jurisdiction?.polygons).map((polygon, index) => {
-					const ring = polygon?.type === "Polygon" ? polygon.coordinates?.[0] : null;
-					return Array.isArray(ring) && ring.length > 2 ? `<path class="map-polygon" style="--polygon-color:${colorForPolygon(index)}" d="${pathForRing(ring)}"/>` : "";
+				const polygonGroups = [
+					{ key: "polygons", color: colorForPolygon(0), label: "Allowed" },
+					{ key: "excludedPolygons", color: "#dc2626", label: "Excluded" }
+				];
+				const polygons = polygonGroups.flatMap(({ key, color }) => {
+					const items = safeArray(currentCategory()?.jurisdiction?.[key]);
+					return items.map((polygon, index) => {
+						const ring = polygon?.type === "Polygon" ? polygon.coordinates?.[0] : null;
+						return Array.isArray(ring) && ring.length > 2 ? `<path class="map-polygon" style="--polygon-color:${colorForPolygon(index + (key === "excludedPolygons" ? 3 : 0))}" d="${pathForRing(ring)}"/>` : "";
+					});
 				}).join("");
 				const draftPath = draftPoints.length ? `<path class="${drawing ? "map-drawing" : "map-polygon"}" d="${draftPoints.map((point, index) => `${index ? "L" : "M"}${point.x},${point.y}`).join(" ")}${drawing ? "" : " Z"}"/>${draftPoints.map((point) => `<circle class="map-point" cx="${point.x}" cy="${point.y}" r="5"/>`).join("")}` : "";
 				const marker = geoToPoint(Number(center.lat), Number(center.lng));
@@ -517,8 +539,22 @@
 			function renderPolygonList() {
 				const list = $("#polygon-list");
 				if (!list) return;
-				const polygons = safeArray(currentCategory()?.jurisdiction?.polygons);
-				list.innerHTML = polygons.map((polygon, index) => `<div class="polygon-row"><span><i class="polygon-swatch" style="background:${colorForPolygon(index)}"></i><strong>Polygon ${index + 1}</strong> - ${safeArray(polygon?.coordinates?.[0]).length} boundary points</span><button type="button" class="button danger small" data-action="delete-polygon" data-polygon-index="${index}">Remove</button></div>`).join("") || '<div class="map-hint">No jurisdiction polygons. Without polygons, the category has no jurisdiction restriction.</div>';
+				const category = currentCategory();
+				const jurisdiction = category?.jurisdiction || {};
+				const groups = [
+					{ key: "polygons", label: "Allowed", color: colorForPolygon(0) },
+					{ key: "excludedPolygons", label: "Excluded", color: "#dc2626" }
+				];
+				const entries = groups.flatMap(({ key, label, color }) => {
+					const polygons = safeArray(jurisdiction[key]);
+					return polygons.map((polygon, index) => `
+						<div class="polygon-row">
+							<span><i class="polygon-swatch" style="background:${colorForPolygon(index + (key === "excludedPolygons" ? 3 : 0))}"></i><strong>${label} polygon ${index + 1}</strong> - ${safeArray(polygon?.coordinates?.[0]).length} boundary points</span>
+							<button type="button" class="button danger small" data-action="delete-polygon" data-polygon-key="${key}" data-polygon-index="${index}">Remove</button>
+						</div>
+					`);
+				});
+				list.innerHTML = entries.length ? entries.join("") : '<div class="map-hint">No polygons yet. Allowed areas are active by default; excluded polygons can be used for private roads or gated service exclusions.</div>';
 			}
 
 			function syncMapViews() {
@@ -598,39 +634,54 @@
 				});
 				(activeTileLayer === "satellite" ? satelliteTiles : streetTiles).addTo(leafletMap);
 				polygonLayer = L.featureGroup().addTo(leafletMap);
-				safeArray(currentCategory()?.jurisdiction?.polygons).forEach((polygon, index) => {
-					try {
-						if (polygon?.type !== "Polygon" || !Array.isArray(polygon.coordinates)) return;
-						const latLngs = polygon.coordinates.map((ring) => ring.map(([longitude, latitude]) => [latitude, longitude]));
-						const layer = L.polygon(latLngs, { color: colorForPolygon(index), weight: 3, fillColor: colorForPolygon(index), fillOpacity: 0.2 });
-						layer._jurisdictionIndex = index;
-						polygonLayer.addLayer(layer);
-					} catch { /* Ignore malformed imported polygon data in the preview. */ }
+				["polygons", "excludedPolygons"].forEach((targetKey) => {
+					safeArray(currentCategory()?.jurisdiction?.[targetKey]).forEach((polygon, index) => {
+						try {
+							if (polygon?.type !== "Polygon" || !Array.isArray(polygon.coordinates)) return;
+							const latLngs = polygon.coordinates.map((ring) => ring.map(([longitude, latitude]) => [latitude, longitude]));
+							const layer = L.polygon(latLngs, {
+								color: targetKey === "excludedPolygons" ? "#dc2626" : colorForPolygon(index),
+								weight: 3,
+								fillColor: targetKey === "excludedPolygons" ? "#dc2626" : colorForPolygon(index),
+								fillOpacity: 0.2
+							});
+							layer._jurisdictionKey = targetKey;
+							layer._jurisdictionIndex = index;
+							polygonLayer.addLayer(layer);
+						} catch { /* Ignore malformed imported polygon data in the preview. */ }
+					});
 				});
 				leafletMap.on(L.Draw.Event.CREATED, (event) => {
 					const geometry = event.layer.toGeoJSON().geometry;
 					if (geometry.type === "Polygon") {
 						const category = currentCategory();
+						const targetKey = jurisdictionTarget === "excludedPolygons" ? "excludedPolygons" : "polygons";
 						category.jurisdiction = category.jurisdiction || {};
-						category.jurisdiction.polygons = safeArray(category.jurisdiction.polygons);
-						const index = category.jurisdiction.polygons.length;
+						category.jurisdiction[targetKey] = safeArray(category.jurisdiction[targetKey]);
+						const index = category.jurisdiction[targetKey].length;
+						event.layer._jurisdictionKey = targetKey;
 						event.layer._jurisdictionIndex = index;
-						event.layer.setStyle({ color: colorForPolygon(index), fillColor: colorForPolygon(index), weight: 3, fillOpacity: 0.2 });
-						category.jurisdiction.polygons.push(geometry);
+						event.layer.setStyle({
+							color: targetKey === "excludedPolygons" ? "#dc2626" : colorForPolygon(index),
+							fillColor: targetKey === "excludedPolygons" ? "#dc2626" : colorForPolygon(index),
+							weight: 3,
+							fillOpacity: 0.2
+						});
+						category.jurisdiction[targetKey].push(geometry);
 						polygonLayer.addLayer(event.layer);
 						drawing = false;
 						draftPoints = [];
 						renderPolygonList();
 						updateMapToolButtons();
-						setStatus("Polygon added as a GeoJSON Polygon.");
+						setStatus(targetKey === "excludedPolygons" ? "Excluded polygon added as a GeoJSON Polygon." : "Polygon added as a GeoJSON Polygon.");
 					}
 				});
 				leafletMap.on(L.Draw.Event.EDITED, (event) => {
-					const polygons = currentCategory()?.jurisdiction?.polygons;
-					if (!Array.isArray(polygons)) return;
 					event.layers.eachLayer((layer) => {
+						const targetKey = layer._jurisdictionKey || "polygons";
+						const polygons = currentCategory()?.jurisdiction?.[targetKey];
 						const index = layer._jurisdictionIndex;
-						if (Number.isInteger(index) && layer.toGeoJSON().geometry.type === "Polygon") polygons[index] = layer.toGeoJSON().geometry;
+						if (Array.isArray(polygons) && Number.isInteger(index) && layer.toGeoJSON().geometry.type === "Polygon") polygons[index] = layer.toGeoJSON().geometry;
 					});
 					renderPolygonList();
 					setStatus("Polygon edits saved to the configuration.");
@@ -775,12 +826,13 @@
 				coordinates.push([...coordinates[0]]);
 				const category = currentCategory();
 				category.jurisdiction = category.jurisdiction || {};
-				category.jurisdiction.polygons = safeArray(category.jurisdiction.polygons);
-				category.jurisdiction.polygons.push({ type: "Polygon", coordinates: [coordinates] });
+				const targetKey = jurisdictionTarget === "excludedPolygons" ? "excludedPolygons" : "polygons";
+				category.jurisdiction[targetKey] = safeArray(category.jurisdiction[targetKey]);
+				category.jurisdiction[targetKey].push({ type: "Polygon", coordinates: [coordinates] });
 				drawing = false;
 				draftPoints = [];
 				renderCategoryEditor();
-				setStatus("Polygon added as a GeoJSON Polygon.");
+				setStatus(targetKey === "excludedPolygons" ? "Excluded polygon added as a GeoJSON Polygon." : "Allowed polygon added as a GeoJSON Polygon.");
 			}
 
 			function mapCoordinates(event, svg) {
@@ -803,6 +855,7 @@
 				if (!parsed || typeof parsed !== "object" || !parsed.location || !Array.isArray(parsed.categories)) throw new Error("Expected an object with a location and categories array.");
 				config = parsed;
 				if (!config.location.defaultCenter) config.location.defaultCenter = { lat: 40.7537, lng: -86.0689 };
+				config.categories.forEach((category) => normalizeJurisdiction(category));
 				activeCategory = config.categories.length ? 0 : -1;
 				drawing = false;
 				draftPoints = [];
@@ -899,6 +952,10 @@
 					triggerAutosave();
 					return;
 				}
+				if (event.target.dataset.jurisdictionTarget !== undefined) {
+					jurisdictionTarget = event.target.value === "excludedPolygons" ? "excludedPolygons" : "polygons";
+					return;
+				}
 				if (event.target.dataset.questionRequired !== undefined) {
 					const question = currentCategory()?.questions?.[Number(event.target.dataset.questionRequired)];
 					if (question) question.required = event.target.checked;
@@ -991,17 +1048,20 @@
 				if (action === "delete-polygon") {
 					const category = currentCategory();
 					const index = Number(event.target.dataset.polygonIndex);
-					const polygons = category.jurisdiction.polygons;
-					const layer = polygonLayer?.getLayers().find((item) => item._jurisdictionIndex === index);
+					const polygonKey = event.target.dataset.polygonKey || "polygons";
+					const polygons = category.jurisdiction?.[polygonKey];
+					if (!Array.isArray(polygons)) return;
+					const layer = polygonLayer?.getLayers().find((item) => item._jurisdictionKey === polygonKey && item._jurisdictionIndex === index);
 					if (layer) polygonLayer.removeLayer(layer);
 					polygons.splice(index, 1);
-					polygonLayer?.getLayers().forEach((item, nextIndex) => {
+					const groupLayers = polygonLayer?.getLayers().filter((item) => item._jurisdictionKey === polygonKey) || [];
+					groupLayers.forEach((item, nextIndex) => {
 						item._jurisdictionIndex = nextIndex;
-						item.setStyle({ color: colorForPolygon(nextIndex), fillColor: colorForPolygon(nextIndex) });
+						item.setStyle({ color: colorForPolygon(nextIndex + (polygonKey === "excludedPolygons" ? 3 : 0)), fillColor: colorForPolygon(nextIndex + (polygonKey === "excludedPolygons" ? 3 : 0)) });
 					});
-					if (!polygons.length) delete category.jurisdiction;
+					if (!safeArray(category.jurisdiction?.polygons).length && !safeArray(category.jurisdiction?.excludedPolygons).length) delete category.jurisdiction;
 					renderCategoryEditor();
-					setStatus("Polygon removed.");
+					setStatus(polygonKey === "excludedPolygons" ? "Excluded polygon removed." : "Polygon removed.");
 				}
 			});
 

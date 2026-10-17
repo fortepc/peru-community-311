@@ -25,6 +25,10 @@
         "address": "351 E Canal St, Peru, IN 46970",
         "socialUrl": "https://www.facebook.com/CityofPeruIndiana"
       },
+      "jurisdiction": {
+        "polygons": [],
+        "excludedPolygons": []
+      },
       "questions": [
         {
           "id": "issue_type",

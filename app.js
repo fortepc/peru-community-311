@@ -48,6 +48,40 @@ const defaultEmergencyKeywords = [
   "active water main break"
 ];
 
+function getJurisdictionRing(polygon) {
+  if (!polygon || polygon.type !== "Polygon" || !Array.isArray(polygon.coordinates) || !polygon.coordinates.length) return null;
+  const ring = polygon.coordinates[0];
+  return Array.isArray(ring) ? ring : null;
+}
+
+function pointInPolygon(lat, lng, polygon) {
+  const ring = getJurisdictionRing(polygon);
+  if (!ring || ring.length < 4) return false;
+
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [xi, yi] = ring[i];
+    const [xj, yj] = ring[j];
+    const intersects = ((yi > lat) !== (yj > lat)) &&
+      (lng < ((xj - xi) * (lat - yi)) / (yj - yi + Number.EPSILON) + xi);
+    if (intersects) inside = !inside;
+  }
+  return inside;
+}
+
+function categoryMatchesJurisdiction(category, lat, lng) {
+  if (!category || !category.jurisdiction) return true;
+
+  const allowed = Array.isArray(category.jurisdiction.polygons) ? category.jurisdiction.polygons : [];
+  const excluded = Array.isArray(category.jurisdiction.excludedPolygons) ? category.jurisdiction.excludedPolygons : [];
+
+  const inAllowed = allowed.length === 0 || allowed.some((polygon) => pointInPolygon(lat, lng, polygon));
+  const inExcluded = excluded.some((polygon) => pointInPolygon(lat, lng, polygon));
+
+  if (!inAllowed) return false;
+  return !inExcluded;
+}
+
 // =============================================================================
 // Helper: Screen Reader Live Announcements
 // =============================================================================
@@ -248,6 +282,10 @@ function initMap() {
 function setMarker(lat, lng) {
   selectedCoords = { lat, lng };
   marker.setLatLng([lat, lng]);
+  renderCategoryCards();
+  if (selectedCategoryId && !appConfig?.categories?.some((cat) => cat.id === selectedCategoryId && categoryMatchesJurisdiction(cat, lat, lng))) {
+    resetCategorySelection();
+  }
   if (reverseGeocodeAbort) reverseGeocodeAbort.abort();
   debouncedReverseGeocode(lat, lng);
   syncStateToURL();
@@ -299,11 +337,17 @@ function renderCategoryCards() {
   if (!container || !appConfig || !appConfig.categories) return;
   container.innerHTML = "";
 
+  const visibleCategories = appConfig.categories.filter((cat) => categoryMatchesJurisdiction(cat, selectedCoords.lat, selectedCoords.lng));
+  if (selectedCategoryId && !visibleCategories.some((cat) => cat.id === selectedCategoryId)) {
+    selectedCategoryId = null;
+    resetCategorySelection();
+  }
+
   // Set ARIA listbox role on container
   container.setAttribute("role", "listbox");
   container.setAttribute("aria-label", "Issue Categories");
 
-  appConfig.categories.forEach((cat) => {
+  visibleCategories.forEach((cat) => {
     const card = document.createElement("div");
     card.className = "category-card border border-gray-200 rounded-lg p-3 cursor-pointer hover:border-indigo-300 hover:bg-gray-50 flex items-start space-x-3 transition";
     card.dataset.id = cat.id;
@@ -354,6 +398,12 @@ function renderCategoryCards() {
 }
 
 function selectCategory(categoryId) {
+  const category = appConfig && appConfig.categories ? appConfig.categories.find((item) => item.id === categoryId) : null;
+  if (!category || !categoryMatchesJurisdiction(category, selectedCoords.lat, selectedCoords.lng)) {
+    resetCategorySelection();
+    return;
+  }
+
   selectedCategoryId = categoryId;
 
   // Hide search bar while a specific category is selected

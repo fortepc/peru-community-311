@@ -124,10 +124,22 @@
           },
           "jurisdiction": {
             "type": "object",
-            "description": "Optional GeoJSON boundary polygons limiting where this category applies.",
+            "description": "Optional GeoJSON boundary polygons that define where this category applies or is excluded.",
             "properties": {
               "polygons": {
                 "type": "array",
+                "description": "Allowed service-area polygons for this category.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": { "type": "string", "enum": ["Polygon"] },
+                    "coordinates": { "type": "array" }
+                  }
+                }
+              },
+              "excludedPolygons": {
+                "type": "array",
+                "description": "GeoJSON polygons that explicitly exclude report locations from this category, such as private roads or gated service areas.",
                 "items": {
                   "type": "object",
                   "properties": {

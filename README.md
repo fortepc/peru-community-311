@@ -29,7 +29,7 @@ Publish the site over HTTPS, then open it in the phone's browser. On Android, us
 - `styles.css` contains custom layout styling, map container responsiveness, accessible focus styles, and print layout rules.
 - `app.js` contains the application logic, geolocation, Leaflet map setup, dynamic questionnaire rendering, URL sync, and dispatch formatting.
 - `manifest.webmanifest`, `service-worker.js`, and `icons/` provide the installable web app metadata, cached app shell, and home-screen icons.
-- `configurator.html` is a standalone editor for importing and exporting `templates.json`. Category details, contacts, emergency guidance, questions, and jurisdiction polygons can be edited there. Jurisdiction is support for a planned feature; the current `index.html` does not yet filter categories by the selected report location. If jurisdiction is supplied in the templates.json, future versions of the index.html file will only display that reporting category if the map pin is within that polygon.
+- `configurator.html` is a standalone editor for importing and exporting `templates.json`. Category details, contacts, emergency guidance, questions, and jurisdiction polygons can be edited there. The app filters categories by selected pin based on inclusion and exclusion polygons.
 - `templates.json` contains this deployment's map defaults, categories, contacts, questions, category icons, and email templates. The app fetches it when the page loads.
 - `templates.schema.json` is the formal JSON Schema specification for validating `templates.json`.
 - `README.md` "You are here" it's a document detailing the project.
@@ -43,7 +43,7 @@ Publish the site over HTTPS, then open it in the phone's browser. On Android, us
 3. In **Site settings**, enter your service area's city, county, state, map center, and default zoom.
 4. Use the category editor to add, remove, or update locally relevant categories. Verify each department, destination, question, and emergency rule directly with the responsible agency.
 5. Set the top-level and any category-specific email subject and body templates for your agencies. See the configuration reference below for supported fields and placeholders.
-6. Optionally draw jurisdiction polygons for categories that may later be limited by report location. Polygon metadata is supported by the configurator, but the current `index.html` does not yet filter categories by jurisdiction.
+6. Optionally draw jurisdiction polygons for categories that may be limited by report location. The app evaluates inclusion and exclusion polygons against the selected map pin.
 7. Download the generated `templates.json` from the configurator and place it in the repository root, replacing the Peru example configuration.
 8. In `index.html`, update the site name, city-specific wording, independent-project disclaimer, page title and descriptions, and `og:url` for the fork's published URL. Review any remaining Peru-specific text in the page.
 9. Test the fork with and without email destinations, with required and optional questions, and with emergency categories. Verify every contact link and generated message before sharing it publicly.
@@ -91,7 +91,7 @@ Each object in the top-level `categories` array describes one report option. Add
 - `icon`: Optional Font Awesome solid icon class, such as `fa-road`. If omitted or invalid, the app uses `fa-circle-info`.
 - `destinations`: Contact and follow-up links for this category.
 - `questions`: The fields residents answer for this category.
-- `jurisdiction`: Optional polygon metadata for a planned location-based category filter.
+- `jurisdiction`: Optional polygon metadata for location-based category visibility. Supported fields are `polygons` for allowed service areas and `excludedPolygons` for areas to hide when the selected pin falls inside them.
 - `emailSubjectTemplate`: Optional subject template that overrides the top-level setting for this category.
 - `emailTemplate`: Optional message-body template that overrides the top-level setting for this category.
 
@@ -101,7 +101,7 @@ Categories can also optionally include an `emergency` object to trigger the flas
 
 ### Jurisdiction Polygons
 
-The standalone `configurator.html` editor can draw one or more polygons for a category. It stores them as GeoJSON Polygon geometries under `jurisdiction.polygons`; coordinates use GeoJSON order, `[longitude, latitude]`, and each boundary ring repeats its first coordinate at the end:
+The standalone `configurator.html` editor can draw one or more inclusion polygons and exclusion polygons for a category. It stores them as GeoJSON Polygon geometries under `jurisdiction.polygons` and `jurisdiction.excludedPolygons`; coordinates use GeoJSON order, `[longitude, latitude]`, and each boundary ring repeats its first coordinate at the end:
 
 ```json
 {
@@ -109,14 +109,20 @@ The standalone `configurator.html` editor can draw one or more polygons for a ca
       "polygons": [
          {
             "type": "Polygon",
-            "coordinates": [[[-86.07, 40.75], [-86.06, 40.75], [-86.06, 40.76], [-86.07, 40.75]]]
+            "coordinates": [[[ -86.07, 40.75], [-86.06, 40.75], [-86.06, 40.76], [-86.07, 40.75]]]
+         }
+      ],
+      "excludedPolygons": [
+         {
+            "type": "Polygon",
+            "coordinates": [[[ -86.065, 40.755], [-86.055, 40.755], [-86.055, 40.763], [-86.065, 40.755]]]
          }
       ]
    }
 }
 ```
 
-Each item in `polygons` is a separate service area. This is configuration support for a planned feature; the current `index.html` does not yet filter categories by the selected report location. The configurator itself works offline using its coordinate grid; when online, it can load Leaflet.Draw with OpenStreetMap street tiles or Esri satellite tiles. Map tiles are fetched from those providers, but template data is not uploaded.
+Each item in `polygons` is a separate service area. `excludedPolygons` override the inclusion rule and are used for private roads, gated roads, or other areas the category should never appear for. The app applies this logic: if a category has no jurisdiction, it always shows; if it has only excluded polygons, it shows unless the pin is inside one; if it has allowed polygons, it only shows when the pin is inside them; if it has both, the pin must be inside an allowed polygon and not inside an excluded polygon.
 
 Here is an example category object to add to the `categories` array. Replace the sample contact details with verified information:
 
