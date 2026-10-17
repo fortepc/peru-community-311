@@ -13,6 +13,61 @@
   "emailTemplate": "CIVIC REPORT: {category}\nDepartment: {department}\nLocation: {location}\nCoordinates: {mapsUrl}\n--------------------------------------------------\n\n{answers}\n\n--------------------------------------------------\nReport generated via Peru Community 311 (open-source citizen portal)",
   "categories": [
     {
+      "id": "wabash-flats",
+      "name": "Wabash Flats Issue",
+      "department": "River Valley Communities LLC",
+      "description": "Report Issues ",
+      "icon": "city",
+      "destinations": {
+        "email": "jgriebel0234@gmail.com",
+        "phone": "(513) 218-0083",
+        "webformUrl": "https://www.bbb.org/us/oh/cincinnati/profile/manufactured-home-rental/river-valley-communities-0292-90022746",
+        "socialUrl": null,
+        "address": "6310 E. Kemper Rd # 125\nCincinnati, OH 45241"
+      },
+      "questions": [],
+      "jurisdiction": {
+        "polygons": [
+          {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [
+                  -86.071792,
+                  40.763544
+                ],
+                [
+                  -86.068541,
+                  40.763523
+                ],
+                [
+                  -86.068461,
+                  40.761736
+                ],
+                [
+                  -86.070102,
+                  40.761736
+                ],
+                [
+                  -86.070129,
+                  40.762276
+                ],
+                [
+                  -86.071787,
+                  40.762248
+                ],
+                [
+                  -86.071792,
+                  40.763544
+                ]
+              ]
+            ],
+            "name": "Wabash Flats"
+          }
+        ]
+      }
+    },
+    {
       "id": "street_sanitation",
       "name": "Street Surface & Debris (Potholes, Roadkill, Obstructions)",
       "department": "Street & Sanitation Department (Brian Stillings, Commissioner)",
