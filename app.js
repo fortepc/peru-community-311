@@ -438,11 +438,49 @@ function setAnalyticsConsent(choice) {
   document.getElementById("analytics-choice-panel").classList.add("hidden");
 }
 
+function getAnalyticsEntryContext() {
+  const searchParams = new URLSearchParams(window.location.search);
+  const utmKeys = [
+    "utm_id",
+    "utm_source",
+    "utm_medium",
+    "utm_campaign",
+    "utm_source_platform",
+    "utm_creative_format",
+    "utm_marketing_tactic",
+    "utm_term",
+    "utm_content"
+  ];
+  const utmParameters = {};
+  for (const key of utmKeys) {
+    const value = searchParams.get(key)?.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 100);
+    if (value) utmParameters[key] = value;
+  }
+
+  const hasCoordinates = searchParams.has("lat") && searchParams.has("lng");
+  const hasCategory = searchParams.has("cat");
+  const hasQuestionAnswer = appConfig.categories.some((category) =>
+    category.questions.some((question) => [
+      String(question.id),
+      `q-${category.id}-${question.id}`,
+      question.name,
+      question.field
+    ].some((key) => key && searchParams.has(key)))
+  );
+
+  return {
+    entryType: hasCoordinates || hasCategory || hasQuestionAnswer ? "prefilled_report" : "base_url",
+    utmParameters
+  };
+}
+
 function initializeAnalytics() {
   const measurementId = siteConfig?.analyticsMeasurementId;
   if (!measurementId || analyticsInitialized) return;
   analyticsInitialized = true;
-  const pageLocation = `${window.location.origin}${window.location.pathname}`;
+  const { entryType, utmParameters } = getAnalyticsEntryContext();
+  const campaignQuery = new URLSearchParams(utmParameters).toString();
+  const pageLocation = `${window.location.origin}${window.location.pathname}${campaignQuery ? `?${campaignQuery}` : ""}`;
   let pageReferrer = "";
   try {
     if (document.referrer) pageReferrer = new URL(document.referrer).origin;
@@ -468,7 +506,9 @@ function initializeAnalytics() {
   window.gtag("event", "page_view", {
     page_location: pageLocation,
     page_referrer: pageReferrer,
-    page_title: document.title
+    page_title: document.title,
+    entry_type: entryType,
+    ...utmParameters
   });
 
   const script = document.createElement("script");
@@ -1285,18 +1325,24 @@ function setupEventListeners() {
   const mailtoBtn = document.getElementById("mailto-btn");
   const webformBtn = document.getElementById("webform-btn");
   const phoneBtn = document.getElementById("phone-btn");
+  const officeBtn = document.getElementById("visit-office-btn");
+  const socialBtn = document.getElementById("social-btn");
+  const emergency911Btn = document.getElementById("emergency-911-call");
   const deptEmergencyCall = document.getElementById("dept-emergency-call");
 
-  if (mailtoBtn) mailtoBtn.addEventListener("click", () => recordReportAction("send_email"));
-  if (webformBtn) webformBtn.addEventListener("click", () => recordReportAction("open_webform"));
-  if (phoneBtn) phoneBtn.addEventListener("click", () => recordReportAction("call_department"));
-  if (deptEmergencyCall) deptEmergencyCall.addEventListener("click", () => recordReportAction("call_department"));
+  if (mailtoBtn) mailtoBtn.addEventListener("click", () => recordReportAction("send_email", "mailto"));
+  if (webformBtn) webformBtn.addEventListener("click", () => recordReportAction("open_webform", "webform"));
+  if (phoneBtn) phoneBtn.addEventListener("click", () => recordReportAction("call_department", "tel"));
+  if (deptEmergencyCall) deptEmergencyCall.addEventListener("click", () => recordReportAction("call_department", "department_dispatch"));
+  if (officeBtn) officeBtn.addEventListener("click", () => trackReportMade("office_directions"));
+  if (socialBtn) socialBtn.addEventListener("click", () => trackReportMade("social_page"));
+  if (emergency911Btn) emergency911Btn.addEventListener("click", () => trackReportMade("emergency_911"));
 
   // Copy Report Action
   const copyBtn = document.getElementById("copy-btn");
   if (copyBtn) {
     copyBtn.addEventListener("click", () => {
-      trackAnalyticsEvent("report_action", { action: "copy_report", category_id: selectedCategoryId });
+      trackReportMade("copy_report");
       const text = buildEmailBody();
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => {
@@ -1311,9 +1357,14 @@ function setupEventListeners() {
   }
 }
 
-function recordReportAction(action) {
+function trackReportMade(actionType) {
   if (!selectedCategoryId) return;
-  trackAnalyticsEvent("report_action", { action, category_id: selectedCategoryId });
+  trackAnalyticsEvent("report_made", { category_id: selectedCategoryId, action_type: actionType });
+}
+
+function recordReportAction(action, actionType = action) {
+  if (!selectedCategoryId) return;
+  trackReportMade(actionType);
   window.dispatchEvent(new CustomEvent("report-action", {
     detail: { action, categoryId: selectedCategoryId, reportDraftId }
   }));

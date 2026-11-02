@@ -178,7 +178,7 @@
           Active emergencies (natural gas odor, sparking power lines, active water main break) require immediate dispatch. <strong>Do NOT send an email report</strong>, as municipal email is not monitored 24/7.
         </p>
         <div class="mt-2.5 flex flex-wrap gap-2" id="emergency-call-actions">
-          <a href="tel:911" class="inline-flex items-center space-x-1.5 bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-lg text-xs shadow-sm transition">
+          <a id="emergency-911-call" href="tel:911" class="inline-flex items-center space-x-1.5 bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-lg text-xs shadow-sm transition">
             <i class="fa-solid fa-phone"></i>
             <span>Call 911 (Immediate Threat)</span>
           </a>
@@ -293,7 +293,7 @@
 
   <section id="analytics-choice-panel" class="hidden border-t border-gray-200 bg-white px-4 py-3 text-xs text-gray-700" aria-label="Analytics preferences">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-      <p class="max-w-3xl mb-0"><strong>Basic visitor data is always collected.</strong> Google Analytics measures page visits and broad device category. You can choose whether to share extra usage events, such as selected categories and report actions. Report text, answers, exact coordinates, search terms, and draft IDs are not sent.</p>
+      <p class="max-w-3xl mb-0"><strong>Basic visitor data is always collected.</strong> Google Analytics measures page visits, broad device category, and standard UTM campaign tags. You can choose whether to share extra usage events, such as selected categories and report actions. Report text, answers, exact coordinates, and draft IDs are not sent.</p>
       <div class="flex items-center gap-2">
         <button id="analytics-accept-btn" type="button" class="rounded-md bg-indigo-600 px-3 py-2 font-semibold text-white hover:bg-indigo-700">Allow usage events</button>
         <button id="analytics-decline-btn" type="button" class="rounded-md border border-gray-300 bg-white px-3 py-2 font-semibold text-gray-700 hover:bg-gray-50">Decline extra events</button>
