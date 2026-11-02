@@ -17,13 +17,25 @@ https://fortepc.github.io/peru-community-311/
 
 This is a stateless, client-side static site. It has no application server or reporting database: reports are not submitted to or stored by this website. Email is opened in the resident's email application, and webforms are hosted by the destination agency. Opening a link does not confirm that an agency received a report.
 
+## Analytics and Privacy
+
+When `analyticsMeasurementId` is configured, basic page-view and device-category metrics are always collected by Google Analytics. The visitor choice controls only the additional usage events. Visitors can decline or change that choice from **Analytics choices** in the footer. Remove or leave the Measurement ID empty to disable all analytics for a deployment. The configurator itself does not load or send analytics; it only edits the ID used by the public 311 page.
+
+After opt-in, the site additionally records the source of a map-pin action, selected category IDs, report reviews, blocked reviews, and report action types (email, webform, phone, or copy). Google Analytics may use its analytics cookie and standard browser/device signals to estimate visits and users. Advertising signals and ad personalization are disabled.
+
+For category and funnel breakdowns in GA4 explorations, register event-scoped custom dimensions for `category_id`, `source`, and `action` in **Admin > Data display > Custom definitions**.
+
+Before collecting real traffic, turn **Enhanced measurement off** for this web stream in **Admin > Data streams > your web stream > Enhanced measurement**. Automatic history-change page views can capture this app's draft query string, and automatic outbound-click events can capture the encoded report body in a `mailto:` URL. This app sends its own sanitized page views and workflow events instead.
+
+With Enhanced measurement disabled, the site's baseline and opt-in events do not send questionnaire answers, report text, search terms, precise coordinates, or report draft IDs to Google Analytics. Page-view locations are limited to the page path; URL query strings and fragments are excluded because they can contain shared report drafts.
+
 The selected location, category, and questionnaire answers are reflected in the page URL so a draft can be shared or reopened. Anyone with that URL can see those values, so do not include sensitive information in a draft. The browser emits a `report-action` custom event for email, webform, and phone actions; it is only an integration point and does not store or count reports.
 
 ## How to Deploy for Your City
 
 1. Fork this repository and review it as a static-site template. The included Peru contacts and categories are examples for the original deployment, not verified information for another community.
 2. In your fork, open **Settings > Pages**. Choose **Deploy from a branch**, select your publishing branch (usually `main`) and the repository root, then save. GitHub Pages will provide the deployment URL.
-3. Edit `config.json` for your city name, county and region, app title, header tagline, page/social descriptions, map center, default zoom, optional site contact email, repository URL, and deployment URL. Coordinates use latitude and longitude fields. The optional site email is separate from department contacts.
+3. Edit `config.json` for your city name, county and region, app title, header tagline, page/social descriptions, map center, default zoom, optional Google Analytics Measurement ID, optional site contact email, repository URL, and deployment URL. Coordinates use latitude and longitude fields. The optional site email is separate from department contacts. Leave `analyticsMeasurementId` empty or omit it to disable analytics.
 4. Edit `templates.json` to configure the categories, department names, questions, emergency guidance, and report subject/body templates. Put each department's email, phone, and official webform URL in that category's `destinations` object. These destinations are where residents route reports; they are not app-wide contact details.
 5. Edit `boundaries.geojson` when a category needs location-based coverage. It is a standard GeoJSON `FeatureCollection`; each boundary is a `Feature` with a unique, stable `properties.id` and a `Polygon` geometry. Coordinates are ordered `[longitude, latitude]`, and each ring must close by repeating its first coordinate.
 6. In `templates.json`, reference boundary IDs from the category's `jurisdiction` object. `includes` is an array of IDs that define the allowed areas; multiple included areas are combined. `excludes` is an array of IDs that always hide the category inside those areas. With no included IDs, the category is available everywhere except its exclusions. Categories without a `jurisdiction` are unrestricted.
@@ -34,7 +46,7 @@ The selected location, category, and questionnaire answers are reflected in the 
 
 ## Configuration Files
 
-- `config.json` contains deployment branding, map defaults, page metadata, and the optional site contact email.
+- `config.json` contains deployment branding, map defaults, page metadata, the optional site contact email, and an optional analytics Measurement ID.
 - `templates.json` contains report categories, department destinations, emergency guidance, questions, and email templates. Category jurisdiction stores only boundary ID references.
 - `boundaries.geojson` contains the shared Polygon Features referenced by categories.
 - `config.schema.json`, `templates.schema.json`, and `boundaries.schema.json` describe the data shapes.

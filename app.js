@@ -25,6 +25,9 @@ let selectedCategoryId = null;
 let reportDraftId = null;
 let applyingUrlState = false;
 let deferredInstallPrompt = null;
+const analyticsConsentKey = "community_311_usage_analytics_consent";
+let analyticsConsent = null;
+let analyticsInitialized = false;
 
 let reverseGeocodeTimer = null;
 let reverseGeocodeAbort = null;
@@ -246,7 +249,7 @@ function applyURLState(params) {
 
   if (hasCoordinates) {
     map.setView([lat, lng], 16);
-    setMarker(lat, lng);
+    setMarker(lat, lng, "shared_link");
   }
 
   const requestedCategory = params.get("cat");
@@ -334,6 +337,10 @@ async function loadTemplates() {
   if (typeof window.turf?.point !== "function" || typeof window.turf?.booleanPointInPolygon !== "function") {
     throw new Error("Turf.js did not load, so jurisdiction boundaries cannot be checked.");
   }
+  if (nextSiteConfig.analyticsMeasurementId &&
+      !/^G-[A-Z0-9]+$/.test(nextSiteConfig.analyticsMeasurementId)) {
+    throw new Error("The Google Analytics Measurement ID must use the G-XXXXXXXXXX format.");
+  }
 
   const nextBoundariesById = new Map();
   for (const feature of boundaryCollection.features) {
@@ -396,6 +403,89 @@ function populateConfiguredContent() {
   document.querySelector('meta[property="og:title"]').content = siteConfig.appTitle;
   document.querySelector('meta[property="og:description"]').content = siteConfig.socialDescription;
   document.querySelector('meta[property="og:url"]').content = siteConfig.deploymentUrl || window.location.href;
+  setupAnalyticsConsent();
+}
+
+function setupAnalyticsConsent() {
+  const panel = document.getElementById("analytics-choice-panel");
+  const preferencesButton = document.getElementById("analytics-preferences-btn");
+  const acceptButton = document.getElementById("analytics-accept-btn");
+  const declineButton = document.getElementById("analytics-decline-btn");
+  if (!siteConfig.analyticsMeasurementId) {
+    panel.classList.add("hidden");
+    preferencesButton.classList.add("hidden");
+    return;
+  }
+
+  let savedChoice = null;
+  try {
+    savedChoice = localStorage.getItem(analyticsConsentKey);
+  } catch (error) {}
+  analyticsConsent = savedChoice === "granted" || savedChoice === "denied" ? savedChoice : null;
+  panel.classList.toggle("hidden", analyticsConsent !== null);
+  initializeAnalytics();
+
+  preferencesButton.addEventListener("click", () => panel.classList.remove("hidden"));
+  acceptButton.addEventListener("click", () => setAnalyticsConsent("granted"));
+  declineButton.addEventListener("click", () => setAnalyticsConsent("denied"));
+}
+
+function setAnalyticsConsent(choice) {
+  analyticsConsent = choice;
+  try {
+    localStorage.setItem(analyticsConsentKey, choice);
+  } catch (error) {}
+  document.getElementById("analytics-choice-panel").classList.add("hidden");
+}
+
+function initializeAnalytics() {
+  const measurementId = siteConfig?.analyticsMeasurementId;
+  if (!measurementId || analyticsInitialized) return;
+  analyticsInitialized = true;
+  const pageLocation = `${window.location.origin}${window.location.pathname}`;
+  let pageReferrer = "";
+  try {
+    if (document.referrer) pageReferrer = new URL(document.referrer).origin;
+  } catch (error) {}
+
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = window.gtag || function gtag() { window.dataLayer.push(arguments); };
+  window.gtag("consent", "default", {
+    analytics_storage: "granted",
+    ad_storage: "denied",
+    ad_user_data: "denied",
+    ad_personalization: "denied"
+  });
+  window.gtag("js", new Date());
+  window.gtag("config", measurementId, {
+    send_page_view: false,
+    page_location: pageLocation,
+    page_referrer: pageReferrer,
+    page_title: document.title,
+    allow_google_signals: false,
+    allow_ad_personalization_signals: false
+  });
+  window.gtag("event", "page_view", {
+    page_location: pageLocation,
+    page_referrer: pageReferrer,
+    page_title: document.title
+  });
+
+  const script = document.createElement("script");
+  script.async = true;
+  script.referrerPolicy = "no-referrer";
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`;
+  script.onerror = () => {
+    analyticsInitialized = false;
+    console.warn("Unable to load Google Analytics.");
+  };
+  document.head.appendChild(script);
+}
+
+function trackAnalyticsEvent(eventName, parameters) {
+  if (analyticsConsent === "granted" && typeof window.gtag === "function") {
+    window.gtag("event", eventName, parameters);
+  }
 }
 
 // =============================================================================
@@ -414,17 +504,18 @@ function initMap() {
 
   marker = L.marker([center.lat, center.lng], { draggable: true }).addTo(map);
 
-  map.on("click", (e) => setMarker(e.latlng.lat, e.latlng.lng));
+  map.on("click", (e) => setMarker(e.latlng.lat, e.latlng.lng, "map_click"));
   marker.on("dragend", (e) => {
     const pos = e.target.getLatLng();
-    setMarker(pos.lat, pos.lng);
+    setMarker(pos.lat, pos.lng, "marker_drag");
   });
 
   reverseGeocode(center.lat, center.lng);
 }
 
-function setMarker(lat, lng) {
+function setMarker(lat, lng, source = "manual") {
   selectedCoords = { lat, lng };
+  trackAnalyticsEvent("location_pin_set", { source });
   marker.setLatLng([lat, lng]);
   renderCategoryCards();
   if (selectedCategoryId && !appConfig?.categories?.some((cat) => cat.id === selectedCategoryId && categoryMatchesJurisdiction(cat, lat, lng))) {
@@ -549,6 +640,7 @@ function selectCategory(categoryId) {
   }
 
   selectedCategoryId = categoryId;
+  trackAnalyticsEvent("category_selected", { category_id: category.id });
 
   // Hide search bar while a specific category is selected
   const searchWrapper = document.getElementById("category-search-wrapper");
@@ -1055,7 +1147,7 @@ function setupEventListeners() {
           if (locateIcon) locateIcon.className = "fa-solid fa-location-arrow text-indigo-600";
           if (locateText) locateText.textContent = "My Location";
           map.setView([pos.coords.latitude, pos.coords.longitude], 16);
-          setMarker(pos.coords.latitude, pos.coords.longitude);
+          setMarker(pos.coords.latitude, pos.coords.longitude, "device_location");
         },
         (err) => {
           locateBtn.disabled = false;
@@ -1160,12 +1252,16 @@ function setupEventListeners() {
 
   if (saveReportBtn && reportModal) {
     saveReportBtn.addEventListener("click", () => {
-      if (!validateRequiredFields()) return;
+      if (!validateRequiredFields()) {
+        trackAnalyticsEvent("report_review_blocked", { category_id: selectedCategoryId });
+        return;
+      }
       reportDraftId = window.crypto && typeof window.crypto.randomUUID === "function"
         ? window.crypto.randomUUID()
         : `report-${Date.now()}-${Math.random().toString(36).slice(2)}`;
       updateDispatchOutput();
       reportModal.showModal();
+      trackAnalyticsEvent("report_reviewed", { category_id: selectedCategoryId });
     });
   }
 
@@ -1200,6 +1296,7 @@ function setupEventListeners() {
   const copyBtn = document.getElementById("copy-btn");
   if (copyBtn) {
     copyBtn.addEventListener("click", () => {
+      trackAnalyticsEvent("report_action", { action: "copy_report", category_id: selectedCategoryId });
       const text = buildEmailBody();
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => {
@@ -1216,6 +1313,7 @@ function setupEventListeners() {
 
 function recordReportAction(action) {
   if (!selectedCategoryId) return;
+  trackAnalyticsEvent("report_action", { action, category_id: selectedCategoryId });
   window.dispatchEvent(new CustomEvent("report-action", {
     detail: { action, categoryId: selectedCategoryId, reportDraftId }
   }));

@@ -291,6 +291,16 @@
     </button>
   </div>
 
+  <section id="analytics-choice-panel" class="hidden border-t border-gray-200 bg-white px-4 py-3 text-xs text-gray-700" aria-label="Analytics preferences">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <p class="max-w-3xl mb-0"><strong>Basic visitor data is always collected.</strong> Google Analytics measures page visits and broad device category. You can choose whether to share extra usage events, such as selected categories and report actions. Report text, answers, exact coordinates, search terms, and draft IDs are not sent.</p>
+      <div class="flex items-center gap-2">
+        <button id="analytics-accept-btn" type="button" class="rounded-md bg-indigo-600 px-3 py-2 font-semibold text-white hover:bg-indigo-700">Allow usage events</button>
+        <button id="analytics-decline-btn" type="button" class="rounded-md border border-gray-300 bg-white px-3 py-2 font-semibold text-gray-700 hover:bg-gray-50">Decline extra events</button>
+      </div>
+    </div>
+  </section>
+
   <!-- Footer -->
   <footer class="bg-white border-t border-gray-200 py-3 text-center text-xs text-gray-500 mt-auto">
     <div class="max-w-7xl mx-auto px-4 flex justify-between items-center flex-wrap gap-2">
@@ -300,6 +310,7 @@
           <i class="fa-brands fa-github mr-1"></i> Project repository
         </a>
         <a id="site-contact-link" href="#" class="hidden ml-2 text-indigo-600 hover:underline">Contact site operator</a>
+        <button id="analytics-preferences-btn" type="button" class="ml-2 text-indigo-600 hover:underline">Analytics choices</button>
       </span>
     </div>
   </footer>

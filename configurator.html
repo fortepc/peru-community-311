@@ -262,6 +262,8 @@
 		<section class="config-panel" aria-labelledby="settings-title">
 				<div class="section-heading"><h3 id="settings-title">Site settings</h3><p>Deployment identity, map defaults, and report email templates</p></div>
 			<div class="settings-grid" id="settings-grid"></div>
+				<p class="map-hint">The configurator itself does not load or send analytics; this Measurement ID is used only by the public 311 page.</p>
+				<p class="map-hint">Before collecting analytics, turn off GA4 Enhanced Measurement for this data stream. Automatic page and outbound-click events can expose draft URLs or report email content.</p>
 		</section>
 
 		<div class="editor-layout">
@@ -402,6 +404,7 @@
 					["Header tagline", "siteConfig.headerTagline", siteConfig.headerTagline, "text"],
 					["Page description", "siteConfig.pageDescription", siteConfig.pageDescription, "textarea", "span-2"],
 					["Social description", "siteConfig.socialDescription", siteConfig.socialDescription, "textarea", "span-2"],
+					["GA4 Measurement ID (public 311 page only)", "siteConfig.analyticsMeasurementId", siteConfig.analyticsMeasurementId, "text"],
 					["Default zoom", "siteConfig.defaultZoom", siteConfig.defaultZoom, "number"],
 					["Center latitude", "siteConfig.mapCenter.lat", center.lat, "number"],
 					["Center longitude", "siteConfig.mapCenter.lng", center.lng, "number"],
@@ -941,6 +944,9 @@
 					!Number.isInteger(importedSiteConfig.defaultZoom) || importedSiteConfig.defaultZoom < 1 || importedSiteConfig.defaultZoom > 20) {
 					throw new Error("config.json must include a city, region, app title, map center, and zoom from 1 to 20.");
 				}
+				if (importedSiteConfig.analyticsMeasurementId && !/^G-[A-Z0-9]+$/.test(importedSiteConfig.analyticsMeasurementId)) {
+					throw new Error("Google Analytics Measurement ID must use the G-XXXXXXXXXX format or be left blank.");
+				}
 				if (!Array.isArray(importedBoundaries.features)) throw new Error("boundaries.geojson must contain a FeatureCollection.");
 				const featureIds = importedBoundaries.features.map((feature) => feature?.properties?.id);
 				if (featureIds.some((id) => typeof id !== "string" || !id) || new Set(featureIds).size !== featureIds.length) {
@@ -984,6 +990,10 @@
 					!Number.isFinite(Number(siteConfig.mapCenter.lat)) || !Number.isFinite(Number(siteConfig.mapCenter.lng)) ||
 					!Number.isInteger(siteConfig.defaultZoom) || siteConfig.defaultZoom < 1 || siteConfig.defaultZoom > 20) {
 					setStatus("Complete the city, region, app title, map center, and valid zoom before downloading.", true);
+					return;
+				}
+				if (siteConfig.analyticsMeasurementId && !/^G-[A-Z0-9]+$/.test(siteConfig.analyticsMeasurementId)) {
+					setStatus("Use a valid Google Analytics Measurement ID or leave it blank.", true);
 					return;
 				}
 				const blob = new Blob([`${JSON.stringify(data, null, 2)}\n`], { type: contentType });
@@ -1038,7 +1048,8 @@
 					for (const part of parts.slice(0, -1)) target = target[part] || (target[part] = {});
 					const key = parts[parts.length - 1];
 					const value = event.target.type === "number" ? numericValue(event.target, 0) : event.target.value;
-					target[key] = root === siteConfig && key === "contactEmail" && !value ? null : value;
+					if (root === siteConfig && key === "analyticsMeasurementId" && !value.trim()) delete target[key];
+					else target[key] = root === siteConfig && key === "contactEmail" && !value ? null : value;
 					if (setting.startsWith("siteConfig.mapCenter.")) renderMap();
 					triggerAutosave();
 					return;

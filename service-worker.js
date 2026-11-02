@@ -1,4 +1,4 @@
-const CACHE_NAME = "community-311-v4";
+const CACHE_NAME = "community-311-v5";
 const APP_SHELL = [
   "./",
   "./index.html",
