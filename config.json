@@ -1,0 +1,17 @@
+{
+  "cityName": "Peru",
+  "countyName": "Miami County",
+  "regionName": "Indiana",
+  "appTitle": "Peru Community 311",
+  "headerTagline": "Citizen-Powered Civic Reporting for Peru, Indiana",
+  "pageDescription": "Independent community-built civic reporting portal for Peru, Indiana. Map local non-emergency issues and prepare reports for the responsible department.",
+  "socialDescription": "Map non-emergency issues in Peru, IN and prepare reports for the responsible agency.",
+  "mapCenter": {
+    "lat": 40.7537,
+    "lng": -86.0689
+  },
+  "defaultZoom": 14,
+  "contactEmail": null,
+  "repositoryUrl": "https://github.com/fortepc/peru-community-311/",
+  "deploymentUrl": "https://fortepc.github.io/peru-community-311/"
+}

@@ -6,16 +6,16 @@
   <meta name="theme-color" content="#0f172a" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Peru Community 311" />
+  <meta name="apple-mobile-web-app-title" content="" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
-  <title>Peru Community 311 - Citizen Issue Reporting</title>
-  <meta name="description" content="Independent community-built civic reporting portal for Peru, Indiana. Map local non-emergency issues and prepare reports for the responsible department." />
-  <meta property="og:title" content="Peru Community 311 - Citizen Issue Reporting" />
-  <meta property="og:description" content="Map non-emergency issues in Peru, IN and prepare reports for the responsible agency." />
+  <title></title>
+  <meta name="description" content="" />
+  <meta property="og:title" content="" />
+  <meta property="og:description" content="" />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://fortepc.github.io/peru-community-311/" />
+  <meta property="og:url" content="" />
   
   <!-- Preconnect resource hints for CDN latency optimization -->
   <link rel="preconnect" href="https://cdn.tailwindcss.com" />
@@ -30,6 +30,9 @@
   <!-- Leaflet CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Turf.js spatial predicates -->
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@7.2.0/turf.min.js"></script>
   
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -49,8 +52,8 @@
           <i class="fa-solid fa-map-location-dot text-2xl"></i>
         </div>
         <div>
-          <h1 class="text-xl font-bold tracking-tight">Peru Community 311</h1>
-          <p class="text-xs text-slate-400">Citizen-Powered Civic Reporting for Peru, Indiana</p>
+          <h1 class="text-xl font-bold tracking-tight"><span id="app-title"></span></h1>
+          <p class="text-xs text-slate-400"><span id="app-tagline"></span></p>
         </div>
       </div>
       <div class="mt-2 sm:mt-0 flex items-center space-x-2">
@@ -106,7 +109,7 @@
         </div>
       </div>
 
-      <div id="map" class="w-full flex-grow" aria-label="Map showing Peru, Indiana"></div>
+      <div id="map" class="w-full flex-grow" aria-label="Map showing the service area"></div>
 
       <!-- Selected Location Bar -->
       <div class="p-3 bg-gray-50 border-t border-gray-200 text-xs text-gray-600 flex justify-between items-center flex-wrap gap-2">
@@ -125,7 +128,7 @@
 
       <!-- Inline Address Edit Form (hidden by default) -->
       <div id="address-edit-box" class="hidden p-2.5 bg-indigo-50/80 border-t border-indigo-100 flex items-center space-x-2 text-xs">
-        <input type="text" id="manual-address-input" class="flex-grow border border-gray-300 rounded px-2.5 py-1 text-xs focus:ring-1 focus:ring-indigo-500 bg-white" placeholder="Enter nearest address or intersection (e.g. 120 W 5th St, Peru, IN)" />
+        <input type="text" id="manual-address-input" class="flex-grow border border-gray-300 rounded px-2.5 py-1 text-xs focus:ring-1 focus:ring-indigo-500 bg-white" placeholder="Enter nearest address or intersection" />
         <button type="button" id="save-address-btn" class="px-2.5 py-1 bg-indigo-600 text-white rounded font-medium hover:bg-indigo-700 transition">Save</button>
         <button type="button" id="cancel-address-btn" class="px-2 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">Cancel</button>
       </div>
@@ -291,11 +294,12 @@
   <!-- Footer -->
   <footer class="bg-white border-t border-gray-200 py-3 text-center text-xs text-gray-500 mt-auto">
     <div class="max-w-7xl mx-auto px-4 flex justify-between items-center flex-wrap gap-2">
-      <span>Peru Community 311 &bull; Open Source Civic Tech</span>
+      <span><span id="footer-app-title"></span> &bull; Open-source civic reporting</span>
       <span>
-        <a href="https://github.com/fortepc/peru-community-311/" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:underline">
-          <i class="fa-brands fa-github mr-1"></i> By FortePC on GitHub
+        <a id="repository-link" href="#" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:underline">
+          <i class="fa-brands fa-github mr-1"></i> Project repository
         </a>
+        <a id="site-contact-link" href="#" class="hidden ml-2 text-indigo-600 hover:underline">Contact site operator</a>
       </span>
     </div>
   </footer>

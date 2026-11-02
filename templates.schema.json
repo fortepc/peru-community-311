@@ -5,44 +5,18 @@
   "description": "Configuration schema for Community 311 civic reporting templates, categories, and destinations.",
   "type": "object",
   "required": [
-    "location",
     "emailSubjectTemplate",
     "emailTemplate",
     "categories"
   ],
   "properties": {
-    "location": {
-      "type": "object",
-      "description": "Geographical scope and initial map settings for the service area.",
-      "required": ["city", "county", "state", "defaultCenter", "defaultZoom"],
-      "properties": {
-        "city": { "type": "string", "description": "City name." },
-        "county": { "type": "string", "description": "County or parish name." },
-        "state": { "type": "string", "description": "State or province abbreviation/name." },
-        "defaultCenter": {
-          "type": "object",
-          "description": "Default latitude and longitude coordinates for centering the map.",
-          "required": ["lat", "lng"],
-          "properties": {
-            "lat": { "type": "number", "minimum": -90, "maximum": 90 },
-            "lng": { "type": "number", "minimum": -180, "maximum": 180 }
-          }
-        },
-        "defaultZoom": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 20,
-          "description": "Default Leaflet zoom level (typically 12-16)."
-        }
-      }
-    },
     "emailSubjectTemplate": {
       "type": "string",
       "description": "Site-wide default email subject template supporting {category} and {location} variables."
     },
     "emailTemplate": {
       "type": "string",
-      "description": "Site-wide default email body template supporting {category}, {department}, {location}, {mapsUrl}, and {answers} placeholders."
+      "description": "Site-wide default email body template supporting {appTitle}, {category}, {department}, {location}, {mapsUrl}, and {answers} placeholders."
     },
     "categories": {
       "type": "array",
@@ -53,7 +27,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "pattern": "^[a-z0-9_]+$",
+            "pattern": "^[a-z0-9_-]+$",
             "description": "Unique stable identifier for URL permalinks and template overrides."
           },
           "name": {
@@ -123,33 +97,22 @@
           },
           "jurisdiction": {
             "type": "object",
-            "description": "Optional GeoJSON boundary polygons that define where this category applies or is excluded.",
+            "description": "Optional references to boundary features that include or exclude this category by report location.",
             "properties": {
-              "polygons": {
+              "includes": {
                 "type": "array",
-                "description": "Allowed service-area polygons for this category.",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "type": { "type": "string", "enum": ["Polygon"] },
-                    "name": { "type": "string", "description": "Optional label shown only in the configurator." },
-                    "coordinates": { "type": "array" }
-                  }
-                }
+                "description": "Boundary feature IDs that define allowed service areas. Multiple areas are combined.",
+                "items": { "type": "string", "minLength": 1 },
+                "uniqueItems": true
               },
-              "excludedPolygons": {
+              "excludes": {
                 "type": "array",
-                "description": "GeoJSON polygons that explicitly exclude report locations from this category, such as private roads or gated service areas.",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "type": { "type": "string", "enum": ["Polygon"] },
-                    "name": { "type": "string", "description": "Optional label shown only in the configurator." },
-                    "coordinates": { "type": "array" }
-                  }
-                }
+                "description": "Boundary feature IDs that explicitly exclude locations, overriding included areas.",
+                "items": { "type": "string", "minLength": 1 },
+                "uniqueItems": true
               }
-            }
+            },
+            "additionalProperties": false
           },
           "questions": {
             "type": "array",

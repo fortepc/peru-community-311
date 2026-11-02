@@ -240,25 +240,27 @@
 	<header class="topbar">
 		<div class="brand">
 			<div class="brand-mark" aria-hidden="true">311</div>
-			<div><h1>Peru Community 311</h1><p>Template configuration editor</p></div>
+			<div><h1>Community 311</h1><p>White-label configuration editor</p></div>
 		</div>
 		<div class="actions">
-			<button class="button" id="import-button" type="button">Import JSON</button>
-			<button class="button" id="copy-button" type="button">Copy JSON</button>
-			<button class="button primary" id="export-button" type="button">Download templates.json</button>
-			<input id="import-file" type="file" accept=".json,application/json" hidden>
+			<button class="button" id="import-button" type="button">Import 3 files</button>
+			<button class="button" id="copy-button" type="button">Copy templates</button>
+			<button class="button" id="export-config-button" type="button">Download config.json</button>
+			<button class="button" id="export-templates-button" type="button">Download templates.json</button>
+			<button class="button primary" id="export-boundaries-button" type="button">Download boundaries.geojson</button>
+			<input id="import-file" type="file" accept=".json,.geojson,application/json,application/geo+json" multiple hidden>
 		</div>
 	</header>
 
 	<main>
 		<div class="intro">
 			<div><p class="eyebrow">Configuration editor</p><h2>Build your report templates.</h2></div>
-			<p class="intro-note">Import your current <strong>templates.json</strong>, edit it offline, then download the updated file. Your configuration stays local; online map layers use public tile services.</p>
+			<p class="intro-note">Import <strong>config.json</strong>, <strong>templates.json</strong>, and <strong>boundaries.geojson</strong> together, edit them locally, then download the updated files. Online map layers use public tile services.</p>
 		</div>
-		<p id="status" class="status" role="status" aria-live="polite">Start with a blank configuration or import an existing templates.json file.</p>
+		<p id="status" class="status" role="status" aria-live="polite">Start with a blank configuration or import all three deployment files.</p>
 
 		<section class="config-panel" aria-labelledby="settings-title">
-			<div class="section-heading"><h3 id="settings-title">Site settings</h3><p>Location defaults and report email templates</p></div>
+				<div class="section-heading"><h3 id="settings-title">Site settings</h3><p>Deployment identity, map defaults, and report email templates</p></div>
 			<div class="settings-grid" id="settings-grid"></div>
 		</section>
 
@@ -274,20 +276,35 @@
 
 	<script>
 		(() => {
-			const blankConfig = () => ({
-				location: { city: "", county: "", state: "", defaultCenter: { lat: 40.7537, lng: -86.0689 }, defaultZoom: 14 },
-				emailSubjectTemplate: "Civic Report: {category} - {location}",
-				emailTemplate: "CIVIC REPORT: {category}\nDepartment: {department}\nLocation: {location}\nCoordinates: {mapsUrl}\n\n{answers}",
-				categories: []
+			const blankSiteConfig = () => ({
+				cityName: "",
+				countyName: "",
+				regionName: "",
+				appTitle: "Community 311",
+				headerTagline: "",
+				pageDescription: "",
+				socialDescription: "",
+				mapCenter: { lat: 39.8283, lng: -98.5795 },
+				defaultZoom: 4,
+				contactEmail: null,
+				repositoryUrl: "",
+				deploymentUrl: ""
 			});
 
-			const AUTOSAVE_KEY = "peru_311_config_autosave";
+			const blankConfig = () => ({
+				emailSubjectTemplate: "Civic Report: {category} - {location}",
+				emailTemplate: "CIVIC REPORT: {category}\nDepartment: {department}\nLocation: {location}\nCoordinates: {mapsUrl}\n\n{answers}\n\nReport generated via {appTitle}.",
+				categories: []
+			});
+			const blankBoundaries = () => ({ type: "FeatureCollection", features: [] });
+
+			const AUTOSAVE_KEY = "community_311_config_autosave_v2";
 			let autosaveTimer = null;
 			function triggerAutosave() {
 				clearTimeout(autosaveTimer);
 				autosaveTimer = setTimeout(() => {
 					try {
-						localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(config));
+						localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({ siteConfig, templates: config, boundaries: boundaryCollection }));
 					} catch (e) {}
 				}, 400);
 			}
@@ -297,7 +314,7 @@
 					const saved = localStorage.getItem(AUTOSAVE_KEY);
 					if (saved) {
 						const parsed = JSON.parse(saved);
-						if (parsed && parsed.location && Array.isArray(parsed.categories)) {
+						if (parsed?.siteConfig && parsed?.templates && parsed?.boundaries?.type === "FeatureCollection") {
 							return parsed;
 						}
 					}
@@ -306,12 +323,14 @@
 			}
 
 			const savedDraft = getSavedDraft();
-			let config = savedDraft || blankConfig();
+			let siteConfig = savedDraft?.siteConfig || blankSiteConfig();
+			let config = savedDraft?.templates || blankConfig();
+			let boundaryCollection = savedDraft?.boundaries || blankBoundaries();
 			let activeCategory = config.categories.length ? 0 : -1;
 			let drawing = false;
 			let draftPoints = [];
 			let mapRadiusMiles = 2.5;
-			let jurisdictionTarget = "polygons";
+			let jurisdictionTarget = "includes";
 			let onlineMapReady = false;
 			let leafletMap = null;
 			let polygonLayer = null;
@@ -335,26 +354,62 @@
 			};
 			const numericValue = (input, fallback = 0) => input.value.trim() === "" ? fallback : Number(input.value);
 			const safeArray = (value) => Array.isArray(value) ? value : [];
+			const boundaryById = (id) => boundaryCollection.features.find((feature) => feature.properties?.id === id) || null;
+			const categoryBoundaryIds = (category, key) => safeArray(category?.jurisdiction?.[key]);
+			const addBoundaryFeature = (category, key, geometry, name) => {
+				const id = createBoundaryId();
+				boundaryCollection.features.push({ type: "Feature", properties: { id, name }, geometry });
+				category.jurisdiction = category.jurisdiction || {};
+				category.jurisdiction[key] = safeArray(category.jurisdiction[key]);
+				category.jurisdiction[key].push(id);
+				return id;
+			};
+			const removeBoundaryReference = (category, key, index) => {
+				const ids = categoryBoundaryIds(category, key);
+				const [id] = ids.splice(index, 1);
+				if (!id) return false;
+				const stillReferenced = config.categories.some((item) =>
+					categoryBoundaryIds(item, "includes").includes(id) || categoryBoundaryIds(item, "excludes").includes(id)
+				);
+				if (!stillReferenced) boundaryCollection.features = boundaryCollection.features.filter((feature) => feature.properties?.id !== id);
+				if (!categoryBoundaryIds(category, "includes").length && !categoryBoundaryIds(category, "excludes").length) delete category.jurisdiction;
+				return true;
+			};
+			let boundaryIdCounter = 0;
+			const createBoundaryId = () => {
+				let id;
+				do {
+					boundaryIdCounter += 1;
+					id = `boundary-${Date.now().toString(36)}-${boundaryIdCounter.toString(36)}`;
+				} while (boundaryById(id));
+				return id;
+			};
 			const normalizeJurisdiction = (category) => {
 				if (!category || !category.jurisdiction) return;
 				const jurisdiction = category.jurisdiction;
-				jurisdiction.polygons = safeArray(jurisdiction.polygons);
-				jurisdiction.excludedPolygons = safeArray(jurisdiction.excludedPolygons);
-				if (!jurisdiction.polygons.length && !jurisdiction.excludedPolygons.length) delete category.jurisdiction;
+				jurisdiction.includes = safeArray(jurisdiction.includes);
+				jurisdiction.excludes = safeArray(jurisdiction.excludes);
+				if (!jurisdiction.includes.length && !jurisdiction.excludes.length) delete category.jurisdiction;
 			};
 
 			function renderSettings() {
-				const location = config.location || (config.location = {});
-				const center = location.defaultCenter || (location.defaultCenter = { lat: 40.7537, lng: -86.0689 });
+				const center = siteConfig.mapCenter || (siteConfig.mapCenter = { lat: 39.8283, lng: -98.5795 });
 				const fields = [
-					["City", "location.city", location.city, "text"],
-					["County", "location.county", location.county, "text"],
-					["State / region", "location.state", location.state, "text"],
-					["Default zoom", "location.defaultZoom", location.defaultZoom, "number"],
-					["Center latitude", "location.defaultCenter.lat", center.lat, "number"],
-					["Center longitude", "location.defaultCenter.lng", center.lng, "number"],
-					["Email subject template", "emailSubjectTemplate", config.emailSubjectTemplate, "text", "span-2"],
-					["Email body template", "emailTemplate", config.emailTemplate, "textarea", "span-4"]
+					["City", "siteConfig.cityName", siteConfig.cityName, "text"],
+					["County", "siteConfig.countyName", siteConfig.countyName, "text"],
+					["State / region", "siteConfig.regionName", siteConfig.regionName, "text"],
+					["App title", "siteConfig.appTitle", siteConfig.appTitle, "text"],
+					["Header tagline", "siteConfig.headerTagline", siteConfig.headerTagline, "text"],
+					["Page description", "siteConfig.pageDescription", siteConfig.pageDescription, "textarea", "span-2"],
+					["Social description", "siteConfig.socialDescription", siteConfig.socialDescription, "textarea", "span-2"],
+					["Default zoom", "siteConfig.defaultZoom", siteConfig.defaultZoom, "number"],
+					["Center latitude", "siteConfig.mapCenter.lat", center.lat, "number"],
+					["Center longitude", "siteConfig.mapCenter.lng", center.lng, "number"],
+					["Site contact email", "siteConfig.contactEmail", siteConfig.contactEmail, "email"],
+					["Repository URL", "siteConfig.repositoryUrl", siteConfig.repositoryUrl, "url"],
+					["Deployment URL", "siteConfig.deploymentUrl", siteConfig.deploymentUrl, "url"],
+					["Email subject template", "templates.emailSubjectTemplate", config.emailSubjectTemplate, "text", "span-2"],
+					["Email body template", "templates.emailTemplate", config.emailTemplate, "textarea", "span-4"]
 				];
 				$("#settings-grid").innerHTML = fields.map(([label, path, value, type, span = ""]) => `
 					<label class="field ${span}"><span>${label}</span>${type === "textarea"
@@ -432,14 +487,14 @@
 								<label class="field" style="width:190px; margin-right:4px;">
 									<span>Polygon target</span>
 									<select data-jurisdiction-target>
-										<option value="polygons" ${jurisdictionTarget === "polygons" ? "selected" : ""}>Allowed areas</option>
-										<option value="excludedPolygons" ${jurisdictionTarget === "excludedPolygons" ? "selected" : ""}>Excluded areas</option>
+											<option value="includes" ${jurisdictionTarget === "includes" ? "selected" : ""}>Allowed areas</option>
+											<option value="excludes" ${jurisdictionTarget === "excludes" ? "selected" : ""}>Excluded areas</option>
 									</select>
 								</label>
 								<button type="button" class="button small primary" data-action="draw-polygon">${drawing ? "Drawing..." : "Draw polygon"}</button>
 								<button type="button" class="button small" data-action="finish-polygon" ${drawing ? "" : "disabled"}>Finish polygon</button>
 								<button type="button" class="button small" data-action="undo-point" ${draftPoints.length ? "" : "disabled"}>Undo point</button>
-								<button type="button" class="button small" data-action="edit-polygons" ${canUseLeafletMap() && (safeArray(category.jurisdiction?.polygons).length || safeArray(category.jurisdiction?.excludedPolygons).length) ? "" : "disabled"}>Edit vertices</button>
+								<button type="button" class="button small" data-action="edit-polygons" ${canUseLeafletMap() && (safeArray(category.jurisdiction?.includes).length || safeArray(category.jurisdiction?.excludes).length) ? "" : "disabled"}>Edit vertices</button>
 								<button type="button" class="button small" data-action="save-polygon-edits" disabled>Save edits</button>
 								<label class="field"><span>Canvas radius (miles)</span><input type="number" min="0.1" max="100" step="0.1" value="${mapRadiusMiles}" data-map-radius></label>
 							</div>
@@ -478,7 +533,7 @@
 			}
 
 			function geoToPoint(latitude, longitude) {
-				const center = config.location?.defaultCenter || { lat: 40.7537, lng: -86.0689 };
+				const center = siteConfig.mapCenter;
 				const miles = Math.max(0.1, Number(mapRadiusMiles) || 2.5);
 				const cosLatitude = Math.max(0.15, Math.cos(Number(center.lat) * Math.PI / 180));
 				const lngRange = miles / (69.172 * cosLatitude);
@@ -490,7 +545,7 @@
 			}
 
 			function pointToGeo(x, y) {
-				const center = config.location?.defaultCenter || { lat: 40.7537, lng: -86.0689 };
+				const center = siteConfig.mapCenter;
 				const miles = Math.max(0.1, Number(mapRadiusMiles) || 2.5);
 				const cosLatitude = Math.max(0.15, Math.cos(Number(center.lat) * Math.PI / 180));
 				return {
@@ -507,13 +562,13 @@
 				}).join(" ") + " Z";
 			}
 
-			function colorForPolygon(index, key = "polygons") {
-				const paletteIndex = (index * 2) + (key === "excludedPolygons" ? 1 : 0);
+			function colorForPolygon(index, key = "includes") {
+				const paletteIndex = (index * 2) + (key === "excludes" ? 1 : 0);
 				return polygonColors[paletteIndex] || `hsl(${Math.round((paletteIndex * 137.508) % 360)} 68% 42%)`;
 			}
 
 			function defaultPolygonName(key, index) {
-				return `${key === "excludedPolygons" ? "Excluded" : "Allowed"} area ${index + 1}`;
+				return `${key === "excludes" ? "Excluded" : "Allowed"} area ${index + 1}`;
 			}
 
 			function canUseLeafletMap() {
@@ -523,15 +578,16 @@
 			function renderMap() {
 				const group = $("#map-content");
 				if (!group) return;
-				const center = config.location?.defaultCenter || { lat: 40.7537, lng: -86.0689 };
+				const center = siteConfig.mapCenter;
 				const grid = [];
 				for (let x = 30; x <= 770; x += 74) grid.push(`<line class="map-grid" x1="${x}" y1="24" x2="${x}" y2="436"/>`);
 				for (let y = 46; y <= 414; y += 61) grid.push(`<line class="map-grid" x1="30" y1="${y}" x2="770" y2="${y}"/>`);
-				const polygonGroups = ["polygons", "excludedPolygons"];
+				const polygonGroups = ["includes", "excludes"];
 				const polygons = polygonGroups.flatMap((key) => {
-					const items = safeArray(currentCategory()?.jurisdiction?.[key]);
-					return items.map((polygon, index) => {
-						const ring = polygon?.type === "Polygon" ? polygon.coordinates?.[0] : null;
+					const items = categoryBoundaryIds(currentCategory(), key);
+					return items.map((id, index) => {
+						const polygon = boundaryById(id);
+						const ring = polygon?.geometry?.type === "Polygon" ? polygon.geometry.coordinates?.[0] : null;
 						return Array.isArray(ring) && ring.length > 2 ? `<path class="map-polygon" style="--polygon-color:${colorForPolygon(index, key)}" d="${pathForRing(ring)}"/>` : "";
 					});
 				}).join("");
@@ -546,19 +602,22 @@
 				const category = currentCategory();
 				const jurisdiction = category?.jurisdiction || {};
 				const groups = [
-					{ key: "polygons", label: "Allowed" },
-					{ key: "excludedPolygons", label: "Excluded" }
+					{ key: "includes", label: "Allowed" },
+					{ key: "excludes", label: "Excluded" }
 				];
 				const entries = groups.flatMap(({ key, label }) => {
-					const polygons = safeArray(jurisdiction[key]);
-					return polygons.map((polygon, index) => `
+					const polygonIds = safeArray(jurisdiction[key]);
+					return polygonIds.map((id, index) => {
+						const polygon = boundaryById(id);
+						return `
 						<div class="polygon-row">
 							<i class="polygon-swatch" style="background:${colorForPolygon(index, key)}" aria-hidden="true"></i>
-							<input class="polygon-name-input" type="text" data-polygon-name data-polygon-key="${key}" data-polygon-index="${index}" value="${escapeHtml(polygon?.name || "")}" placeholder="${label} area ${index + 1}" aria-label="Name for ${label.toLowerCase()} polygon ${index + 1}">
-							<span class="polygon-points">${safeArray(polygon?.coordinates?.[0]).length} points</span>
+							<input class="polygon-name-input" type="text" data-polygon-name data-polygon-key="${key}" data-polygon-index="${index}" value="${escapeHtml(polygon?.properties?.name || "")}" placeholder="${label} area ${index + 1}" aria-label="Name for ${label.toLowerCase()} polygon ${index + 1}">
+							<span class="polygon-points">${safeArray(polygon?.geometry?.coordinates?.[0]).length} points</span>
 							<button type="button" class="button danger small" data-action="delete-polygon" data-polygon-key="${key}" data-polygon-index="${index}">Remove</button>
 						</div>
-					`);
+						`;
+					});
 				});
 				list.innerHTML = entries.length ? entries.join("") : '<div class="map-hint">No polygons yet. Allowed areas are active by default; excluded polygons can be used for private roads or gated service exclusions.</div>';
 			}
@@ -628,8 +687,8 @@
 				editHandler = null;
 				editingPolygons = false;
 				if (leafletMap) leafletMap.remove();
-				const center = config.location?.defaultCenter || { lat: 40.7537, lng: -86.0689 };
-				leafletMap = L.map(element, { zoomControl: true }).setView([Number(center.lat), Number(center.lng)], Number(config.location?.defaultZoom) || 14);
+				const center = siteConfig.mapCenter;
+				leafletMap = L.map(element, { zoomControl: true }).setView([Number(center.lat), Number(center.lng)], Number(siteConfig.defaultZoom) || 4);
 				streetTiles = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 					maxZoom: 19,
 					attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -640,11 +699,12 @@
 				});
 				(activeTileLayer === "satellite" ? satelliteTiles : streetTiles).addTo(leafletMap);
 				polygonLayer = L.featureGroup().addTo(leafletMap);
-				["polygons", "excludedPolygons"].forEach((targetKey) => {
-					safeArray(currentCategory()?.jurisdiction?.[targetKey]).forEach((polygon, index) => {
+				["includes", "excludes"].forEach((targetKey) => {
+					categoryBoundaryIds(currentCategory(), targetKey).forEach((id, index) => {
 						try {
-							if (polygon?.type !== "Polygon" || !Array.isArray(polygon.coordinates)) return;
-							const latLngs = polygon.coordinates.map((ring) => ring.map(([longitude, latitude]) => [latitude, longitude]));
+							const feature = boundaryById(id);
+							if (feature?.geometry?.type !== "Polygon" || !Array.isArray(feature.geometry.coordinates)) return;
+							const latLngs = feature.geometry.coordinates.map((ring) => ring.map(([longitude, latitude]) => [latitude, longitude]));
 							const color = colorForPolygon(index, targetKey);
 							const layer = L.polygon(latLngs, {
 								color,
@@ -654,6 +714,7 @@
 							});
 							layer._jurisdictionKey = targetKey;
 							layer._jurisdictionIndex = index;
+							layer._jurisdictionId = id;
 							polygonLayer.addLayer(layer);
 						} catch { /* Ignore malformed imported polygon data in the preview. */ }
 					});
@@ -662,42 +723,37 @@
 					const geometry = event.layer.toGeoJSON().geometry;
 					if (geometry.type === "Polygon") {
 						const category = currentCategory();
-						const targetKey = jurisdictionTarget === "excludedPolygons" ? "excludedPolygons" : "polygons";
-						category.jurisdiction = category.jurisdiction || {};
-						category.jurisdiction[targetKey] = safeArray(category.jurisdiction[targetKey]);
-						const index = category.jurisdiction[targetKey].length;
-						geometry.name = defaultPolygonName(targetKey, index);
+						const targetKey = jurisdictionTarget === "excludes" ? "excludes" : "includes";
+						const index = categoryBoundaryIds(category, targetKey).length;
+						const id = addBoundaryFeature(category, targetKey, geometry, defaultPolygonName(targetKey, index));
 						const color = colorForPolygon(index, targetKey);
 						event.layer._jurisdictionKey = targetKey;
 						event.layer._jurisdictionIndex = index;
+						event.layer._jurisdictionId = id;
 						event.layer.setStyle({
 							color,
 							fillColor: color,
 							weight: 3,
 							fillOpacity: 0.2
 						});
-						category.jurisdiction[targetKey].push(geometry);
 						polygonLayer.addLayer(event.layer);
 						drawing = false;
 						draftPoints = [];
 						renderPolygonList();
 						updateMapToolButtons();
-						setStatus(targetKey === "excludedPolygons" ? "Excluded polygon added as a GeoJSON Polygon." : "Polygon added as a GeoJSON Polygon.");
+						setStatus(targetKey === "excludes" ? "Excluded boundary added to boundaries.geojson." : "Allowed boundary added to boundaries.geojson.");
 					}
 				});
 				leafletMap.on(L.Draw.Event.EDITED, (event) => {
 					event.layers.eachLayer((layer) => {
-						const targetKey = layer._jurisdictionKey || "polygons";
-						const polygons = currentCategory()?.jurisdiction?.[targetKey];
-						const index = layer._jurisdictionIndex;
-						if (Array.isArray(polygons) && Number.isInteger(index) && layer.toGeoJSON().geometry.type === "Polygon") {
-							const geometry = layer.toGeoJSON().geometry;
-							geometry.name = polygons[index]?.name || defaultPolygonName(targetKey, index);
-							polygons[index] = geometry;
+						const feature = boundaryById(layer._jurisdictionId);
+						if (feature && layer.toGeoJSON().geometry.type === "Polygon") {
+							feature.geometry = layer.toGeoJSON().geometry;
 						}
 					});
 					renderPolygonList();
-					setStatus("Polygon edits saved to the configuration.");
+					triggerAutosave();
+					setStatus("Boundary edits saved to boundaries.geojson.");
 				});
 				leafletMap.on(L.Draw.Event.DRAWSTOP, () => {
 					drawing = false;
@@ -839,14 +895,14 @@
 				coordinates.push([...coordinates[0]]);
 				const category = currentCategory();
 				category.jurisdiction = category.jurisdiction || {};
-				const targetKey = jurisdictionTarget === "excludedPolygons" ? "excludedPolygons" : "polygons";
-				category.jurisdiction[targetKey] = safeArray(category.jurisdiction[targetKey]);
-				const index = category.jurisdiction[targetKey].length;
-				category.jurisdiction[targetKey].push({ type: "Polygon", name: defaultPolygonName(targetKey, index), coordinates: [coordinates] });
+				const targetKey = jurisdictionTarget === "excludes" ? "excludes" : "includes";
+				const index = categoryBoundaryIds(category, targetKey).length;
+				addBoundaryFeature(category, targetKey, { type: "Polygon", coordinates: [coordinates] }, defaultPolygonName(targetKey, index));
 				drawing = false;
 				draftPoints = [];
 				renderCategoryEditor();
-				setStatus(targetKey === "excludedPolygons" ? "Excluded polygon added as a GeoJSON Polygon." : "Allowed polygon added as a GeoJSON Polygon.");
+				triggerAutosave();
+				setStatus(targetKey === "excludes" ? "Excluded boundary added to boundaries.geojson." : "Allowed boundary added to boundaries.geojson.");
 			}
 
 			function mapCoordinates(event, svg) {
@@ -864,38 +920,89 @@
 				else question[key] = value;
 			}
 
-			function importText(text) {
-				const parsed = JSON.parse(text);
-				if (!parsed || typeof parsed !== "object" || !parsed.location || !Array.isArray(parsed.categories)) throw new Error("Expected an object with a location and categories array.");
-				config = parsed;
-				if (!config.location.defaultCenter) config.location.defaultCenter = { lat: 40.7537, lng: -86.0689 };
-				config.categories.forEach((category) => normalizeJurisdiction(category));
+			async function importFiles(files) {
+				let importedSiteConfig = null;
+				let importedTemplates = null;
+				let importedBoundaries = null;
+				for (const file of files) {
+					const parsed = JSON.parse(await file.text());
+					if (parsed?.type === "FeatureCollection") importedBoundaries = parsed;
+					else if (Array.isArray(parsed?.categories)) importedTemplates = parsed;
+					else if (parsed?.mapCenter) importedSiteConfig = parsed;
+				}
+				if (!importedSiteConfig || !importedTemplates || !importedBoundaries) {
+					throw new Error("Select config.json, templates.json, and boundaries.geojson together.");
+				}
+				if (typeof importedSiteConfig.cityName !== "string" || !importedSiteConfig.cityName.trim() ||
+					typeof importedSiteConfig.regionName !== "string" || !importedSiteConfig.regionName.trim() ||
+					typeof importedSiteConfig.appTitle !== "string" || !importedSiteConfig.appTitle.trim() ||
+					!Number.isFinite(Number(importedSiteConfig.mapCenter?.lat)) ||
+					!Number.isFinite(Number(importedSiteConfig.mapCenter?.lng)) ||
+					!Number.isInteger(importedSiteConfig.defaultZoom) || importedSiteConfig.defaultZoom < 1 || importedSiteConfig.defaultZoom > 20) {
+					throw new Error("config.json must include a city, region, app title, map center, and zoom from 1 to 20.");
+				}
+				if (!Array.isArray(importedBoundaries.features)) throw new Error("boundaries.geojson must contain a FeatureCollection.");
+				const featureIds = importedBoundaries.features.map((feature) => feature?.properties?.id);
+				if (featureIds.some((id) => typeof id !== "string" || !id) || new Set(featureIds).size !== featureIds.length) {
+					throw new Error("Every boundary Feature must have a unique properties.id.");
+				}
+				if (importedBoundaries.features.some((feature) => feature?.type !== "Feature" || feature.geometry?.type !== "Polygon")) {
+					throw new Error("Every boundary Feature must contain a Polygon geometry.");
+				}
+				const availableIds = new Set(featureIds);
+				importedTemplates.categories.forEach((category) => {
+					const jurisdiction = category.jurisdiction;
+					if (jurisdiction && typeof jurisdiction === "object" &&
+						("polygons" in jurisdiction || "excludedPolygons" in jurisdiction)) {
+						throw new Error(`Category "${category.id}" still contains inline polygons; migrate them to boundaries.geojson.`);
+					}
+					for (const key of ["includes", "excludes"]) {
+						if (category.jurisdiction?.[key] !== undefined && !Array.isArray(category.jurisdiction[key])) {
+							throw new Error(`Category "${category.id}" jurisdiction.${key} must be an array.`);
+						}
+						const references = categoryBoundaryIds(category, key);
+						if (new Set(references).size !== references.length) throw new Error(`Category "${category.id}" has duplicate jurisdiction.${key} IDs.`);
+					}
+					normalizeJurisdiction(category);
+					for (const id of [...categoryBoundaryIds(category, "includes"), ...categoryBoundaryIds(category, "excludes")]) {
+						if (!availableIds.has(id)) throw new Error(`Category "${category.id}" references missing boundary "${id}".`);
+					}
+				});
+				siteConfig = { ...blankSiteConfig(), ...importedSiteConfig, mapCenter: { ...blankSiteConfig().mapCenter, ...importedSiteConfig.mapCenter } };
+				config = importedTemplates;
+				boundaryCollection = importedBoundaries;
 				activeCategory = config.categories.length ? 0 : -1;
 				drawing = false;
 				draftPoints = [];
 				renderAll();
 				triggerAutosave();
-				setStatus(`Imported configuration with ${config.categories.length} categories. Review changes, then download templates.json.`);
+				setStatus(`Imported all three files and ${config.categories.length} categories. Review changes, then download the updated files.`);
 			}
 
-			function downloadJson() {
-				const blob = new Blob([`${JSON.stringify(config, null, 2)}\n`], { type: "application/json" });
+			function downloadFile(filename, data, contentType) {
+				if (!siteConfig.cityName.trim() || !siteConfig.regionName.trim() || !siteConfig.appTitle.trim() ||
+					!Number.isFinite(Number(siteConfig.mapCenter.lat)) || !Number.isFinite(Number(siteConfig.mapCenter.lng)) ||
+					!Number.isInteger(siteConfig.defaultZoom) || siteConfig.defaultZoom < 1 || siteConfig.defaultZoom > 20) {
+					setStatus("Complete the city, region, app title, map center, and valid zoom before downloading.", true);
+					return;
+				}
+				const blob = new Blob([`${JSON.stringify(data, null, 2)}\n`], { type: contentType });
 				const url = URL.createObjectURL(blob);
 				const anchor = document.createElement("a");
 				anchor.href = url;
-				anchor.download = "templates.json";
+				anchor.download = filename;
 				document.body.append(anchor);
 				anchor.click();
 				anchor.remove();
-				URL.revokeObjectURL(url);
-				setStatus("Downloaded templates.json.");
+				setTimeout(() => URL.revokeObjectURL(url), 1000);
+				setStatus(`Downloaded ${filename}.`);
 			}
 
 			async function copyJson() {
 				const text = JSON.stringify(config, null, 2);
 				try {
 					await navigator.clipboard.writeText(text);
-					setStatus("Configuration JSON copied to clipboard.");
+					setStatus("templates.json copied to clipboard.");
 				} catch {
 					const area = document.createElement("textarea");
 					area.value = text;
@@ -905,7 +1012,7 @@
 					area.select();
 					const copied = document.execCommand("copy");
 					area.remove();
-					setStatus(copied ? "Configuration JSON copied to clipboard." : "Clipboard access is unavailable. Download the JSON instead.", !copied);
+					setStatus(copied ? "templates.json copied to clipboard." : "Clipboard access is unavailable. Download the project files instead.", !copied);
 				}
 			}
 
@@ -917,20 +1024,22 @@
 
 			document.addEventListener("input", (event) => {
 				if (event.target.dataset.polygonName !== undefined) {
-					const polygons = currentCategory()?.jurisdiction?.[event.target.dataset.polygonKey];
-					const polygon = polygons?.[Number(event.target.dataset.polygonIndex)];
-					if (polygon) polygon.name = event.target.value;
+					const ids = categoryBoundaryIds(currentCategory(), event.target.dataset.polygonKey);
+					const polygon = boundaryById(ids[Number(event.target.dataset.polygonIndex)]);
+					if (polygon) polygon.properties.name = event.target.value;
 					triggerAutosave();
 					return;
 				}
 				const setting = event.target.dataset.setting;
 				if (setting) {
 					const parts = setting.split(".");
-					let target = config;
+					const root = parts.shift() === "templates" ? config : siteConfig;
+					let target = root;
 					for (const part of parts.slice(0, -1)) target = target[part] || (target[part] = {});
 					const key = parts[parts.length - 1];
-					target[key] = event.target.type === "number" ? numericValue(event.target, 0) : event.target.value;
-					if (setting.startsWith("location.defaultCenter.")) renderMap();
+					const value = event.target.type === "number" ? numericValue(event.target, 0) : event.target.value;
+					target[key] = root === siteConfig && key === "contactEmail" && !value ? null : value;
+					if (setting.startsWith("siteConfig.mapCenter.")) renderMap();
 					triggerAutosave();
 					return;
 				}
@@ -974,7 +1083,7 @@
 					return;
 				}
 				if (event.target.dataset.jurisdictionTarget !== undefined) {
-					jurisdictionTarget = event.target.value === "excludedPolygons" ? "excludedPolygons" : "polygons";
+					jurisdictionTarget = event.target.value === "excludes" ? "excludes" : "includes";
 					return;
 				}
 				if (event.target.dataset.questionRequired !== undefined) {
@@ -1019,6 +1128,11 @@
 				}
 				if (action === "delete-category") {
 					config.categories.splice(activeCategory, 1);
+					const usedBoundaryIds = new Set(config.categories.flatMap((category) => [
+						...categoryBoundaryIds(category, "includes"),
+						...categoryBoundaryIds(category, "excludes")
+					]));
+					boundaryCollection.features = boundaryCollection.features.filter((feature) => usedBoundaryIds.has(feature.properties?.id));
 					activeCategory = config.categories.length ? Math.min(activeCategory, config.categories.length - 1) : -1;
 					drawing = false;
 					draftPoints = [];
@@ -1044,7 +1158,7 @@
 					if (editingPolygons) savePolygonEdits();
 					if (canUseLeafletMap()) {
 						drawing = true;
-						const targetKey = jurisdictionTarget === "excludedPolygons" ? "excludedPolygons" : "polygons";
+						const targetKey = jurisdictionTarget === "excludes" ? "excludes" : "includes";
 						const nextColor = colorForPolygon(currentCategory().jurisdiction?.[targetKey]?.length || 0, targetKey);
 						drawHandler = new L.Draw.Polygon(leafletMap, { shapeOptions: { color: nextColor, fillColor: nextColor, fillOpacity: 0.2 } });
 						drawHandler.enable();
@@ -1070,22 +1184,11 @@
 				if (action === "delete-polygon") {
 					const category = currentCategory();
 					const index = Number(event.target.dataset.polygonIndex);
-					const polygonKey = event.target.dataset.polygonKey || "polygons";
-					const polygons = category.jurisdiction?.[polygonKey];
-					if (!Array.isArray(polygons)) return;
-					const layer = polygonLayer?.getLayers().find((item) => item._jurisdictionKey === polygonKey && item._jurisdictionIndex === index);
-					if (layer) polygonLayer.removeLayer(layer);
-					polygons.splice(index, 1);
-					const groupLayers = polygonLayer?.getLayers().filter((item) => item._jurisdictionKey === polygonKey) || [];
-					groupLayers.forEach((item, nextIndex) => {
-						item._jurisdictionIndex = nextIndex;
-						const color = colorForPolygon(nextIndex, polygonKey);
-						item.setStyle({ color, fillColor: color });
-					});
-					if (!safeArray(category.jurisdiction?.polygons).length && !safeArray(category.jurisdiction?.excludedPolygons).length) delete category.jurisdiction;
+					const polygonKey = event.target.dataset.polygonKey || "includes";
+					if (!removeBoundaryReference(category, polygonKey, index)) return;
 					renderCategoryEditor();
 					triggerAutosave();
-					setStatus(polygonKey === "excludedPolygons" ? "Excluded polygon removed." : "Polygon removed.");
+					setStatus(polygonKey === "excludes" ? "Excluded boundary and its references removed." : "Allowed boundary and its references removed.");
 				}
 			});
 
@@ -1110,14 +1213,16 @@
 
 			$("#import-button").addEventListener("click", () => $("#import-file").click());
 			$("#import-file").addEventListener("change", async (event) => {
-				const file = event.target.files[0];
-				if (!file) return;
-				try { importText(await file.text()); }
+				const files = Array.from(event.target.files || []);
+				if (!files.length) return;
+				try { await importFiles(files); }
 				catch (error) { setStatus(`Could not import JSON: ${error.message}`, true); }
 				event.target.value = "";
 			});
 			$("#copy-button").addEventListener("click", copyJson);
-			$("#export-button").addEventListener("click", downloadJson);
+			$("#export-config-button").addEventListener("click", () => downloadFile("config.json", siteConfig, "application/json"));
+			$("#export-templates-button").addEventListener("click", () => downloadFile("templates.json", config, "application/json"));
+			$("#export-boundaries-button").addEventListener("click", () => downloadFile("boundaries.geojson", boundaryCollection, "application/geo+json"));
 			$("#add-category").addEventListener("click", addCategory);
 			window.addEventListener("offline", () => {
 				if (drawHandler) drawHandler.disable();

@@ -1,5 +1,5 @@
 /**
- * Peru Community 311 - Main Application Script
+ * Community 311 - Main Application Script
  * 
  * This file drives the interactive citizen reporting portal:
  * - Map interactions & reverse geocoding via Leaflet and OpenStreetMap
@@ -16,9 +16,11 @@
 // =============================================================================
 
 let appConfig = null;
+let siteConfig = null;
+let boundariesById = new Map();
 let map, marker;
-let selectedCoords = { lat: 40.7537, lng: -86.0689 };
-let selectedAddress = "Center of Peru, IN";
+let selectedCoords = { lat: 0, lng: 0 };
+let selectedAddress = "";
 let selectedCategoryId = null;
 let reportDraftId = null;
 let applyingUrlState = false;
@@ -27,7 +29,6 @@ let deferredInstallPrompt = null;
 let reverseGeocodeTimer = null;
 let reverseGeocodeAbort = null;
 
-// Fallback templates used if templates.json is missing or lacks top-level templates
 const defaultEmailTemplate = `CIVIC REPORT: {category}
 Department: {department}
 Location: {location}
@@ -37,7 +38,7 @@ Coordinates: {mapsUrl}
 {answers}
 
 --------------------------------------------------
-Report generated via Peru Community 311 (open-source citizen portal)`;
+Report generated via {appTitle} (open-source citizen portal)`;
 
 const defaultEmailSubjectTemplate = "Civic Report: {category} - {location}";
 
@@ -48,35 +49,18 @@ const defaultEmergencyKeywords = [
   "active water main break"
 ];
 
-function getJurisdictionRing(polygon) {
-  if (!polygon || polygon.type !== "Polygon" || !Array.isArray(polygon.coordinates) || !polygon.coordinates.length) return null;
-  const ring = polygon.coordinates[0];
-  return Array.isArray(ring) ? ring : null;
-}
-
-function pointInPolygon(lat, lng, polygon) {
-  const ring = getJurisdictionRing(polygon);
-  if (!ring || ring.length < 4) return false;
-
-  let inside = false;
-  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    const [xi, yi] = ring[i];
-    const [xj, yj] = ring[j];
-    const intersects = ((yi > lat) !== (yj > lat)) &&
-      (lng < ((xj - xi) * (lat - yi)) / (yj - yi + Number.EPSILON) + xi);
-    if (intersects) inside = !inside;
-  }
-  return inside;
-}
-
 function categoryMatchesJurisdiction(category, lat, lng) {
   if (!category || !category.jurisdiction) return true;
 
-  const allowed = Array.isArray(category.jurisdiction.polygons) ? category.jurisdiction.polygons : [];
-  const excluded = Array.isArray(category.jurisdiction.excludedPolygons) ? category.jurisdiction.excludedPolygons : [];
-
-  const inAllowed = allowed.length === 0 || allowed.some((polygon) => pointInPolygon(lat, lng, polygon));
-  const inExcluded = excluded.some((polygon) => pointInPolygon(lat, lng, polygon));
+  const includes = Array.isArray(category.jurisdiction.includes) ? category.jurisdiction.includes : [];
+  const excludes = Array.isArray(category.jurisdiction.excludes) ? category.jurisdiction.excludes : [];
+  const point = window.turf.point([lng, lat]);
+  const inAllowed = includes.length === 0 || includes.some((id) =>
+    window.turf.booleanPointInPolygon(point, boundariesById.get(id))
+  );
+  const inExcluded = excludes.some((id) =>
+    window.turf.booleanPointInPolygon(point, boundariesById.get(id))
+  );
 
   if (!inAllowed) return false;
   return !inExcluded;
@@ -225,7 +209,12 @@ function scrollToReportForm() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   const initialParams = new URLSearchParams(window.location.search);
-  await loadTemplates();
+  try {
+    await loadTemplates();
+  } catch (error) {
+    showInitializationError(error);
+    return;
+  }
   initMap();
   setupEventListeners();
   setupMobileObserver();
@@ -324,15 +313,89 @@ function syncStateToURL() {
 // =============================================================================
 
 async function loadTemplates() {
-  try {
-    const response = await fetch("templates.json");
-    if (!response.ok) throw new Error("Failed to load templates.json");
-    appConfig = await response.json();
-  } catch (err) {
-    console.warn("Notice: Fetching templates.json failed, loading default fallback config.", err);
-    appConfig = getDefaultConfig();
+  const paths = ["./config.json", "./templates.json", "./boundaries.geojson"];
+  const responses = await Promise.all(paths.map((path) => fetch(path)));
+  const failedIndex = responses.findIndex((response) => !response.ok);
+  if (failedIndex !== -1) throw new Error(`Failed to load ${paths[failedIndex]}`);
+
+  const [nextSiteConfig, nextAppConfig, boundaryCollection] = await Promise.all(
+    responses.map((response) => response.json())
+  );
+  if (typeof nextSiteConfig?.cityName !== "string" || !nextSiteConfig.cityName.trim() ||
+      typeof nextSiteConfig?.regionName !== "string" || !nextSiteConfig.regionName.trim() ||
+      typeof nextSiteConfig?.appTitle !== "string" || !nextSiteConfig.appTitle.trim() ||
+      !Number.isFinite(Number(nextSiteConfig?.mapCenter?.lat)) ||
+      !Number.isFinite(Number(nextSiteConfig?.mapCenter?.lng)) ||
+      !Number.isInteger(nextSiteConfig?.defaultZoom) || nextSiteConfig.defaultZoom < 1 || nextSiteConfig.defaultZoom > 20 ||
+      !Array.isArray(nextAppConfig?.categories) ||
+      boundaryCollection?.type !== "FeatureCollection" || !Array.isArray(boundaryCollection.features)) {
+    throw new Error("The city configuration, templates, or boundary collection has an invalid structure.");
   }
+  if (typeof window.turf?.point !== "function" || typeof window.turf?.booleanPointInPolygon !== "function") {
+    throw new Error("Turf.js did not load, so jurisdiction boundaries cannot be checked.");
+  }
+
+  const nextBoundariesById = new Map();
+  for (const feature of boundaryCollection.features) {
+    const id = feature?.properties?.id;
+    if (typeof id !== "string" || !id || feature?.geometry?.type !== "Polygon" || nextBoundariesById.has(id)) {
+      throw new Error("Every boundary must be a Polygon Feature with a unique properties.id.");
+    }
+    nextBoundariesById.set(id, feature);
+  }
+  for (const category of nextAppConfig.categories) {
+    const jurisdiction = category?.jurisdiction;
+    if (jurisdiction && typeof jurisdiction === "object" &&
+        ("polygons" in jurisdiction || "excludedPolygons" in jurisdiction)) {
+      throw new Error(`Category "${category.id}" uses legacy inline polygons; replace them with boundary IDs.`);
+    }
+    for (const key of ["includes", "excludes"]) {
+      const references = jurisdiction?.[key];
+      if (references !== undefined && !Array.isArray(references)) {
+        throw new Error(`Category "${category.id}" jurisdiction.${key} must be an array.`);
+      }
+      for (const id of references || []) {
+        if (!nextBoundariesById.has(id)) throw new Error(`Category "${category.id}" references missing boundary "${id}".`);
+      }
+    }
+  }
+
+  siteConfig = nextSiteConfig;
+  appConfig = nextAppConfig;
+  boundariesById = nextBoundariesById;
+  selectedCoords = { lat: Number(siteConfig.mapCenter.lat), lng: Number(siteConfig.mapCenter.lng) };
+  selectedAddress = `Center of ${siteConfig.cityName}, ${siteConfig.regionName}`;
+  populateConfiguredContent();
   renderCategoryCards();
+}
+
+function showInitializationError(error) {
+  console.error("Unable to initialize the reporting app.", error);
+  const categoryContainer = document.getElementById("category-cards-container");
+  if (categoryContainer) categoryContainer.textContent = "The app could not load its city configuration. Please try again later.";
+  announceToScreenReader("The app could not load its city configuration.");
+}
+
+function populateConfiguredContent() {
+  document.title = `${siteConfig.appTitle} - Citizen Issue Reporting`;
+  document.getElementById("app-title").textContent = siteConfig.appTitle;
+  document.getElementById("app-tagline").textContent = siteConfig.headerTagline;
+  document.getElementById("footer-app-title").textContent = siteConfig.appTitle;
+  document.getElementById("map").setAttribute("aria-label", `Map showing ${siteConfig.cityName}, ${siteConfig.regionName}`);
+  document.getElementById("manual-address-input").placeholder = `Enter nearest address or intersection in ${siteConfig.cityName}, ${siteConfig.regionName}`;
+  const repositoryLink = document.getElementById("repository-link");
+  if (siteConfig.repositoryUrl) repositoryLink.href = siteConfig.repositoryUrl;
+  const siteContactLink = document.getElementById("site-contact-link");
+  if (siteConfig.contactEmail) {
+    siteContactLink.href = `mailto:${siteConfig.contactEmail}`;
+    siteContactLink.classList.remove("hidden");
+  }
+
+  document.querySelector('meta[name="apple-mobile-web-app-title"]').content = siteConfig.appTitle;
+  document.querySelector('meta[name="description"]').content = siteConfig.pageDescription;
+  document.querySelector('meta[property="og:title"]').content = siteConfig.appTitle;
+  document.querySelector('meta[property="og:description"]').content = siteConfig.socialDescription;
+  document.querySelector('meta[property="og:url"]').content = siteConfig.deploymentUrl || window.location.href;
 }
 
 // =============================================================================
@@ -340,8 +403,8 @@ async function loadTemplates() {
 // =============================================================================
 
 function initMap() {
-  const center = (appConfig && appConfig.location && appConfig.location.defaultCenter) || { lat: 40.7537, lng: -86.0689 };
-  const zoom = (appConfig && appConfig.location && appConfig.location.defaultZoom) || 14;
+  const center = siteConfig.mapCenter;
+  const zoom = siteConfig.defaultZoom;
 
   map = L.map("map").setView([center.lat, center.lng], zoom);
 
@@ -728,6 +791,7 @@ function getEmailTemplateData(category) {
   return {
     answers,
     variables: {
+      appTitle: siteConfig?.appTitle || "Community 311",
       category: category.name,
       department: category.department,
       location: selectedAddress,
@@ -1200,25 +1264,6 @@ function setupMobileObserver() {
     }, { threshold: 0.15 });
     observer.observe(reportSection);
   }
-}
-
-// Default Fallback Configuration
-function getDefaultConfig() {
-  return {
-    location: { city: "Peru", county: "Miami County", state: "IN", defaultCenter: { lat: 40.7537, lng: -86.0689 }, defaultZoom: 14 },
-    emailSubjectTemplate: defaultEmailSubjectTemplate,
-    emailTemplate: defaultEmailTemplate,
-    categories: [
-      {
-        id: "default",
-        name: "Other Issue",
-        department: "Detailed Categories Failed to Load",
-        description: "Default fallback category when custom config is unavailable.",
-        destinations: { phone: "(765) 472-2400" },
-        questions: [{ id: "description", label: "Details", type: "textarea", required: true }]
-      }
-    ]
-  };
 }
 
 // Toggle OpenStreetMap Info Tooltip on Mobile Tap

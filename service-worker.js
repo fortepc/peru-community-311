@@ -1,10 +1,12 @@
-const CACHE_NAME = "peru-community-311-v3";
+const CACHE_NAME = "community-311-v4";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
+  "./config.json",
   "./templates.json",
+  "./boundaries.geojson",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
@@ -24,7 +26,7 @@ self.addEventListener("activate", (event) => {
   event.waitUntil((async () => {
     const cacheNames = await caches.keys();
     await Promise.all(cacheNames
-      .filter((cacheName) => cacheName.startsWith("peru-community-311-") && cacheName !== CACHE_NAME)
+      .filter((cacheName) => (cacheName.startsWith("community-311-") || cacheName.startsWith("peru-community-311-")) && cacheName !== CACHE_NAME)
       .map((cacheName) => caches.delete(cacheName)));
     await self.clients.claim();
   })());

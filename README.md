@@ -1,213 +1,57 @@
-# Peru Community 311
+# Community 311
+
+This open-source, citizen-run 311 alternative was originally built for Peru, Indiana. The repository includes that deployment as example data; communities can fork the project and replace the city configuration, report categories, contacts, and service boundaries.
 
 ## Live Deployment
 
 https://fortepc.github.io/peru-community-311/
 
-This repository contains the configured Peru, Indiana deployment of Peru Community 311. Its map defaults, issue categories, agency contacts, emergency guidance, and report templates are specific to Peru and Miami County. It is not a blank or ready-to-deploy template for another town; communities reusing the code should replace and verify the deployment-specific configuration before publishing.
-
-> **Disclaimer:** Peru Community 311 is an independent community initiative. It is not owned, operated, or managed by the City of Peru or Miami County government offices.
+> **Disclaimer:** The original Peru Community 311 deployment is an independent community initiative. It is not owned, operated, or managed by the City of Peru or Miami County government offices.
 
 ## How It Works
 
-1. Pin an issue on the Leaflet map or use the device's location.
-2. Choose an issue category and complete its questionnaire.
-3. Select **Review & Report** to review the report and the category's available department contact information.
-4. Contact the responsible agency using the listed email, official web portal, or phone. This version does not save reports to this website or submit them to an agency.
+1. A resident pins an issue on the Leaflet map or uses the device location.
+2. The resident selects an applicable category and answers its questions.
+3. The app builds a report for review and presents the category's configured contact methods.
+4. The resident sends the report with a `mailto:` link or submits it through an external agency webform. Phone links are available when configured.
 
-The selected location, category, and questionnaire answers are reflected in the page URL so a draft can be shared or reopened. Anyone with that URL can see those values, so do not include sensitive information in a draft.
+This is a stateless, client-side static site. It has no application server or reporting database: reports are not submitted to or stored by this website. Email is opened in the resident's email application, and webforms are hosted by the destination agency. Opening a link does not confirm that an agency received a report.
 
-The browser emits a `report-action` custom event when someone chooses **Send as email**, opens an official web portal, or calls a department. Its `detail` contains `action` (`send_email`, `open_webform`, or `call_department`), `categoryId`, and a `reportDraftId` shared by actions taken in the same report dialog. This is only an integration point: actions and reports are not stored or counted by this deployment. Opening an email, form, or phone link also does not confirm that the agency received a report.
+The selected location, category, and questionnaire answers are reflected in the page URL so a draft can be shared or reopened. Anyone with that URL can see those values, so do not include sensitive information in a draft. The browser emits a `report-action` custom event for email, webform, and phone actions; it is only an integration point and does not store or count reports.
+
+## How to Deploy for Your City
+
+1. Fork this repository and review it as a static-site template. The included Peru contacts and categories are examples for the original deployment, not verified information for another community.
+2. In your fork, open **Settings > Pages**. Choose **Deploy from a branch**, select your publishing branch (usually `main`) and the repository root, then save. GitHub Pages will provide the deployment URL.
+3. Edit `config.json` for your city name, county and region, app title, header tagline, page/social descriptions, map center, default zoom, optional site contact email, repository URL, and deployment URL. Coordinates use latitude and longitude fields. The optional site email is separate from department contacts.
+4. Edit `templates.json` to configure the categories, department names, questions, emergency guidance, and report subject/body templates. Put each department's email, phone, and official webform URL in that category's `destinations` object. These destinations are where residents route reports; they are not app-wide contact details.
+5. Edit `boundaries.geojson` when a category needs location-based coverage. It is a standard GeoJSON `FeatureCollection`; each boundary is a `Feature` with a unique, stable `properties.id` and a `Polygon` geometry. Coordinates are ordered `[longitude, latitude]`, and each ring must close by repeating its first coordinate.
+6. In `templates.json`, reference boundary IDs from the category's `jurisdiction` object. `includes` is an array of IDs that define the allowed areas; multiple included areas are combined. `excludes` is an array of IDs that always hide the category inside those areas. With no included IDs, the category is available everywhere except its exclusions. Categories without a `jurisdiction` are unrestricted.
+7. Optionally open `configurator.html`, import `config.json`, `templates.json`, and `boundaries.geojson` together, edit the settings/categories/boundaries, and download the three updated files. The editor keeps data in the browser and does not upload it.
+8. Verify every destination with the responsible agency, review emergency wording, and test pins inside/outside each boundary. Confirm the GitHub Pages URL and all relative data files work before sharing the site.
+
+`manifest.webmanifest` is a separate static install asset. Its name is generic by default; update its name, short name, and description for a branded install. The service worker caches the app shell and all three runtime data files. Map tiles, reverse geocoding, the CDN libraries, and external webforms still require an internet connection.
+
+## Configuration Files
+
+- `config.json` contains deployment branding, map defaults, page metadata, and the optional site contact email.
+- `templates.json` contains report categories, department destinations, emergency guidance, questions, and email templates. Category jurisdiction stores only boundary ID references.
+- `boundaries.geojson` contains the shared Polygon Features referenced by categories.
+- `config.schema.json`, `templates.schema.json`, and `boundaries.schema.json` describe the data shapes.
+
+Email templates support `{appTitle}`, `{category}`, `{department}`, `{location}`, `{latitude}`, `{longitude}`, `{mapsUrl}`, `{answers}`, and `{question:question_id}`. Category-specific templates can override the top-level email subject or body.
 
 ## Install on a Phone
 
-Publish the site over HTTPS, then open it in the phone's browser. On Android, use the browser's **Install app** or **Add to Home screen** option. On iPhone or iPad, open the Share menu in Safari and choose **Add to Home Screen**. The app shell is cached after the first successful visit, but the live map, address lookup, and externally hosted libraries still require an internet connection.
+Publish over HTTPS, then open the site in the phone's browser. On Android, use **Install app** or **Add to Home screen**. On iPhone or iPad, open Safari's Share menu and choose **Add to Home Screen**. The app shell is cached after the first successful visit, but the live map, address lookup, CDN libraries, and external reporting destinations require internet access.
 
 ## Repository Structure
 
-- `index.html` contains the markup for the map, category picker, questionnaire, and report preview modal.
-- `styles.css` contains custom layout styling, map container responsiveness, accessible focus styles, and print layout rules.
-- `app.js` contains the application logic, geolocation, Leaflet map setup, dynamic questionnaire rendering, URL sync, and dispatch formatting.
-- `manifest.webmanifest`, `service-worker.js`, and `icons/` provide the installable web app metadata, cached app shell, and home-screen icons.
-- `configurator.html` is a standalone editor for importing and exporting `templates.json`. Category details, contacts, emergency guidance, questions, and jurisdiction polygons can be edited there. The app filters categories by selected pin based on inclusion and exclusion polygons.
-- `templates.json` contains this deployment's map defaults, categories, contacts, questions, category icons, and email templates. The app fetches it when the page loads.
-- `templates.schema.json` is the formal JSON Schema specification for validating `templates.json`.
-- `README.md` "You are here" it's a document detailing the project.
+- `index.html`, `styles.css`, and `app.js` are the reusable application interface and client-side engine.
+- `config.json`, `templates.json`, and `boundaries.geojson` are deployment-specific data.
+- `configurator.html` is a standalone editor for all three data files.
+- `service-worker.js`, `manifest.webmanifest`, and `icons/` provide offline app-shell caching and install metadata.
+- `*.schema.json` files describe the configuration and GeoJSON structures.
 - `LICENSE` contains the project's license.
 
-
-## Fork for Another Community
-
-1. Fork this repository and treat its Peru-specific content as example data, not as information for your community.
-2. Open `configurator.html` in a browser. Import the included `templates.json` to adapt this example, or start with a blank configuration to build your categories from scratch. The editor works as a standalone file and does not upload your configuration.
-3. In **Site settings**, enter your service area's city, county, state, map center, and default zoom.
-4. Use the category editor to add, remove, or update locally relevant categories. Verify each department, destination, question, and emergency rule directly with the responsible agency.
-5. Set the top-level and any category-specific email subject and body templates for your agencies. See the configuration reference below for supported fields and placeholders.
-6. Optionally draw jurisdiction polygons for categories that may be limited by report location. The app evaluates inclusion and exclusion polygons against the selected map pin.
-7. Download the generated `templates.json` from the configurator and place it in the repository root, replacing the Peru example configuration.
-8. In `index.html`, update the site name, city-specific wording, independent-project disclaimer, page title and descriptions, and `og:url` for the fork's published URL. Review any remaining Peru-specific text in the page.
-9. Test the fork with and without email destinations, with required and optional questions, and with emergency categories. Verify every contact link and generated message before sharing it publicly.
-10. Publish the static files with GitHub Pages, then open the published site to confirm `templates.json` loads and the share-preview metadata points to the fork's URL.
-
-Retain the visible disclaimer that the site is independent unless the deploying organization has authorization to represent itself differently. Map tiles and reverse geocoding use OpenStreetMap services; follow the applicable attribution and usage policies for your deployment.
-
-## `templates.json` Configuration Reference
-
-The app loads `templates.json` when it starts. Edit this file to change the map defaults, categories, questions, and report destinations. Keep this deployment-specific file separate from the reusable page logic when adapting the project.
-
-### Location Defaults
-
-The top-level `location` object controls the initial map view:
-
-- `city`, `county`, and `state` describe the service area.
-- `defaultCenter.lat` and `defaultCenter.lng` set the initial map coordinates.
-- `defaultZoom` sets the initial map zoom level.
-
-For example, this configuration opens the map near Peru at zoom level 14:
-
-```json
-{
-   "location": {
-      "city": "Peru",
-      "county": "Miami County",
-      "state": "IN",
-      "defaultCenter": {
-         "lat": 40.7537,
-         "lng": -86.0689
-      },
-      "defaultZoom": 14
-   }
-}
-```
-
-### Categories
-
-Each object in the top-level `categories` array describes one report option. Add a new object to the array or edit an existing one. Each category can contain:
-
-- `id`: Stable identifier for the category. Keep it unique; category-specific email templates use it.
-- `name`: User-facing category name.
-- `department`: Department or organization shown as responsible.
-- `description`: Short explanation shown in the category list.
-- `icon`: Optional Font Awesome icon name/classes or a Font Awesome `<i>`, layered HTML, or SVG snippet. Font Awesome classes, safe inline styling (including color, size, transform, and flip), and `data-fa-*` attributes are retained. Other markup and unsafe styles/references are discarded. The site currently loads Font Awesome 6.4 Free; Pro-only glyphs/families require switching to a licensed Pro stylesheet or kit.
-- `destinations`: Contact and follow-up links for this category.
-- `questions`: The fields residents answer for this category.
-- `jurisdiction`: Optional polygon metadata for location-based category visibility. Supported fields are `polygons` for allowed service areas and `excludedPolygons` for areas to hide when the selected pin falls inside them.
-- `emailSubjectTemplate`: Optional subject template that overrides the top-level setting for this category.
-- `emailTemplate`: Optional message-body template that overrides the top-level setting for this category.
-
-The `destinations` object supports `email`, `phone`, `webformUrl`, `socialUrl`, and `address`. The email button uses `email`; the call button uses `phone`; and the extra links use `webformUrl` and `socialUrl`. Use `null` for a destination that is not available. A configured `address` is shown on the category card as location/contact information; confirm with the destination whether it accepts in-person reports.
-
-Categories can also optionally include an `emergency` object to trigger the flashing emergency mode in the app. Use `enabled: true` for categories that should always trigger emergency mode, or provide a `keywords` array for answer text that should trigger the alert when selected. The app will still use the category's phone number for the emergency call button.
-
-### Jurisdiction Polygons
-
-The standalone `configurator.html` editor can draw one or more inclusion polygons and exclusion polygons for a category. It stores them as GeoJSON Polygon geometries under `jurisdiction.polygons` and `jurisdiction.excludedPolygons`; coordinates use GeoJSON order, `[longitude, latitude]`, and each boundary ring repeats its first coordinate at the end:
-
-```json
-{
-   "jurisdiction": {
-      "polygons": [
-         {
-            "type": "Polygon",
-            "coordinates": [[[ -86.07, 40.75], [-86.06, 40.75], [-86.06, 40.76], [-86.07, 40.75]]]
-         }
-      ],
-      "excludedPolygons": [
-         {
-            "type": "Polygon",
-            "coordinates": [[[ -86.065, 40.755], [-86.055, 40.755], [-86.055, 40.763], [-86.065, 40.755]]]
-         }
-      ]
-   }
-}
-```
-
-Each item in `polygons` is a separate service area. `excludedPolygons` override the inclusion rule and are used for private roads, gated roads, or other areas the category should never appear for. Polygon names are optional configurator labels and do not appear in the public app. The app applies this logic: if a category has no jurisdiction, it always shows; if it has only excluded polygons, it shows unless the pin is inside one; if it has allowed polygons, it only shows when the pin is inside them; if it has both, the pin must be inside an allowed polygon and not inside an excluded polygon.
-
-Here is an example category object to add to the `categories` array. Replace the sample contact details with verified information:
-
-```json
-{
-   "id": "street_surface",
-   "name": "Street Surface Issues",
-   "department": "Street Department",
-   "description": "Report potholes and debris on public streets.",
-   "icon": "fa-road",
-   "emergency": {
-      "keywords": ["active water main break", "sparking wire"]
-   },
-   "emailSubjectTemplate": "Street issue: {location}",
-   "emailTemplate": "Please inspect this street issue.\nLocation: {location}\nIssue: {question:details}\nMap: {mapsUrl}",
-   "destinations": {
-      "email": "street-dept@example.gov",
-      "phone": "(765) 555-0100",
-      "webformUrl": null,
-      "socialUrl": null,
-      "address": "123 Main St, Peru, IN"
-   },
-   "questions": [
-      {
-         "id": "details",
-         "label": "Describe the issue",
-         "type": "textarea",
-         "required": true,
-         "placeholder": "Include the nearest address or intersection."
-      }
-   ]
-}
-```
-
-### Questionnaire Fields
-
-Each object in a category's `questions` array defines one input:
-
-- `id`: Unique identifier within that category. It also lets an email template refer to this answer.
-- `label`: Text shown beside the input and used as its label in `{answers}`.
-- `type`: `select`, `text`, or `textarea`.
-- `required`: Whether the field is required before sending or copying the report. Enforced with inline validation.
-- `placeholder`: Optional hint for `text` and `textarea` inputs.
-- `options`: Required for `select`; an array of the choices to show.
-
-For example, a short category-specific question can be configured like this:
-
-```json
-{
-   "id": "surface_issue",
-   "label": "What needs attention?",
-   "type": "select",
-   "required": true,
-   "options": ["Pothole", "Debris", "Other"]
-}
-```
-
-When adding a question, give it a unique `id` and make sure select questions have at least one option. Use `text` for a single-line answer and `textarea` for longer details.
-
-## Email Message Templates
-
-The top-level `emailSubjectTemplate` controls the mailto subject, and `emailTemplate` controls the message body used by both **Send as email** and **Copy report**. A category can optionally set `emailSubjectTemplate` and/or `emailTemplate` to override either setting. The default subject is `Civic Report: {category} - {location}`. In JSON strings, write `\n` in the body template where a line break should appear.
-
-Available placeholders:
-
-| Placeholder | Value |
-| --- | --- |
-| `{category}` | Selected category name |
-| `{department}` | Department assigned to the category |
-| `{location}` | Selected address or coordinate fallback |
-| `{latitude}` | Selected latitude |
-| `{longitude}` | Selected longitude |
-| `{mapsUrl}` | Google Maps URL for the selected coordinates |
-| `{answers}` | All questionnaire answers, formatted with their labels |
-| `{question:question_id}` | One answer, using its `id` from the category's `questions` list |
-
-These placeholders are supported in both subject and body templates. For example, `{question:surface_issue}` inserts the answer to the `surface_issue` question. Empty answers and unknown question IDs become `N/A`. Unrecognized placeholders remain unchanged so configuration mistakes are visible.
-
-For example, these top-level settings create a short subject and a multi-line message body:
-
-```json
-{
-   "emailSubjectTemplate": "Report: {category} at {location}",
-   "emailTemplate": "CIVIC REPORT: {category}\nDepartment: {department}\nLocation: {location}\nIssue: {question:surface_issue}\nDetails: {question:details}\nMap: {mapsUrl}"
-}
-```
-
-A category can override either value by including `emailSubjectTemplate` or `emailTemplate` in that category object.
+Map tiles and address lookup use OpenStreetMap services. Retain appropriate attribution and follow the services' usage policies for your deployment.

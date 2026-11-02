@@ -1,16 +1,6 @@
 {
-  "location": {
-    "city": "Peru",
-    "county": "Miami County",
-    "state": "IN",
-    "defaultCenter": {
-      "lat": 40.7537,
-      "lng": -86.0689
-    },
-    "defaultZoom": 14
-  },
   "emailSubjectTemplate": "Report: {category} - {location}",
-  "emailTemplate": "CIVIC REPORT: {category}\nDepartment: {department}\nLocation: {location}\nCoordinates: {mapsUrl}\n--------------------------------------------------\n\n{answers}\n\n--------------------------------------------------\nReport generated via Peru Community 311 (open-source citizen portal)",
+  "emailTemplate": "CIVIC REPORT: {category}\nDepartment: {department}\nLocation: {location}\nCoordinates: {mapsUrl}\n--------------------------------------------------\n\n{answers}\n\n--------------------------------------------------\nReport generated via {appTitle} (open-source citizen portal)",
   "categories": [
     {
       "id": "wabash-flats-road",
@@ -60,43 +50,8 @@
         }
       ],
       "jurisdiction": {
-        "polygons": [
-          {
-            "type": "Polygon",
-            "coordinates": [
-              [
-                [
-                  -86.071846,
-                  40.763538
-                ],
-                [
-                  -86.071835,
-                  40.762221
-                ],
-                [
-                  -86.070119,
-                  40.762237
-                ],
-                [
-                  -86.070097,
-                  40.76173
-                ],
-                [
-                  -86.068493,
-                  40.76175
-                ],
-                [
-                  -86.068563,
-                  40.763521
-                ],
-                [
-                  -86.071846,
-                  40.763538
-                ]
-              ]
-            ],
-            "name": "Wabash Flats"
-          }
+        "includes": [
+          "wabash-flats"
         ]
       }
     },
@@ -147,81 +102,9 @@
         }
       ],
       "jurisdiction": {
-        "excludedPolygons": [
-          {
-            "type": "Polygon",
-            "coordinates": [
-              [
-                [
-                  -86.07183,
-                  40.762248
-                ],
-                [
-                  -86.071744,
-                  40.763523
-                ],
-                [
-                  -86.068525,
-                  40.763515
-                ],
-                [
-                  -86.068504,
-                  40.761752
-                ],
-                [
-                  -86.070092,
-                  40.76176
-                ],
-                [
-                  -86.070102,
-                  40.762304
-                ],
-                [
-                  -86.07183,
-                  40.762248
-                ]
-              ]
-            ]
-          },
-          {
-            "type": "Polygon",
-            "coordinates": [
-              [
-                [
-                  -86.08449,
-                  40.76048
-                ],
-                [
-                  -86.084318,
-                  40.758156
-                ],
-                [
-                  -86.083889,
-                  40.757928
-                ],
-                [
-                  -86.080885,
-                  40.758936
-                ],
-                [
-                  -86.080606,
-                  40.758627
-                ],
-                [
-                  -86.077924,
-                  40.759537
-                ],
-                [
-                  -86.078868,
-                  40.761634
-                ],
-                [
-                  -86.08449,
-                  40.76048
-                ]
-              ]
-            ]
-          }
+        "excludes": [
+          "street-sanitation-wabash-flats-exclusion",
+          "street-sanitation-northwest-exclusion"
         ]
       }
     },

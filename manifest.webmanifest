@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Peru Community 311",
+  "name": "Community 311",
   "short_name": "Community 311",
-  "description": "Map local non-emergency issues in Peru, Indiana and prepare reports for the responsible department.",
+  "description": "Map local non-emergency issues and prepare reports for the responsible department.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
