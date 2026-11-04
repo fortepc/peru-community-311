@@ -25,8 +25,6 @@ let selectedCategoryId = null;
 let reportDraftId = null;
 let applyingUrlState = false;
 let deferredInstallPrompt = null;
-const analyticsConsentKey = "community_311_usage_analytics_consent";
-let analyticsConsent = null;
 let analyticsInitialized = false;
 
 let reverseGeocodeTimer = null;
@@ -341,6 +339,9 @@ async function loadTemplates() {
       !/^G-[A-Z0-9]+$/.test(nextSiteConfig.analyticsMeasurementId)) {
     throw new Error("The Google Analytics Measurement ID must use the G-XXXXXXXXXX format.");
   }
+  if (nextSiteConfig.reportWebhookUrl && !isValidReportWebhookUrl(nextSiteConfig.reportWebhookUrl)) {
+    throw new Error("The report webhook URL must be a Discord webhook URL.");
+  }
 
   const nextBoundariesById = new Map();
   for (const feature of boundaryCollection.features) {
@@ -376,6 +377,16 @@ async function loadTemplates() {
   renderCategoryCards();
 }
 
+function isValidReportWebhookUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && url.hostname === "discord.com" &&
+      /^\/api\/webhooks\/\d+\/[A-Za-z0-9_-]+$/.test(url.pathname) && !url.search && !url.hash;
+  } catch (error) {
+    return false;
+  }
+}
+
 function showInitializationError(error) {
   console.error("Unable to initialize the reporting app.", error);
   const categoryContainer = document.getElementById("category-cards-container");
@@ -397,45 +408,17 @@ function populateConfiguredContent() {
     siteContactLink.href = `mailto:${siteConfig.contactEmail}`;
     siteContactLink.classList.remove("hidden");
   }
+  if (!siteConfig.reportWebhookUrl) {
+    document.getElementById("save-report-btn").disabled = true;
+    document.getElementById("report-save-disclosure").textContent = "Report saving is not configured for this deployment.";
+  }
 
   document.querySelector('meta[name="apple-mobile-web-app-title"]').content = siteConfig.appTitle;
   document.querySelector('meta[name="description"]').content = siteConfig.pageDescription;
   document.querySelector('meta[property="og:title"]').content = siteConfig.appTitle;
   document.querySelector('meta[property="og:description"]').content = siteConfig.socialDescription;
   document.querySelector('meta[property="og:url"]').content = siteConfig.deploymentUrl || window.location.href;
-  setupAnalyticsConsent();
-}
-
-function setupAnalyticsConsent() {
-  const panel = document.getElementById("analytics-choice-panel");
-  const preferencesButton = document.getElementById("analytics-preferences-btn");
-  const acceptButton = document.getElementById("analytics-accept-btn");
-  const declineButton = document.getElementById("analytics-decline-btn");
-  if (!siteConfig.analyticsMeasurementId) {
-    panel.classList.add("hidden");
-    preferencesButton.classList.add("hidden");
-    return;
-  }
-
-  let savedChoice = null;
-  try {
-    savedChoice = localStorage.getItem(analyticsConsentKey);
-  } catch (error) {}
-  analyticsConsent = savedChoice === "granted" || savedChoice === "denied" ? savedChoice : null;
-  panel.classList.toggle("hidden", analyticsConsent !== null);
   initializeAnalytics();
-
-  preferencesButton.addEventListener("click", () => panel.classList.remove("hidden"));
-  acceptButton.addEventListener("click", () => setAnalyticsConsent("granted"));
-  declineButton.addEventListener("click", () => setAnalyticsConsent("denied"));
-}
-
-function setAnalyticsConsent(choice) {
-  analyticsConsent = choice;
-  try {
-    localStorage.setItem(analyticsConsentKey, choice);
-  } catch (error) {}
-  document.getElementById("analytics-choice-panel").classList.add("hidden");
 }
 
 function getAnalyticsEntryContext() {
@@ -523,7 +506,7 @@ function initializeAnalytics() {
 }
 
 function trackAnalyticsEvent(eventName, parameters) {
-  if (analyticsConsent === "granted" && typeof window.gtag === "function") {
+  if (typeof window.gtag === "function") {
     window.gtag("event", eventName, parameters);
   }
 }
@@ -961,6 +944,93 @@ function buildEmailSubject() {
   return renderEmailTemplate(template, category);
 }
 
+function buildReportRecord() {
+  const category = appConfig.categories.find((item) => item.id === selectedCategoryId);
+  const answers = Array.from(document.querySelectorAll("#dynamic-form [data-question-id]"), (input) => ({
+    questionId: input.dataset.questionId,
+    question: input.dataset.questionLabel,
+    answer: input.value ? input.value.trim() : "N/A"
+  }));
+
+  return {
+    reportId: reportDraftId,
+    submittedAt: new Date().toISOString(),
+    city: siteConfig.cityName,
+    region: siteConfig.regionName,
+    categoryId: category.id,
+    category: category.name,
+    department: category.department,
+    location: {
+      description: selectedAddress,
+      latitude: selectedCoords.lat,
+      longitude: selectedCoords.lng
+    },
+    answers,
+    reportText: buildEmailBody()
+  };
+}
+
+async function saveReportToInbox(report) {
+  if (!siteConfig.reportWebhookUrl) throw new Error("Report saving is not configured for this site.");
+
+  const formData = new FormData();
+  formData.append("payload_json", JSON.stringify({
+    content: "A new community report was saved.",
+    allowed_mentions: { parse: [] },
+    embeds: [{
+      title: `${report.category} report`.slice(0, 256),
+      description: "Full report details are attached as a JSON file.",
+      timestamp: report.submittedAt,
+      fields: [
+        { name: "Report ID", value: report.reportId.slice(0, 1024), inline: true },
+        { name: "Department", value: String(report.department || "Not specified").slice(0, 1024), inline: true },
+        { name: "Location", value: String(report.location.description || "Not specified").slice(0, 1024) },
+        { name: "Coordinates", value: `${report.location.latitude}, ${report.location.longitude}`, inline: true }
+      ]
+    }]
+  }));
+  formData.append("files[0]", new Blob([JSON.stringify(report, null, 2)], { type: "application/json" }),
+    `community-report-${report.reportId}.json`);
+
+  const webhookUrl = new URL(siteConfig.reportWebhookUrl);
+  webhookUrl.searchParams.set("wait", "true");
+  const response = await fetch(webhookUrl.toString(), { method: "POST", body: formData });
+  if (!response.ok) throw new Error(`Discord returned HTTP ${response.status}.`);
+}
+
+function setReportSaveNotice(state) {
+  const notice = document.getElementById("report-save-notice");
+  const icon = document.getElementById("report-save-icon");
+  const title = document.getElementById("report-save-title");
+  const message = document.getElementById("report-save-message");
+  const states = {
+    saving: {
+      classes: ["bg-blue-50", "border-blue-300", "text-blue-950"],
+      icon: "fa-solid fa-spinner fa-spin mr-1.5 text-blue-700",
+      title: "Saving report...",
+      message: "Saving this report to map... It has not been sent to the appropriate department. Use one of the contact methods below to report the issue to the responsible authority."
+    },
+    success: {
+      classes: ["bg-green-50", "border-green-300", "text-green-950"],
+      icon: "fa-solid fa-circle-check mr-1.5 text-green-700",
+      title: "Your report was saved, but not yet sent to the appropriate department.",
+      message: "In a future version, this report will be displayed on a public map to help other people report this issue as well. It has not been sent to the appropriate department. Use one of the contact methods below to report the issue to the responsible authority."
+    },
+    failure: {
+      classes: ["bg-red-50", "border-red-300", "text-red-950"],
+      icon: "fa-solid fa-circle-exclamation mr-1.5 text-red-700",
+      title: "The report could not be saved to the map. It has not been sent to the appropriate department.",
+      message: "No report was confirmed as saved... It has not been sent to the appropriate department. Use one of the contact methods below to report the issue to the responsible authority."
+    }
+  }[state];
+
+  notice.classList.remove("bg-blue-50", "border-blue-300", "text-blue-950", "bg-green-50", "border-green-300", "text-green-950", "bg-red-50", "border-red-300", "text-red-950");
+  notice.classList.add(...states.classes);
+  icon.className = states.icon;
+  title.textContent = states.title;
+  message.textContent = states.message;
+}
+
 function renderContactInfo(category) {
   const container = document.getElementById("report-contact-info");
   if (!container) return;
@@ -1285,23 +1355,40 @@ function setupEventListeners() {
     changeCatBtn.addEventListener("click", resetCategorySelection);
   }
 
-  // Review & Submit Dialog
+  // Save report and show follow-up actions
   const reportModal = document.getElementById("report-modal");
   const saveReportBtn = document.getElementById("save-report-btn");
   const closeReportModalBtn = document.getElementById("close-report-modal");
 
   if (saveReportBtn && reportModal) {
-    saveReportBtn.addEventListener("click", () => {
+    saveReportBtn.addEventListener("click", async () => {
       if (!validateRequiredFields()) {
-        trackAnalyticsEvent("report_review_blocked", { category_id: selectedCategoryId });
+        trackAnalyticsEvent("report_save_blocked", { category_id: selectedCategoryId });
         return;
       }
       reportDraftId = window.crypto && typeof window.crypto.randomUUID === "function"
         ? window.crypto.randomUUID()
         : `report-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const categoryId = selectedCategoryId;
+      saveReportBtn.disabled = true;
+      document.getElementById("save-report-text").textContent = "Saving report...";
       updateDispatchOutput();
+      setReportSaveNotice("saving");
       reportModal.showModal();
-      trackAnalyticsEvent("report_reviewed", { category_id: selectedCategoryId });
+      trackAnalyticsEvent("report_save_started", { category_id: categoryId });
+
+      try {
+        await saveReportToInbox(buildReportRecord());
+        setReportSaveNotice("success");
+        trackAnalyticsEvent("report_saved", { category_id: categoryId });
+      } catch (error) {
+        console.error("Unable to save the report.", error);
+        setReportSaveNotice("failure");
+        trackAnalyticsEvent("report_save_failed", { category_id: categoryId });
+      } finally {
+        saveReportBtn.disabled = false;
+        document.getElementById("save-report-text").textContent = "Save Report";
+      }
     });
   }
 

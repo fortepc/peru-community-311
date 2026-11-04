@@ -286,6 +286,7 @@
 				headerTagline: "",
 				pageDescription: "",
 				socialDescription: "",
+				reportWebhookUrl: "",
 				mapCenter: { lat: 39.8283, lng: -98.5795 },
 				defaultZoom: 4,
 				contactEmail: null,
@@ -405,6 +406,7 @@
 					["Page description", "siteConfig.pageDescription", siteConfig.pageDescription, "textarea", "span-2"],
 					["Social description", "siteConfig.socialDescription", siteConfig.socialDescription, "textarea", "span-2"],
 					["GA4 Measurement ID (public 311 page only)", "siteConfig.analyticsMeasurementId", siteConfig.analyticsMeasurementId, "text"],
+					["Discord report webhook (public client-side URL)", "siteConfig.reportWebhookUrl", siteConfig.reportWebhookUrl, "url", "span-2"],
 					["Default zoom", "siteConfig.defaultZoom", siteConfig.defaultZoom, "number"],
 					["Center latitude", "siteConfig.mapCenter.lat", center.lat, "number"],
 					["Center longitude", "siteConfig.mapCenter.lng", center.lng, "number"],
@@ -947,6 +949,9 @@
 				if (importedSiteConfig.analyticsMeasurementId && !/^G-[A-Z0-9]+$/.test(importedSiteConfig.analyticsMeasurementId)) {
 					throw new Error("Google Analytics Measurement ID must use the G-XXXXXXXXXX format or be left blank.");
 				}
+				if (importedSiteConfig.reportWebhookUrl && !/^https:\/\/discord\.com\/api\/webhooks\/[0-9]+\/[A-Za-z0-9_-]+$/.test(importedSiteConfig.reportWebhookUrl)) {
+					throw new Error("Report webhook URL must be a Discord webhook URL.");
+				}
 				if (!Array.isArray(importedBoundaries.features)) throw new Error("boundaries.geojson must contain a FeatureCollection.");
 				const featureIds = importedBoundaries.features.map((feature) => feature?.properties?.id);
 				if (featureIds.some((id) => typeof id !== "string" || !id) || new Set(featureIds).size !== featureIds.length) {
@@ -994,6 +999,10 @@
 				}
 				if (siteConfig.analyticsMeasurementId && !/^G-[A-Z0-9]+$/.test(siteConfig.analyticsMeasurementId)) {
 					setStatus("Use a valid Google Analytics Measurement ID or leave it blank.", true);
+					return;
+				}
+				if (siteConfig.reportWebhookUrl && !/^https:\/\/discord\.com\/api\/webhooks\/[0-9]+\/[A-Za-z0-9_-]+$/.test(siteConfig.reportWebhookUrl)) {
+					setStatus("Use a valid Discord report webhook URL or leave it blank.", true);
 					return;
 				}
 				const blob = new Blob([`${JSON.stringify(data, null, 2)}\n`], { type: contentType });

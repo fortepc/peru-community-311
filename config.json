@@ -12,6 +12,7 @@
   },
   "defaultZoom": 14,
   "analyticsMeasurementId": "G-HXZDM2HKTH",
+  "reportWebhookUrl": "https://discord.com/api/webhooks/1567369516546007101/qQWVY-e_wjhLpfV1MOO2ajWIwYrqk2pdnZAiHTnWI2USq2nYz9KBNetfT6QP2lzlcvTM",
   "contactEmail": null,
   "repositoryUrl": "https://github.com/fortepc/peru-community-311/",
   "deploymentUrl": "https://fortepc.github.io/peru-community-311/"
