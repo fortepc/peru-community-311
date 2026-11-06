@@ -4,12 +4,12 @@
   "categories": [
     {
       "id": "wabash-flats-road",
-      "name": "Wabash Flats Road Issue",
-      "department": "River Valley Communities LLC, Jim Griebel",
-      "description": "Report potholes, asphalt damage, roadkill removal on street/alley, fallen road debris, or missed trash collection.",
+      "name": "Wabash Flats Issue",
+      "department": "River Valley Communities LLC (Jim Griebel)",
+      "description": "Report potholes, damaged pavement, roadkill on public streets or alleys, fallen road debris, or missed trash collection.",
       "icon": "fa-city",
       "destinations": {
-        "email": "jgriebel0234@gmail.com",
+        "email": "wabashflats@river-valleymhc.com",
         "webformUrl": null,
         "phone": "(513) 218-0083",
         "address": "6310 E. Kemper Rd # 125\nCincinnati, OH 45241",
@@ -17,40 +17,100 @@
       },
       "questions": [
         {
-          "id": "issue_type",
-          "label": "Type of Roadway / Surface Hazard",
-          "type": "select",
+          "type": "text",
           "required": true,
-          "options": [
-            "Pothole / Deep Asphalt Crater",
-            "Deceased Animal Removal (Roadkill on Public Street)",
-            "Roadway Obstruction / Fallen Cargo / Debris",
-            "Snow / Ice Removal Request",
-            "Other"
-          ]
-        },
-        {
-          "id": "traffic_impact",
-          "label": "Traffic Impact",
-          "type": "select",
-          "required": true,
-          "options": [
-            "No - Traffic moving normally",
-            "Partially - Drivers must slow down or swerve",
-            "Completely - Lane or alley completely blocked"
-          ]
+          "id": "category",
+          "label": "Issue type",
+          "placeholder": "e.g. pothole, roadkill removal, fallen debris, missed trash collection"
         },
         {
           "id": "details",
-          "label": "Location Details & Description",
+          "label": "Location and description",
           "type": "textarea",
           "required": true,
-          "placeholder": "Dead animal in the northbound lane, needs removed"
+          "placeholder": "A dead animal in the northbound lane needs to be removed."
         }
       ],
       "jurisdiction": {
         "includes": [
           "wabash-flats"
+        ],
+        "excludes": []
+      }
+    },
+    {
+      "id": "wabashrivercommons",
+      "name": "Wabash River Commons Issue",
+      "department": "Wabash River Commons",
+      "icon": "fa-circle-info",
+      "destinations": {
+        "email": "wabashrivercommons@pmandm.net",
+        "phone": "(765) 327 2804",
+        "webformUrl": null,
+        "socialUrl": "https://www.yelp.com/biz/wabash-river-commons-peru",
+        "address": "548 Sycamore Trl\nPeru, IN 46970"
+      },
+      "questions": [],
+      "description": "Wabash River Commons is a private community. Report road and property issues directly to its management team using the contact details below.",
+      "jurisdiction": {
+        "includes": [
+          "boundary-mw5abl52-3"
+        ],
+        "excludes": []
+      }
+    },
+    {
+      "id": "parks_recreation",
+      "name": "Parks & Recreation Facilities (Damage, Vandalism, Playgrounds)",
+      "department": "Peru Parks Department (Cliff Helvie, Superintendent)",
+      "description": "Report damaged playground equipment or park shelters, overflowing trash, or vandalism at Maconaquah Park and other municipal facilities.",
+      "icon": "fa-tree",
+      "destinations": {
+        "email": "chelvie@cityofperu.org",
+        "webformUrl": "https://www.cityofperu.org/",
+        "phone": "(765) 472-1432",
+        "address": "Maconaquah Park, Peru, IN 46970",
+        "socialUrl": "https://www.facebook.com/PeruParks"
+      },
+      "questions": [
+        {
+          "id": "park_issue",
+          "label": "Park Issue Type",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Damaged / Broken Playground Equipment",
+            "Damaged, Vandalized, or Unsanitary Park Restroom",
+            "Park Shelter / Bench Damage",
+            "Overflowing Trash Receptacles in Park",
+            "Vandalism or Graffiti on Park Structure",
+            "Fallen Tree Branch on Park Trail or Play Area"
+          ]
+        },
+        {
+          "id": "park_name",
+          "label": "Park / Facility Name",
+          "type": "text",
+          "required": true,
+          "placeholder": "e.g. Maconaquah Park, Miami's Fort, Riverwalk, Municipal Golf Course"
+        },
+        {
+          "id": "details",
+          "label": "Specific Location & Context",
+          "type": "textarea",
+          "required": false,
+          "placeholder": "Park and exact location within it; identify the equipment or fixture and describe the damage or sanitation issue."
+        }
+      ],
+      "jurisdiction": {
+        "includes": [
+          "boundary-mw5a8kio-2",
+          "boundary-maconaquah-park",
+          "boundary-west-city-park",
+          "boundary-peru-river-walkway",
+          "boundary-davis-park",
+          "boundary-eck-park",
+          "boundary-peru-skatepark"
         ],
         "excludes": []
       }
@@ -117,7 +177,7 @@
       "id": "traffic_signals_signs",
       "name": "Traffic Signals, Signs & Road Control Devices",
       "department": "Traffic Department (Todd Wolfe, Department Head)",
-      "description": "Report broken or dark traffic lights, knocked-down stop/yield signs, missing street markers, or damaged signal poles.",
+      "description": "Report dark or malfunctioning traffic signals, knocked-down stop or yield signs, missing or damaged street-name signs, or damaged signal poles.",
       "icon": "fa-traffic-light",
       "destinations": {
         "email": "trafficdept@cityofperu.org",
@@ -151,7 +211,10 @@
       "jurisdiction": {
         "excludes": [
           "wabash-flats",
-          "street-sanitation-northwest-exclusion"
+          "street-sanitation-northwest-exclusion",
+          "boundary-mw5a8kio-2",
+          "boundary-maconaquah-park",
+          "boundary-mw5abl52-3"
         ],
         "includes": [
           "boundary-mw5a52rp-1"
@@ -163,16 +226,15 @@
           "damaged or knocked-down stop / yield sign",
           "knocked-down stop",
           "knocked down stop",
-          "traffic signal dark",
-          "signal dark"
+          "traffic signal dark"
         ]
       }
     },
     {
       "id": "foliage_hazard_tree",
       "name": "Hazardous Trees, Foliage & Sign Visibility Obstructions",
-      "department": "Peru Street Dept / Utility Line Trim / Parks Dept",
-      "description": "Report overgrown branches blocking stop signs/sightlines, fallen limbs blocking roads, or tree branches threatening power/telecom wires.",
+      "department": "Peru Street Department, Utility Line Trimming, and Parks Department",
+      "description": "Report overgrown branches blocking stop signs or sightlines, fallen limbs blocking roads, or tree limbs threatening power or telecom wires.",
       "icon": "fa-leaf",
       "destinations": {
         "email": "mayorsadmin@cityofperu.org",
@@ -228,13 +290,13 @@
         "keywords": [
           "touching or tangled in electrical",
           "tree limb resting on wires",
-          "resting on wires"
+          "posing immediate fall risk"
         ]
       }
     },
     {
       "id": "stormwater_flooding_drain",
-      "name": "Storm Drains, Flooding & Railroad Underpass (Broadway Tunnel)",
+      "name": "Clogged Storm Drains & Flooding",
       "department": "Peru Utilities - Stormwater & Drainage",
       "description": "Report clogged storm drain catch basins, standing water at the Broadway Tunnel underpass, or localized street flooding.",
       "icon": "fa-cloud-showers-heavy",
@@ -269,8 +331,8 @@
       ],
       "jurisdiction": {
         "excludes": [
-          "street-sanitation-northwest-exclusion",
-          "wabash-flats"
+          "wabash-flats",
+          "street-sanitation-northwest-exclusion"
         ],
         "includes": [
           "boundary-mw5a52rp-1"
@@ -279,8 +341,8 @@
       "emergency": {
         "phone": "(765) 473-5522",
         "keywords": [
-          "railroad underpass (broadway tunnel) deep standing water",
-          "broadway tunnel",
+          "railroad underpass flooded",
+          "broadway tunnel flooded",
           "vehicles cannot pass",
           "deep standing water"
         ]
@@ -290,12 +352,13 @@
       "id": "peru_utilities_water_sewer",
       "name": "Water Main Leaks, Running Water & Sewage Odors",
       "department": "Peru Utilities - Division of Water Management",
-      "description": "Report gushing water leaks, water bubbling from street/curb, low pressure, discolored water, or raw sewage backup/smell.",
+      "description": "Report gushing water leaks, water bubbling from a street or curb, low pressure, discolored water, raw sewage backups, or sewage odors.",
       "icon": "fa-droplet",
       "emergency": {
         "phone": "(765) 473-6681",
         "keywords": [
           "active water main break",
+          "active main break",
           "property threat"
         ]
       },
@@ -341,10 +404,7 @@
         }
       ],
       "jurisdiction": {
-        "excludes": [
-          "street-sanitation-northwest-exclusion",
-          "wabash-flats"
-        ],
+        "excludes": [],
         "includes": [
           "boundary-mw5a52rp-1"
         ]
@@ -354,7 +414,7 @@
       "id": "natural_gas_nipsco",
       "name": "Natural Gas Smell or Pipeline Hazard (NIPSCO)",
       "department": "NIPSCO Gas Emergency Dispatch",
-      "description": "Report suspected natural gas leaks or rotten egg odors. IF YOU SMELL GAS INSIDE OR NEAR BUILDINGS, EVACUATE IMMEDIATELY AND CALL 911.",
+      "description": "Report suspected natural gas leaks or rotten-egg odors. If you smell gas inside or near a building, leave immediately and call 911 from a safe location. For an outdoor leak, call NIPSCO at (800) 634-3524.",
       "icon": "fa-fire-flame-simple",
       "emergency": {
         "enabled": true,
@@ -369,23 +429,11 @@
       },
       "questions": [
         {
-          "id": "gas_hazard_type",
-          "label": "Gas Incident Type",
-          "type": "select",
-          "required": true,
-          "options": [
-            "Outdoor Rotten Egg / Sulfur Smell Near Street or Alley",
-            "Hissing Sound Near Gas Meter or Main Line",
-            "Damaged Gas Line During Excavation / Digging",
-            "Indoor Gas Smell (EVACUATE IMMEDIATELY & CALL 1-800-634-3524 / 911)"
-          ]
-        },
-        {
           "id": "details",
           "label": "Location & Details",
           "type": "textarea",
           "required": false,
-          "placeholder": "From a safe distance, give the location and describe the odor, hissing, or damaged line. Evacuate; do not operate switches or start vehicles. Call 911 or NIPSCO."
+          "placeholder": "From a safe location, give the address and describe the odor, hissing, or damaged line. Do not operate switches or start vehicles. If gas is inside or near a building, leave and call 911; for an outdoor leak, call NIPSCO at (800) 634-3524."
         }
       ]
     },
@@ -445,69 +493,19 @@
           "animal bite",
           "attack"
         ]
-      }
-    },
-    {
-      "id": "parks_recreation",
-      "name": "Parks & Recreation Facilities (Damage, Vandalism, Playgrounds)",
-      "department": "Peru Parks Department (Cliff Helvie, Superintendent)",
-      "description": "Report broken playground equipment, damaged park shelters, trash overflow in parks, or vandalism at Maconaquah Park & municipal facilities.",
-      "icon": "fa-tree",
-      "destinations": {
-        "email": "chelvie@cityofperu.org",
-        "webformUrl": "https://www.cityofperu.org/",
-        "phone": "(765) 472-1432",
-        "address": "Maconaquah Park, Peru, IN 46970",
-        "socialUrl": "https://www.facebook.com/PeruParks"
       },
-      "questions": [
-        {
-          "id": "park_issue",
-          "label": "Park Issue Type",
-          "type": "select",
-          "required": true,
-          "options": [
-            "Damaged / Broken Playground Equipment",
-            "Damaged, Vandalized, or Unsanitary Park Restroom",
-            "Park Shelter / Bench Damage",
-            "Overflowing Trash Receptacles in Park",
-            "Vandalism or Graffiti on Park Structure",
-            "Fallen Tree Branch on Park Trail or Play Area"
-          ]
-        },
-        {
-          "id": "park_name",
-          "label": "Park / Facility Name",
-          "type": "text",
-          "required": true,
-          "placeholder": "e.g. Maconaquah Park, Miami's Fort, Riverwalk, Municipal Golf Course"
-        },
-        {
-          "id": "details",
-          "label": "Specific Location & Context",
-          "type": "textarea",
-          "required": false,
-          "placeholder": "Park and exact location within it; identify the equipment or fixture and describe the damage or sanitation issue."
-        }
-      ],
       "jurisdiction": {
         "includes": [
-          "boundary-mw5a8kio-2",
-          "boundary-maconaquah-park",
-          "boundary-west-city-park",
-          "boundary-peru-river-walkway",
-          "boundary-davis-park",
-          "boundary-eck-park",
-          "boundary-peru-skatepark"
+          "boundary-mw5a52rp-1"
         ],
         "excludes": []
       }
     },
     {
       "id": "peru_utilities_electric",
-      "name": "Electric Power Outage & Street Light Outages",
+      "name": "Power Outages and Streetlight Issues",
       "department": "Peru Utilities Line Department (Michael Biesenbach, T&D Supt)",
-      "description": "Report streetlight outages, flickering or dayburning lights, and damaged transformers. For downed wires, sparks, or smoke, stay at least 30 feet away and call 911.",
+      "description": "Report streetlight outages, flickering lights, lights that remain on during the day, and damaged transformers. For downed wires, sparks, or smoke, stay at least 30 feet away and call 911.",
       "icon": "fa-bolt",
       "emergency": {
         "phone": "911",
@@ -516,7 +514,8 @@
           "electrical sparking",
           "sparking wire",
           "transformer smoking",
-          "open electrical cabinet"
+          "open pad-mount cabinet",
+          "smoke from transformer"
         ]
       },
       "destinations": {
@@ -565,7 +564,7 @@
       "id": "railroad_crossing",
       "name": "Blocked Railroad Crossing (Stopped Trains)",
       "department": "Federal Railroad Administration (FRA) & Local Dispatch",
-      "description": "Report stopped or blocking trains at local grade crossings directly to Federal Railroad Administration safety tracking.",
+      "description": "Report a stopped train using the Federal Railroad Administration's blocked-crossing form. For immediate danger at a crossing, call Miami County Central Dispatch at (765) 473-5522. Call 911 if a person or vehicle is on the tracks or a crossing gate is malfunctioning.",
       "icon": "fa-train",
       "destinations": {
         "email": null,
@@ -598,8 +597,7 @@
             "Fremont St Crossing",
             "Grant St Crossing",
             "Union St Crossing",
-            "Kelly Ave Crossing",
-            "Other Crossing (Include in details)"
+            "Other crossing (describe it below)"
           ]
         },
         {
@@ -607,31 +605,48 @@
           "label": "Train Details / Engine Number (if visible)",
           "type": "textarea",
           "required": false,
-          "placeholder": "e.g. Norfolk Southern train completely stopped across Broadway. Engine # if visible."
+          "placeholder": "Describe the crossing and train location. Include the engine number if visible. For a person or vehicle on the tracks, or a malfunctioning gate, call 911."
         }
       ],
-      "jurisdiction": {
-        "includes": [
-          "boundary-mw5a52rp-1"
-        ],
-        "excludes": []
-      },
       "emergency": {
         "phone": "911",
         "keywords": [
-          "stuck on tracks",
           "vehicle on tracks",
+          "person on tracks",
+          "car on tracks",
+          "truck on tracks",
           "malfunctioning gate",
           "gate broken"
+        ]
+      },
+      "jurisdiction": {
+        "excludes": [
+          "boundary-mw5abl52-3",
+          "boundary-maconaquah-park",
+          "street-sanitation-northwest-exclusion",
+          "boundary-mw5a8kio-2",
+          "wabash-flats",
+          "boundary-peru-skatepark",
+          "boundary-davis-park",
+          "boundary-west-city-park",
+          "boundary-peru-river-walkway",
+          "boundary-eck-park"
+        ],
+        "includes": [
+          "railroad-crossing-benton-st",
+          "railroad-crossing-water-st",
+          "railroad-crossing-tippecanoe-st",
+          "railroad-crossing-fremont-st",
+          "railroad-crossing-grant-st",
+          "railroad-crossing-union-st"
         ]
       }
     },
     {
       "id": "building_code_enforcement",
       "name": "High Grass, Blight, Private Vehicles & Code Violations",
-      "department": "Building & Zoning Dept (Bruce Carson, Comm. / Bill Sheets, Code Enf.)",
-      "description": "Report tall grass (>8 inches), junk/blight accumulation in yards, abandoned/inoperable vehicles, or unsafe structures.",
-      "icon": "fa-house-triangle-exclamation",
+      "department": "Building and Zoning Department (Bruce Carson, Commissioner; Bill Sheets, Code Enforcement)",
+      "description": "Report grass taller than 8 inches, junk or blight in yards, abandoned or inoperable vehicles, or unsafe structures.",
       "destinations": {
         "email": "bcarson@cityofperu.org",
         "webformUrl": "https://peru.portal.iworq.net/PERU/new-case/400/530",
@@ -678,54 +693,14 @@
           "boundary-mw5a52rp-1"
         ],
         "excludes": []
-      }
-    },
-    {
-      "id": "sidewalk_curb_ada",
-      "name": "Sidewalks, Trip Hazards & ADA Curb Aprons",
-      "department": "Peru Street & Building Departments",
-      "description": "Report buckled or cracked sidewalks, severe tripping hazards, sunken curb ramps, or blocked public walkways.",
-      "icon": "fa-person-walking",
-      "destinations": {
-        "email": "mayorsadmin@cityofperu.org",
-        "webformUrl": "https://www.cityofperu.org/egov/apps/action/center.egov?view=form;page=1;id=33",
-        "phone": "(765) 472-2501",
-        "address": "351 E Canal St, Peru, IN 46970",
-        "socialUrl": null
       },
-      "questions": [
-        {
-          "id": "sidewalk_issue",
-          "label": "Walkway Hazard",
-          "type": "select",
-          "required": true,
-          "options": [
-            "Tree Root Buckled Sidewalk / Severe Lipping Hazard",
-            "Cracked / Collapsed / Missing Concrete Slab",
-            "Damaged ADA Curb Ramp / Tactile Mat",
-            "Obstruction Blocking Public Sidewalk Passability"
-          ]
-        },
-        {
-          "id": "details",
-          "label": "Location & Context",
-          "type": "textarea",
-          "required": false,
-          "placeholder": "Street address, height of the raised edge or size of the missing section, and whether the sidewalk is blocked or difficult to pass."
-        }
-      ],
-      "jurisdiction": {
-        "includes": [
-          "boundary-mw5a52rp-1"
-        ],
-        "excludes": []
-      }
+      "icon": "fa-solid fa-wheat-awn-circle-exclamation"
     },
     {
       "id": "police_dispatch",
       "name": "Abandoned Vehicles & Vandalism on Public Property",
       "department": "Peru Police Department / Miami County Central Dispatch",
-      "description": "Report long-term abandoned vehicles on public streets or graffiti and vandalism on public property. For non-emergency reports, email the City or call Dispatch; call 911 for an immediate threat or active incident.",
+      "description": "Report vehicles abandoned on public streets for more than 72 hours, or graffiti and vandalism on public property. Email mayorsadmin@cityofperu.org or call Dispatch at (765) 473-5522. Call 911 for an immediate threat or active incident.",
       "icon": "fa-shield-halved",
       "destinations": {
         "email": "mayorsadmin@cityofperu.org",
@@ -769,11 +744,52 @@
       "emergency": {
         "phone": "911",
         "keywords": [
-          "in progress",
           "active threat",
           "burglary in progress",
-          "active violence"
+          "active violence",
+          "immediate threat"
         ]
+      }
+    },
+    {
+      "id": "sidewalk_curb_ada",
+      "name": "Sidewalks, Trip Hazards & ADA Curb Aprons",
+      "department": "Peru Street & Building Departments",
+      "description": "Report buckled or cracked sidewalks, severe tripping hazards, sunken curb ramps, or blocked public walkways.",
+      "icon": "fa-person-walking",
+      "destinations": {
+        "email": "mayorsadmin@cityofperu.org",
+        "webformUrl": "https://www.cityofperu.org/egov/apps/action/center.egov?view=form;page=1;id=33",
+        "phone": "(765) 472-2501",
+        "address": "351 E Canal St, Peru, IN 46970",
+        "socialUrl": null
+      },
+      "questions": [
+        {
+          "id": "sidewalk_issue",
+          "label": "Walkway Hazard",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Tree Root Buckled Sidewalk / Severe Lipping Hazard",
+            "Cracked / Collapsed / Missing Concrete Slab",
+            "Damaged ADA Curb Ramp / Tactile Mat",
+            "Obstruction Blocking Public Sidewalk Passability"
+          ]
+        },
+        {
+          "id": "details",
+          "label": "Location & Context",
+          "type": "textarea",
+          "required": false,
+          "placeholder": "Street address, height of the raised edge or size of the missing section, and whether the sidewalk is blocked or difficult to pass."
+        }
+      ],
+      "jurisdiction": {
+        "includes": [
+          "boundary-mw5a52rp-1"
+        ],
+        "excludes": []
       }
     },
     {
@@ -821,7 +837,22 @@
           "required": false,
           "placeholder": "e.g. Deep pothole on US 31 northbound ramp at SR 19 exit."
         }
-      ]
+      ],
+      "jurisdiction": {
+        "excludes": [
+          "wabash-flats",
+          "street-sanitation-northwest-exclusion",
+          "boundary-mw5a8kio-2",
+          "boundary-maconaquah-park",
+          "boundary-mw5abl52-3",
+          "boundary-west-city-park",
+          "boundary-peru-river-walkway",
+          "boundary-eck-park",
+          "boundary-davis-park",
+          "boundary-peru-skatepark"
+        ],
+        "includes": []
+      }
     },
     {
       "id": "unlisted_missing_category",

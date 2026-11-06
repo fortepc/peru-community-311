@@ -47,12 +47,16 @@
       "type": "Feature",
       "properties": {
         "id": "street-sanitation-northwest-exclusion",
-        "name": "Street Sanitation - Northwest Exclusion"
+        "name": "Mt. Hope Cemetery"
       },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
+            [
+              -86.082644,
+              40.761805
+            ],
             [
               -86.08449,
               40.76048
@@ -82,8 +86,8 @@
               40.761634
             ],
             [
-              -86.08449,
-              40.76048
+              -86.082644,
+              40.761805
             ]
           ]
         ]
@@ -2741,7 +2745,7 @@
       "type": "Feature",
       "properties": {
         "id": "boundary-mw5abl52-3",
-        "name": "New River Apartments Private Road"
+        "name": "Wabash River Commons"
       },
       "geometry": {
         "type": "Polygon",
@@ -3557,6 +3561,164 @@
             ]
           ]
         ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "railroad-crossing-benton-st",
+        "name": "Benton Street Railroad Crossing Zone",
+        "source": "OpenStreetMap",
+        "osm_node_id": 180573121,
+        "source_url": "https://www.openstreetmap.org/node/180573121",
+        "source_accessed": "2026-11-06"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-86.0587944, 40.759531],
+          [-86.0604715, 40.7590013],
+          [-86.0621486, 40.759531],
+          [-86.0628433, 40.76081],
+          [-86.0621486, 40.762089],
+          [-86.0604715, 40.7626187],
+          [-86.0587944, 40.762089],
+          [-86.0580997, 40.76081],
+          [-86.0587944, 40.759531]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "railroad-crossing-water-st",
+        "name": "Water Street Railroad Crossing Zone",
+        "source": "OpenStreetMap",
+        "osm_node_id": 180573115,
+        "source_url": "https://www.openstreetmap.org/node/180573115",
+        "source_accessed": "2026-11-06"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-86.0621096, 40.7586527],
+          [-86.0637867, 40.758123],
+          [-86.0654638, 40.7586527],
+          [-86.0661585, 40.7599317],
+          [-86.0654638, 40.7612107],
+          [-86.0637867, 40.7617404],
+          [-86.0621096, 40.7612107],
+          [-86.0614149, 40.7599317],
+          [-86.0621096, 40.7586527]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "railroad-crossing-tippecanoe-st",
+        "name": "Tippecanoe Street Railroad Crossing Zone",
+        "source": "OpenStreetMap",
+        "osm_node_id": 180573113,
+        "source_url": "https://www.openstreetmap.org/node/180573113",
+        "source_accessed": "2026-11-06"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-86.0637859, 40.7582025],
+          [-86.065463, 40.7576728],
+          [-86.0671401, 40.7582025],
+          [-86.0678348, 40.7594815],
+          [-86.0671401, 40.7607605],
+          [-86.065463, 40.7612902],
+          [-86.0637859, 40.7607605],
+          [-86.0630912, 40.7594815],
+          [-86.0637859, 40.7582025]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "railroad-crossing-fremont-st",
+        "name": "Fremont Street Railroad Crossing Zone",
+        "source": "OpenStreetMap",
+        "osm_node_id": 180572227,
+        "source_url": "https://www.openstreetmap.org/node/180572227",
+        "source_accessed": "2026-11-06"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-86.0765674, 40.7538338],
+          [-86.0782445, 40.7533041],
+          [-86.0799216, 40.7538338],
+          [-86.0806163, 40.7551128],
+          [-86.0799216, 40.7563918],
+          [-86.0782445, 40.7569215],
+          [-86.0765674, 40.7563918],
+          [-86.0758727, 40.7551128],
+          [-86.0765674, 40.7538338]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "railroad-crossing-grant-st",
+        "name": "Grant Street Railroad Crossing Zone",
+        "source": "OpenStreetMap",
+        "osm_node_id": 180572225,
+        "source_url": "https://www.openstreetmap.org/node/180572225",
+        "source_accessed": "2026-11-06"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-86.0794681, 40.7523732],
+          [-86.0811452, 40.7518435],
+          [-86.0828223, 40.7523732],
+          [-86.083517, 40.7536522],
+          [-86.0828223, 40.7549312],
+          [-86.0811452, 40.7554609],
+          [-86.0794681, 40.7549312],
+          [-86.0787734, 40.7536522],
+          [-86.0794681, 40.7523732]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "railroad-crossing-union-st",
+        "name": "Union Street Railroad Crossing Zone",
+        "source": "OpenStreetMap",
+        "osm_node_id": 180572224,
+        "source_url": "https://www.openstreetmap.org/node/180572224",
+        "source_accessed": "2026-11-06"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-86.0832038, 40.7504833],
+          [-86.0848809, 40.7499536],
+          [-86.086558, 40.7504833],
+          [-86.0867772, 40.7508869],
+          [-86.08673, 40.7509071],
+          [-86.085704, 40.7513671],
+          [-86.0848967, 40.7517742],
+          [-86.0848948, 40.7517758],
+          [-86.0848941, 40.7517779],
+          [-86.0848957, 40.7517811],
+          [-86.0850267, 40.7518861],
+          [-86.0851367, 40.7519761],
+          [-86.0864664, 40.7530702],
+          [-86.0848809, 40.753571],
+          [-86.0832038, 40.7530413],
+          [-86.0825091, 40.7517623],
+          [-86.0832038, 40.7504833]
+        ]]
       }
     }
   ]
