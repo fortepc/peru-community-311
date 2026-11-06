@@ -5,7 +5,7 @@
     {
       "id": "wabash-flats-road",
       "name": "Wabash Flats Road Issue",
-      "department": "River Valley Communities LLC,  Jim Griebel",
+      "department": "River Valley Communities LLC, Jim Griebel",
       "description": "Report potholes, asphalt damage, roadkill removal on street/alley, fallen road debris, or missed trash collection.",
       "icon": "fa-city",
       "destinations": {
@@ -38,8 +38,7 @@
             "No - Traffic moving normally",
             "Partially - Drivers must slow down or swerve",
             "Completely - Lane or alley completely blocked"
-          ],
-          "placeholder": "No - Traffic moving normally"
+          ]
         },
         {
           "id": "details",
@@ -61,7 +60,7 @@
       "name": "Street Surface & Debris (Potholes, Obstructions, Missed Collection)",
       "department": "Street & Sanitation Department (Brian Stillings, Commissioner)",
       "description": "Report potholes, asphalt damage, fallen road debris, or missed residential trash, recycling, and yard-waste collection.",
-      "icon": "road-circle-xmark",
+      "icon": "fa-road-circle-xmark",
       "destinations": {
         "email": "brians@cityofperu.org",
         "webformUrl": "https://www.cityofperu.org/egov/apps/action/center.egov?view=form;page=1;id=5",
@@ -157,6 +156,16 @@
         "includes": [
           "boundary-mw5a52rp-1"
         ]
+      },
+      "emergency": {
+        "phone": "911",
+        "keywords": [
+          "damaged or knocked-down stop / yield sign",
+          "knocked-down stop",
+          "knocked down stop",
+          "traffic signal dark",
+          "signal dark"
+        ]
       }
     },
     {
@@ -213,6 +222,14 @@
         "includes": [
           "boundary-mw5a52rp-1"
         ]
+      },
+      "emergency": {
+        "phone": "911",
+        "keywords": [
+          "touching or tangled in electrical",
+          "tree limb resting on wires",
+          "resting on wires"
+        ]
       }
     },
     {
@@ -257,6 +274,15 @@
         ],
         "includes": [
           "boundary-mw5a52rp-1"
+        ]
+      },
+      "emergency": {
+        "phone": "(765) 473-5522",
+        "keywords": [
+          "railroad underpass (broadway tunnel) deep standing water",
+          "broadway tunnel",
+          "vehicles cannot pass",
+          "deep standing water"
         ]
       }
     },
@@ -409,7 +435,17 @@
           "required": false,
           "placeholder": "For a loose dog, call Dispatch at (765) 473-5522. Otherwise give the address or cross streets, animal type, condition, and whether it is in a lane or on the shoulder. Do not approach an aggressive animal."
         }
-      ]
+      ],
+      "emergency": {
+        "phone": "(765) 473-5522",
+        "keywords": [
+          "stray or aggressive dog / loose dog in traffic",
+          "aggressive dog",
+          "loose dog in traffic",
+          "animal bite",
+          "attack"
+        ]
+      }
     },
     {
       "id": "parks_recreation",
@@ -456,7 +492,13 @@
       ],
       "jurisdiction": {
         "includes": [
-          "boundary-mw5a8kio-2"
+          "boundary-mw5a8kio-2",
+          "boundary-maconaquah-park",
+          "boundary-west-city-park",
+          "boundary-peru-river-walkway",
+          "boundary-davis-park",
+          "boundary-eck-park",
+          "boundary-peru-skatepark"
         ],
         "excludes": []
       }
@@ -553,7 +595,7 @@
             "Benton St Crossing",
             "Water St Crossing",
             "Tippecanoe St Crossing",
-            "Freemont St Crossing",
+            "Fremont St Crossing",
             "Grant St Crossing",
             "Union St Crossing",
             "Kelly Ave Crossing",
@@ -573,6 +615,15 @@
           "boundary-mw5a52rp-1"
         ],
         "excludes": []
+      },
+      "emergency": {
+        "phone": "911",
+        "keywords": [
+          "stuck on tracks",
+          "vehicle on tracks",
+          "malfunctioning gate",
+          "gate broken"
+        ]
       }
     },
     {
@@ -714,6 +765,15 @@
           "boundary-mw5a52rp-1"
         ],
         "excludes": []
+      },
+      "emergency": {
+        "phone": "911",
+        "keywords": [
+          "in progress",
+          "active threat",
+          "burglary in progress",
+          "active violence"
+        ]
       }
     },
     {
