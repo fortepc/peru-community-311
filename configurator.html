@@ -29,6 +29,7 @@
 			--shadow: var(--ui-shadow);
 		}
 		* { box-sizing: border-box; }
+		[hidden] { display: none !important; }
 		body {
 			margin: 0;
 			color: var(--ink);
@@ -87,8 +88,34 @@
 		.intro-note { max-width: 390px; margin: 0; color: var(--muted); font-size: 13px; }
 		.status { min-height: 22px; margin: 0 0 14px; color: var(--ui-muted); font-size: 13px; }
 		.status.error { color: #b91c1c; }
-				.config-panel, .category-panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--ui-radius-lg); box-shadow: var(--shadow); }
+		.config-panel, .category-panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--ui-radius-lg); box-shadow: var(--shadow); }
 		.config-panel { padding: 20px; margin-bottom: 20px; }
+		.boundary-panel { margin-bottom: 20px; }
+		.data-source { margin-left: 8px; color: var(--muted); font-size: 11px; }
+		.data-dialog { width: min(680px, calc(100vw - 24px)); max-height: min(84vh, 760px); padding: 0; border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 18px 60px rgb(15 23 42 / 25%); }
+		.data-dialog::backdrop { background: rgb(15 23 42 / 58%); }
+		.dialog-head, .dialog-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 19px; }
+		.dialog-head { border-bottom: 1px solid var(--line); }
+		.dialog-head h2 { margin: 0; font-size: 18px; }
+		.dialog-body { display: grid; gap: 18px; padding: 18px 19px; overflow: auto; }
+		.dialog-foot { justify-content: flex-end; border-top: 1px solid var(--line); }
+		.data-file-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 8px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+		.data-file-row:last-child { border-bottom: 0; }
+		.data-file-row strong { overflow-wrap: anywhere; font-size: 13px; }
+		.dialog-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+		.boundary-map-tools { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; margin-bottom: 10px; }
+		.boundary-map-tools .field { width: min(280px, 100%); }
+		.boundary-list { display: grid; gap: 6px; margin-top: 12px; }
+		.boundary-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: start; gap: 9px; padding: 8px; background: #f9fafb; border: 1px solid var(--line); border-radius: 6px; }
+		.boundary-details { display: grid; min-width: 0; gap: 5px; }
+		.boundary-usage { color: var(--muted); font-size: 11px; }
+		.boundary-usage ul { margin: 2px 0 0; padding-left: 18px; }
+		.boundary-usage li { padding: 1px 0; }
+		.boundary-picker { display: grid; gap: 8px; }
+		.boundary-picker-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; max-height: 180px; overflow: auto; padding: 8px; background: #f9fafb; border: 1px solid var(--line); border-radius: 6px; }
+		.boundary-choice { display: grid; grid-template-columns: 16px minmax(0, 1fr); align-items: start; gap: 7px; min-width: 0; padding: 4px; font-size: 12px; }
+		.boundary-choice span { display: block; min-width: 0; overflow-wrap: anywhere; white-space: normal; }
+		.boundary-choice input { flex: 0 0 auto; accent-color: var(--ui-indigo); }
 		.section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
 		.section-heading h3 { margin: 0; font-size: 18px; line-height: 1.25; font-weight: 700; }
 		.section-heading p { margin: 0; color: var(--muted); font-size: 12px; }
@@ -231,6 +258,11 @@
 			.question-grid { grid-template-columns: 1fr; }
 			.question-grid .remove-question { justify-self: start; }
 			.map-tools .field { width: 100%; margin: 4px 0 0; }
+			.boundary-map-tools .field { width: 100%; }
+			.boundary-picker-list { grid-template-columns: 1fr; }
+			.boundary-row { grid-template-columns: auto minmax(0, 1fr) auto; }
+			.data-file-row { grid-template-columns: minmax(0, 1fr) auto; }
+			.data-file-row strong { grid-column: 1 / -1; }
 			.section-heading { align-items: flex-start; flex-direction: column; }
 			.span-2 { grid-column: span 2; }
 		}
@@ -243,27 +275,56 @@
 			<div><h1>Community 311</h1><p>White-label configuration editor</p></div>
 		</div>
 		<div class="actions">
-			<button class="button" id="import-button" type="button">Import 3 files</button>
-			<button class="button" id="copy-button" type="button">Copy templates</button>
-			<button class="button" id="export-config-button" type="button">Download config.json</button>
-			<button class="button" id="export-templates-button" type="button">Download templates.json</button>
-			<button class="button primary" id="export-boundaries-button" type="button">Download boundaries.geojson</button>
-			<input id="import-file" type="file" accept=".json,.geojson,application/json,application/geo+json" multiple hidden>
+			<button class="button primary" id="data-button" type="button">Import / Export</button>
 		</div>
 	</header>
+
+	<dialog class="data-dialog" id="data-dialog" aria-labelledby="data-dialog-title">
+		<div class="dialog-head"><h2 id="data-dialog-title">Import and export files</h2><button class="button small" type="button" data-close-dialog aria-label="Close data dialog">Close</button></div>
+		<div class="dialog-body">
+			<section aria-labelledby="deployment-data-title">
+				<div class="section-heading"><h3 id="deployment-data-title">Current deployment</h3><span class="data-source" id="data-source"></span></div>
+				<p class="map-hint">Load the three files beside this configurator. Existing edits are never replaced without confirmation.</p>
+				<button class="button" type="button" id="load-deployment-button">Load current deployment</button>
+			</section>
+			<section aria-labelledby="individual-files-title">
+				<div class="section-heading"><h3 id="individual-files-title">Individual files</h3></div>
+				<div class="data-file-row"><strong>config.json</strong><button class="button small" type="button" data-import-file="config">Import</button><button class="button small" type="button" data-export-file="config">Export</button></div>
+				<div class="data-file-row"><strong>boundaries.geojson</strong><button class="button small" type="button" data-import-file="boundaries">Import</button><button class="button small" type="button" data-export-file="boundaries">Export</button></div>
+				<div class="data-file-row"><strong>templates.json</strong><button class="button small" type="button" data-import-file="templates">Import</button><button class="button small" type="button" data-export-file="templates">Export</button></div>
+			</section>
+			<section aria-labelledby="all-files-title">
+				<div class="section-heading"><h3 id="all-files-title">All deployment files</h3></div>
+				<div class="dialog-actions"><button class="button" type="button" id="import-all-button">Import all</button><button class="button primary" type="button" id="export-all-button">Export all</button><button class="button" type="button" id="copy-templates-button">Copy templates</button><button class="button danger" type="button" id="clear-all-button">Start from scratch</button></div>
+			</section>
+			<input id="single-import-file" type="file" accept=".json,.geojson,application/json,application/geo+json" hidden>
+			<input id="all-import-files" type="file" accept=".json,.geojson,application/json,application/geo+json" multiple hidden>
+		</div>
+		<div class="dialog-foot"><button class="button" type="button" data-close-dialog>Done</button></div>
+	</dialog>
 
 	<main>
 		<div class="intro">
 			<div><p class="eyebrow">Configuration editor</p><h2>Build your report templates.</h2></div>
-			<p class="intro-note">Import <strong>config.json</strong>, <strong>templates.json</strong>, and <strong>boundaries.geojson</strong> together, edit them locally, then download the updated files. Online map layers use public tile services.</p>
+			<p class="intro-note">Configure the site, define shared service boundaries, then assign them to report categories. Online map layers use public tile services.</p>
 		</div>
-		<p id="status" class="status" role="status" aria-live="polite">Start with a blank configuration or import all three deployment files.</p>
+		<p id="status" class="status" role="status" aria-live="polite">Loading the current deployment, or preparing a blank configuration.</p>
 
 		<section class="config-panel" aria-labelledby="settings-title">
-				<div class="section-heading"><h3 id="settings-title">Site settings</h3><p>Deployment identity, map defaults, and report email templates</p></div>
+				<div class="section-heading"><h3 id="settings-title">1. Site settings</h3><p>Deployment identity and map defaults</p></div>
 			<div class="settings-grid" id="settings-grid"></div>
 				<p class="map-hint">The configurator itself does not load or send analytics; this Measurement ID is used only by the public 311 page.</p>
 				<p class="map-hint">Before publishing this Measurement ID, turn off GA4 Enhanced Measurement for this data stream. Automatic page and outbound-click events can expose draft URLs or report email content.</p>
+		</section>
+
+		<section class="config-panel boundary-panel" aria-labelledby="boundaries-title">
+			<div class="section-heading"><h3 id="boundaries-title">2. Service boundaries</h3><p>Name each area once, then reuse it across categories</p></div>
+			<div id="boundary-editor"></div>
+		</section>
+
+		<section class="config-panel" aria-labelledby="templates-title">
+			<div class="section-heading"><h3 id="templates-title">3. Report templates</h3><p>Default report email and category-specific workflows</p></div>
+			<div class="settings-grid" id="template-default-fields"></div>
 		</section>
 
 		<div class="editor-layout">
@@ -303,13 +364,22 @@
 
 			const AUTOSAVE_KEY = "community_311_config_autosave_v2";
 			let autosaveTimer = null;
+			let editRevision = 0;
+			let dataDirty = false;
 			function triggerAutosave() {
+				editRevision += 1;
+				dataDirty = true;
+				syncDataSource();
 				clearTimeout(autosaveTimer);
 				autosaveTimer = setTimeout(() => {
-					try {
-						localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({ siteConfig, templates: config, boundaries: boundaryCollection }));
-					} catch (e) {}
+					persistDraft();
 				}, 400);
+			}
+
+			function persistDraft() {
+				try {
+					localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({ siteConfig, templates: config, boundaries: boundaryCollection, source: dataSource, drawingBoundaryName }));
+				} catch (e) {}
 			}
 
 			function getSavedDraft() {
@@ -326,6 +396,8 @@
 			}
 
 			const savedDraft = getSavedDraft();
+			let dataSource = savedDraft?.source || (savedDraft ? "Autosaved draft" : "Blank configuration");
+			let drawingBoundaryName = savedDraft?.drawingBoundaryName || "";
 			let siteConfig = savedDraft?.siteConfig || blankSiteConfig();
 			let config = savedDraft?.templates || blankConfig();
 			let boundaryCollection = savedDraft?.boundaries || blankBoundaries();
@@ -333,7 +405,6 @@
 			let drawing = false;
 			let draftPoints = [];
 			let mapRadiusMiles = 2.5;
-			let jurisdictionTarget = "includes";
 			let onlineMapReady = false;
 			let leafletMap = null;
 			let polygonLayer = null;
@@ -359,24 +430,10 @@
 			const safeArray = (value) => Array.isArray(value) ? value : [];
 			const boundaryById = (id) => boundaryCollection.features.find((feature) => feature.properties?.id === id) || null;
 			const categoryBoundaryIds = (category, key) => safeArray(category?.jurisdiction?.[key]);
-			const addBoundaryFeature = (category, key, geometry, name) => {
+			const addBoundaryFeature = (geometry, name) => {
 				const id = createBoundaryId();
-				boundaryCollection.features.push({ type: "Feature", properties: { id, name }, geometry });
-				category.jurisdiction = category.jurisdiction || {};
-				category.jurisdiction[key] = safeArray(category.jurisdiction[key]);
-				category.jurisdiction[key].push(id);
+				boundaryCollection.features.push({ type: "Feature", properties: { id, name: name.trim() }, geometry });
 				return id;
-			};
-			const removeBoundaryReference = (category, key, index) => {
-				const ids = categoryBoundaryIds(category, key);
-				const [id] = ids.splice(index, 1);
-				if (!id) return false;
-				const stillReferenced = config.categories.some((item) =>
-					categoryBoundaryIds(item, "includes").includes(id) || categoryBoundaryIds(item, "excludes").includes(id)
-				);
-				if (!stillReferenced) boundaryCollection.features = boundaryCollection.features.filter((feature) => feature.properties?.id !== id);
-				if (!categoryBoundaryIds(category, "includes").length && !categoryBoundaryIds(category, "excludes").length) delete category.jurisdiction;
-				return true;
 			};
 			let boundaryIdCounter = 0;
 			const createBoundaryId = () => {
@@ -394,6 +451,22 @@
 				jurisdiction.excludes = safeArray(jurisdiction.excludes);
 				if (!jurisdiction.includes.length && !jurisdiction.excludes.length) delete category.jurisdiction;
 			};
+			const boundaryNameError = (name, exceptId = null) => {
+				const normalized = String(name ?? "").trim().toLocaleLowerCase();
+				if (!normalized) return "Every boundary needs a name.";
+				if (boundaryCollection.features.some((feature) => feature.properties?.id !== exceptId && String(feature.properties?.name ?? "").trim().toLocaleLowerCase() === normalized)) {
+					return `A boundary named "${String(name).trim()}" already exists.`;
+				}
+				return "";
+			};
+			const boundaryReferences = (id) => config.categories.flatMap((category) => {
+				const keys = ["includes", "excludes"].filter((key) => categoryBoundaryIds(category, key).includes(id));
+				return keys.map((key) => `${category.name || category.id || "Untitled category"} (${key === "includes" ? "allowed" : "excluded"})`);
+			});
+			function syncDataSource() {
+				const label = $("#data-source");
+				if (label) label.textContent = `${dataSource}${dataDirty ? " · edited locally" : " · saved in this browser"}`;
+			}
 
 			function renderSettings() {
 				const center = siteConfig.mapCenter || (siteConfig.mapCenter = { lat: 39.8283, lng: -98.5795 });
@@ -412,14 +485,69 @@
 					["Center longitude", "siteConfig.mapCenter.lng", center.lng, "number"],
 					["Site contact email", "siteConfig.contactEmail", siteConfig.contactEmail, "email"],
 					["Repository URL", "siteConfig.repositoryUrl", siteConfig.repositoryUrl, "url"],
-					["Deployment URL", "siteConfig.deploymentUrl", siteConfig.deploymentUrl, "url"],
-					["Email subject template", "templates.emailSubjectTemplate", config.emailSubjectTemplate, "text", "span-2"],
-					["Email body template", "templates.emailTemplate", config.emailTemplate, "textarea", "span-4"]
+					["Deployment URL", "siteConfig.deploymentUrl", siteConfig.deploymentUrl, "url"]
 				];
 				$("#settings-grid").innerHTML = fields.map(([label, path, value, type, span = ""]) => `
 					<label class="field ${span}"><span>${label}</span>${type === "textarea"
 						? `<textarea data-setting="${path}">${escapeHtml(value ?? "")}</textarea>`
 						: `<input data-setting="${path}" type="${type}" value="${escapeHtml(value ?? "")}" step="any">`}</label>`).join("");
+			}
+
+			function renderTemplateDefaults() {
+				const fields = [
+					["Default email subject", "templates.emailSubjectTemplate", config.emailSubjectTemplate, "text", "span-2"],
+					["Default email body", "templates.emailTemplate", config.emailTemplate, "textarea", "span-4"]
+				];
+				$("#template-default-fields").innerHTML = fields.map(([label, path, value, type, span]) => `
+					<label class="field ${span}"><span>${label}</span>${type === "textarea"
+						? `<textarea data-setting="${path}">${escapeHtml(value ?? "")}</textarea>`
+						: `<input data-setting="${path}" type="${type}" value="${escapeHtml(value ?? "")}">`}</label>`).join("");
+			}
+
+			function renderBoundaryEditor() {
+				const editor = $("#boundary-editor");
+				if (!editor) return;
+				editor.innerHTML = `
+					<div class="boundary-map-tools">
+						<label class="field"><span>New boundary name</span><input type="text" data-new-boundary-name value="${escapeHtml(drawingBoundaryName)}" placeholder="e.g. North service area" required></label>
+						<button type="button" class="button primary small" data-action="draw-polygon">${drawing ? "Drawing..." : "Draw boundary"}</button>
+						<button type="button" class="button small" data-action="finish-polygon" ${drawing ? "" : "disabled"}>Finish boundary</button>
+						<button type="button" class="button small" data-action="undo-point" ${draftPoints.length ? "" : "disabled"}>Undo point</button>
+						<button type="button" class="button small" data-action="edit-polygons" ${canUseLeafletMap() && boundaryCollection.features.length ? "" : "disabled"}>Edit vertices</button>
+						<button type="button" class="button small" data-action="save-polygon-edits" disabled>Save edits</button>
+						<label class="field"><span>Canvas radius (miles)</span><input type="number" min="0.1" max="100" step="0.1" value="${mapRadiusMiles}" data-map-radius></label>
+					</div>
+					<div class="map-tools map-online-tools" hidden>
+						<div class="map-view-buttons" role="group" aria-label="Map view">
+							<button type="button" class="button small selected" data-map-view="streets">Street map</button>
+							<button type="button" class="button small" data-map-view="satellite">Satellite</button>
+						</div>
+						<span class="map-hint">Online tiles load only when available.</span>
+					</div>
+					<div class="map-wrap"><svg id="jurisdiction-map" viewBox="0 0 800 460" role="img" aria-label="Offline service boundary drawing canvas"><g id="map-content"></g></svg></div>
+					<div class="leaflet-map-wrap"><div id="leaflet-map" aria-label="Online map for drawing service boundaries"></div></div>
+					<p class="map-hint" id="map-help">${drawing ? "Click the canvas to add boundary points, then finish the boundary." : "The orange marker is the configured default map center. Draw and name each allowed or excluded service area here."}</p>
+					<div class="boundary-list" id="polygon-list"></div>`;
+				renderMap();
+				renderPolygonList();
+				syncMapViews();
+				if (canUseLeafletMap()) mountLeafletMap();
+			}
+
+			function renderBoundaryPicker(category, key, label) {
+				const selected = new Set(categoryBoundaryIds(category, key));
+				const choices = boundaryCollection.features.map((feature) => {
+					const id = feature.properties.id;
+					const name = feature.properties.name || "Unnamed boundary";
+					return `<label class="boundary-choice" data-boundary-choice data-search-name="${escapeHtml(name.toLocaleLowerCase())}">
+						<input type="checkbox" data-category-boundary="${key}" data-boundary-id="${escapeHtml(id)}" ${selected.has(id) ? "checked" : ""}>
+						<span title="${escapeHtml(name)}">${escapeHtml(name)}</span>
+					</label>`;
+				}).join("");
+				return `<div class="field span-2 boundary-picker"><span>${label}</span>
+					<input type="search" data-boundary-search="${key}" placeholder="Search boundaries" aria-label="Search ${label.toLowerCase()}">
+					<div class="boundary-picker-list">${choices || '<span class="map-hint">Create boundaries in section 2 first.</span>'}</div>
+				</div>`;
 			}
 
 			function renderCategoryList() {
@@ -486,40 +614,11 @@
 						<section class="subsection"><div class="subsection-head"><div><h4>Follow-up questions</h4><p>Question IDs must be unique within this category.</p></div><button type="button" class="button small" data-action="add-question">+ Add question</button></div>
 							<div class="question-list">${questions.map((question, index) => renderQuestion(question, index)).join("") || '<p class="map-hint">No questions yet.</p>'}</div>
 						</section>
-						<section class="subsection"><div class="subsection-head"><div><h4>Jurisdiction</h4><p>Optional polygon coverage for future location-based category filtering.</p></div></div>
-							<p class="jurisdiction-copy">Draw one or more allowed service-area polygons and, if needed, excluded polygons for areas such as private roads, gated communities, or non-city rights-of-way. Exported values remain GeoJSON Polygon objects in <strong>longitude, latitude</strong> order.</p>
-							<div class="map-tools">
-								<label class="field" style="width:190px; margin-right:4px;">
-									<span>Polygon target</span>
-									<select data-jurisdiction-target>
-											<option value="includes" ${jurisdictionTarget === "includes" ? "selected" : ""}>Allowed areas</option>
-											<option value="excludes" ${jurisdictionTarget === "excludes" ? "selected" : ""}>Excluded areas</option>
-									</select>
-								</label>
-								<button type="button" class="button small primary" data-action="draw-polygon">${drawing ? "Drawing..." : "Draw polygon"}</button>
-								<button type="button" class="button small" data-action="finish-polygon" ${drawing ? "" : "disabled"}>Finish polygon</button>
-								<button type="button" class="button small" data-action="undo-point" ${draftPoints.length ? "" : "disabled"}>Undo point</button>
-								<button type="button" class="button small" data-action="edit-polygons" ${canUseLeafletMap() && (safeArray(category.jurisdiction?.includes).length || safeArray(category.jurisdiction?.excludes).length) ? "" : "disabled"}>Edit vertices</button>
-								<button type="button" class="button small" data-action="save-polygon-edits" disabled>Save edits</button>
-								<label class="field"><span>Canvas radius (miles)</span><input type="number" min="0.1" max="100" step="0.1" value="${mapRadiusMiles}" data-map-radius></label>
-							</div>
-							<div class="map-tools map-online-tools" hidden>
-								<div class="map-view-buttons" role="group" aria-label="Map view">
-									<button type="button" class="button small selected" data-map-view="streets">Street map</button>
-									<button type="button" class="button small" data-map-view="satellite">Satellite</button>
-								</div>
-								<span class="map-hint">Online tiles load only when available.</span>
-							</div>
-							<div class="map-wrap"><svg id="jurisdiction-map" viewBox="0 0 800 460" role="img" aria-label="Offline jurisdiction polygon drawing canvas"><g id="map-content"></g></svg></div>
-							<div class="leaflet-map-wrap"><div id="leaflet-map" aria-label="Online map for drawing jurisdiction polygons"></div></div>
-							<p class="map-hint" id="map-help">${drawing ? "Click the canvas to add boundary points, then finish the polygon." : "The orange marker is the configured default map center. Set the center under Site settings; this canvas uses a local coordinate grid and needs no map service."}</p>
-							<div class="polygon-list" id="polygon-list"></div>
+						<section class="subsection"><div class="subsection-head"><div><h4>Jurisdiction</h4><p>Optional category coverage. Empty Allowed selection means available everywhere except exclusions.</p></div></div>
+							<p class="jurisdiction-copy">Select named boundaries created in section 2. Allowed areas combine; excluded areas always take precedence.</p>
+							<div class="settings-grid">${renderBoundaryPicker(category, "includes", "Allowed boundaries")}${renderBoundaryPicker(category, "excludes", "Excluded boundaries")}</div>
 						</section>
 					</div>`;
-				renderMap();
-				renderPolygonList();
-				syncMapViews();
-				if (canUseLeafletMap()) mountLeafletMap();
 			}
 
 			function renderQuestion(question, index) {
@@ -572,10 +671,6 @@
 				return polygonColors[paletteIndex] || `hsl(${Math.round((paletteIndex * 137.508) % 360)} 68% 42%)`;
 			}
 
-			function defaultPolygonName(key, index) {
-				return `${key === "excludes" ? "Excluded" : "Allowed"} area ${index + 1}`;
-			}
-
 			function canUseLeafletMap() {
 				return onlineMapReady && navigator.onLine;
 			}
@@ -587,14 +682,9 @@
 				const grid = [];
 				for (let x = 30; x <= 770; x += 74) grid.push(`<line class="map-grid" x1="${x}" y1="24" x2="${x}" y2="436"/>`);
 				for (let y = 46; y <= 414; y += 61) grid.push(`<line class="map-grid" x1="30" y1="${y}" x2="770" y2="${y}"/>`);
-				const polygonGroups = ["includes", "excludes"];
-				const polygons = polygonGroups.flatMap((key) => {
-					const items = categoryBoundaryIds(currentCategory(), key);
-					return items.map((id, index) => {
-						const polygon = boundaryById(id);
-						const ring = polygon?.geometry?.type === "Polygon" ? polygon.geometry.coordinates?.[0] : null;
-						return Array.isArray(ring) && ring.length > 2 ? `<path class="map-polygon" style="--polygon-color:${colorForPolygon(index, key)}" d="${pathForRing(ring)}"/>` : "";
-					});
+				const polygons = boundaryCollection.features.map((feature, index) => {
+					const ring = feature?.geometry?.type === "Polygon" ? feature.geometry.coordinates?.[0] : null;
+					return Array.isArray(ring) && ring.length > 2 ? `<path class="map-polygon" style="--polygon-color:${colorForPolygon(index)}" d="${pathForRing(ring)}"/>` : "";
 				}).join("");
 				const draftPath = draftPoints.length ? `<path class="${drawing ? "map-drawing" : "map-polygon"}" d="${draftPoints.map((point, index) => `${index ? "L" : "M"}${point.x},${point.y}`).join(" ")}${drawing ? "" : " Z"}"/>${draftPoints.map((point) => `<circle class="map-point" cx="${point.x}" cy="${point.y}" r="5"/>`).join("")}` : "";
 				const marker = geoToPoint(Number(center.lat), Number(center.lng));
@@ -604,46 +694,38 @@
 			function renderPolygonList() {
 				const list = $("#polygon-list");
 				if (!list) return;
-				const category = currentCategory();
-				const jurisdiction = category?.jurisdiction || {};
-				const groups = [
-					{ key: "includes", label: "Allowed" },
-					{ key: "excludes", label: "Excluded" }
-				];
-				const entries = groups.flatMap(({ key, label }) => {
-					const polygonIds = safeArray(jurisdiction[key]);
-					return polygonIds.map((id, index) => {
-						const polygon = boundaryById(id);
-						return `
-						<div class="polygon-row">
-							<i class="polygon-swatch" style="background:${colorForPolygon(index, key)}" aria-hidden="true"></i>
-							<input class="polygon-name-input" type="text" data-polygon-name data-polygon-key="${key}" data-polygon-index="${index}" value="${escapeHtml(polygon?.properties?.name || "")}" placeholder="${label} area ${index + 1}" aria-label="Name for ${label.toLowerCase()} polygon ${index + 1}">
-							<span class="polygon-points">${safeArray(polygon?.geometry?.coordinates?.[0]).length} points</span>
-							<button type="button" class="button danger small" data-action="delete-polygon" data-polygon-key="${key}" data-polygon-index="${index}">Remove</button>
+				const entries = boundaryCollection.features.map((feature, index) => {
+					const id = feature.properties.id;
+					const references = boundaryReferences(id);
+					return `<div class="boundary-row">
+						<i class="polygon-swatch" style="background:${colorForPolygon(index)}" aria-hidden="true"></i>
+						<div class="boundary-details">
+							<input class="polygon-name-input" type="text" data-boundary-name="${escapeHtml(id)}" value="${escapeHtml(feature.properties.name || "")}" aria-label="Name for boundary ${index + 1}" required>
+							<div class="boundary-usage"><div>${safeArray(feature.geometry?.coordinates?.[0]).length} points</div>${references.length ? `<div>Used by:</div><ul>${references.map((reference) => `<li>${escapeHtml(reference)}</li>`).join("")}</ul>` : "<div>Not assigned</div>"}</div>
 						</div>
-						`;
-					});
+						<button type="button" class="button danger small" data-action="delete-boundary" data-boundary-id="${escapeHtml(id)}">Remove</button>
+					</div>`;
 				});
-				list.innerHTML = entries.length ? entries.join("") : '<div class="map-hint">No polygons yet. Allowed areas are active by default; excluded polygons can be used for private roads or gated service exclusions.</div>';
+				list.innerHTML = entries.length ? entries.join("") : '<div class="map-hint">No boundaries yet. Name a service area and draw its polygon above.</div>';
 			}
 
 			function syncMapViews() {
-				const offlineWrap = $(".map-wrap", $("#category-editor"));
-				const leafletWrap = $(".leaflet-map-wrap", $("#category-editor"));
-				const viewControls = $(".map-online-tools", $("#category-editor"));
+				const offlineWrap = $(".map-wrap", $("#boundary-editor"));
+				const leafletWrap = $(".leaflet-map-wrap", $("#boundary-editor"));
+				const viewControls = $(".map-online-tools", $("#boundary-editor"));
 				if (!offlineWrap || !leafletWrap || !viewControls) return;
 				const showOnline = canUseLeafletMap();
 				viewControls.hidden = !showOnline;
 				offlineWrap.style.display = showOnline ? "none" : "block";
 				leafletWrap.style.display = showOnline ? "block" : "none";
 				$("#leaflet-map").style.display = showOnline ? "block" : "none";
-				const radiusField = $("[data-map-radius]", $("#category-editor"))?.closest(".field");
+				const radiusField = $("[data-map-radius]", $("#boundary-editor"))?.closest(".field");
 				if (radiusField) radiusField.hidden = showOnline;
 				document.querySelectorAll("[data-map-view]").forEach((button) => button.classList.toggle("selected", button.dataset.mapView === mapView));
 				const help = $("#map-help");
 				if (help) {
 					help.textContent = showOnline
-						? "Street and satellite tiles are provided by OpenStreetMap and Esri. Attribution is shown on the map. Drag existing vertices to reshape a polygon; drag a midpoint to add a vertex."
+										? "Street and satellite tiles are provided by OpenStreetMap and Esri. Attribution is shown on the map. Drag existing vertices to reshape a boundary; drag a midpoint to add a vertex."
 						: drawing ? "Offline map fallback: click three or more boundary points, then finish the polygon." : "The online map is unavailable. This coordinate grid is shown automatically as a drawing fallback.";
 				}
 			}
@@ -675,7 +757,7 @@
 					await loadScript("https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js");
 					onlineMapReady = true;
 					mapView = "streets";
-					renderCategoryEditor();
+					renderBoundaryEditor();
 					setStatus("Online map ready. Street and satellite views are available.");
 				} catch {
 					onlineMapReady = false;
@@ -704,37 +786,28 @@
 				});
 				(activeTileLayer === "satellite" ? satelliteTiles : streetTiles).addTo(leafletMap);
 				polygonLayer = L.featureGroup().addTo(leafletMap);
-				["includes", "excludes"].forEach((targetKey) => {
-					categoryBoundaryIds(currentCategory(), targetKey).forEach((id, index) => {
-						try {
-							const feature = boundaryById(id);
-							if (feature?.geometry?.type !== "Polygon" || !Array.isArray(feature.geometry.coordinates)) return;
-							const latLngs = feature.geometry.coordinates.map((ring) => ring.map(([longitude, latitude]) => [latitude, longitude]));
-							const color = colorForPolygon(index, targetKey);
-							const layer = L.polygon(latLngs, {
-								color,
-								weight: 3,
-								fillColor: color,
-								fillOpacity: 0.2
-							});
-							layer._jurisdictionKey = targetKey;
-							layer._jurisdictionIndex = index;
-							layer._jurisdictionId = id;
-							polygonLayer.addLayer(layer);
-						} catch { /* Ignore malformed imported polygon data in the preview. */ }
-					});
+				boundaryCollection.features.forEach((feature, index) => {
+					try {
+						if (feature?.geometry?.type !== "Polygon" || !Array.isArray(feature.geometry.coordinates)) return;
+						const latLngs = feature.geometry.coordinates.map((ring) => ring.map(([longitude, latitude]) => [latitude, longitude]));
+						const color = colorForPolygon(index);
+						const layer = L.polygon(latLngs, { color, weight: 3, fillColor: color, fillOpacity: 0.2 });
+						layer._boundaryId = feature.properties.id;
+						polygonLayer.addLayer(layer);
+					} catch { /* Ignore malformed imported polygon data in the preview. */ }
 				});
 				leafletMap.on(L.Draw.Event.CREATED, (event) => {
 					const geometry = event.layer.toGeoJSON().geometry;
 					if (geometry.type === "Polygon") {
-						const category = currentCategory();
-						const targetKey = jurisdictionTarget === "excludes" ? "excludes" : "includes";
-						const index = categoryBoundaryIds(category, targetKey).length;
-						const id = addBoundaryFeature(category, targetKey, geometry, defaultPolygonName(targetKey, index));
-						const color = colorForPolygon(index, targetKey);
-						event.layer._jurisdictionKey = targetKey;
-						event.layer._jurisdictionIndex = index;
-						event.layer._jurisdictionId = id;
+						const nameError = boundaryNameError(drawingBoundaryName);
+						if (nameError) {
+							setStatus(nameError, true);
+						return;
+						}
+						const index = boundaryCollection.features.length;
+						const id = addBoundaryFeature(geometry, drawingBoundaryName);
+						const color = colorForPolygon(index);
+						event.layer._boundaryId = id;
 						event.layer.setStyle({
 							color,
 							fillColor: color,
@@ -744,21 +817,25 @@
 						polygonLayer.addLayer(event.layer);
 						drawing = false;
 						draftPoints = [];
+						drawingBoundaryName = "";
+						$('[data-new-boundary-name]').value = "";
 						renderPolygonList();
+						renderCategoryEditor();
 						updateMapToolButtons();
-						setStatus(targetKey === "excludes" ? "Excluded boundary added to boundaries.geojson." : "Allowed boundary added to boundaries.geojson.");
+						triggerAutosave();
+						setStatus("Named boundary added to boundaries.geojson.");
 					}
 				});
 				leafletMap.on(L.Draw.Event.EDITED, (event) => {
 					event.layers.eachLayer((layer) => {
-						const feature = boundaryById(layer._jurisdictionId);
+						const feature = boundaryById(layer._boundaryId);
 						if (feature && layer.toGeoJSON().geometry.type === "Polygon") {
 							feature.geometry = layer.toGeoJSON().geometry;
 						}
 					});
 					renderPolygonList();
 					triggerAutosave();
-					setStatus("Boundary edits saved to boundaries.geojson.");
+					setStatus("Boundary geometry edits saved.");
 				});
 				leafletMap.on(L.Draw.Event.DRAWSTOP, () => {
 					drawing = false;
@@ -781,7 +858,10 @@
 				const undoButton = $('[data-action="undo-point"]');
 				const editButton = $('[data-action="edit-polygons"]');
 				const saveEditsButton = $('[data-action="save-polygon-edits"]');
-				if (drawButton) drawButton.textContent = drawing ? "Drawing..." : "Draw polygon";
+				if (drawButton) {
+					drawButton.textContent = drawing ? "Drawing..." : "Draw boundary";
+					drawButton.disabled = drawing;
+				}
 				if (finishButton) finishButton.disabled = !drawing;
 				if (undoButton) undoButton.disabled = canUseLeafletMap() ? !drawing : draftPoints.length === 0;
 				if (editButton) {
@@ -860,7 +940,10 @@
 					else delete target[key];
 				} else if (parts[0] === "destinations") target[key] = value;
 				else target[key] = value;
-				if (path === "name" || path === "department") renderCategoryList();
+				if (path === "name" || path === "department") {
+					renderCategoryList();
+					renderPolygonList();
+				}
 				if (path === "id" || path === "name") $(".category-panel-head h3").textContent = category.name || "New category";
 				triggerAutosave();
 			}
@@ -890,7 +973,12 @@
 
 			function addPolygon() {
 				if (draftPoints.length < 3) {
-					setStatus("A polygon needs at least three boundary points.", true);
+					setStatus("A boundary needs at least three points.", true);
+					return;
+				}
+				const nameError = boundaryNameError(drawingBoundaryName);
+				if (nameError) {
+					setStatus(nameError, true);
 					return;
 				}
 				const coordinates = draftPoints.map((point) => {
@@ -898,16 +986,14 @@
 					return [Number(geo.lng.toFixed(7)), Number(geo.lat.toFixed(7))];
 				});
 				coordinates.push([...coordinates[0]]);
-				const category = currentCategory();
-				category.jurisdiction = category.jurisdiction || {};
-				const targetKey = jurisdictionTarget === "excludes" ? "excludes" : "includes";
-				const index = categoryBoundaryIds(category, targetKey).length;
-				addBoundaryFeature(category, targetKey, { type: "Polygon", coordinates: [coordinates] }, defaultPolygonName(targetKey, index));
+				addBoundaryFeature({ type: "Polygon", coordinates: [coordinates] }, drawingBoundaryName);
 				drawing = false;
 				draftPoints = [];
+				drawingBoundaryName = "";
+				renderBoundaryEditor();
 				renderCategoryEditor();
 				triggerAutosave();
-				setStatus(targetKey === "excludes" ? "Excluded boundary added to boundaries.geojson." : "Allowed boundary added to boundaries.geojson.");
+				setStatus("Named boundary added to boundaries.geojson.");
 			}
 
 			function mapCoordinates(event, svg) {
@@ -925,86 +1011,176 @@
 				else question[key] = value;
 			}
 
-			async function importFiles(files) {
-				let importedSiteConfig = null;
-				let importedTemplates = null;
-				let importedBoundaries = null;
-				for (const file of files) {
-					const parsed = JSON.parse(await file.text());
-					if (parsed?.type === "FeatureCollection") importedBoundaries = parsed;
-					else if (Array.isArray(parsed?.categories)) importedTemplates = parsed;
-					else if (parsed?.mapCenter) importedSiteConfig = parsed;
+			function validateCandidate(candidateSite, candidateTemplates, candidateBoundaries) {
+				if (typeof candidateSite.cityName !== "string" || !candidateSite.cityName.trim() ||
+					typeof candidateSite.regionName !== "string" || !candidateSite.regionName.trim() ||
+					typeof candidateSite.appTitle !== "string" || !candidateSite.appTitle.trim() ||
+					!Number.isFinite(Number(candidateSite.mapCenter?.lat)) || Number(candidateSite.mapCenter.lat) < -90 || Number(candidateSite.mapCenter.lat) > 90 ||
+					!Number.isFinite(Number(candidateSite.mapCenter?.lng)) || Number(candidateSite.mapCenter.lng) < -180 || Number(candidateSite.mapCenter.lng) > 180 ||
+					!Number.isInteger(candidateSite.defaultZoom) || candidateSite.defaultZoom < 1 || candidateSite.defaultZoom > 20) {
+					throw new Error("config.json needs a city, region, app title, valid map coordinates, and zoom from 1 to 20.");
 				}
-				if (!importedSiteConfig || !importedTemplates || !importedBoundaries) {
-					throw new Error("Select config.json, templates.json, and boundaries.geojson together.");
-				}
-				if (typeof importedSiteConfig.cityName !== "string" || !importedSiteConfig.cityName.trim() ||
-					typeof importedSiteConfig.regionName !== "string" || !importedSiteConfig.regionName.trim() ||
-					typeof importedSiteConfig.appTitle !== "string" || !importedSiteConfig.appTitle.trim() ||
-					!Number.isFinite(Number(importedSiteConfig.mapCenter?.lat)) ||
-					!Number.isFinite(Number(importedSiteConfig.mapCenter?.lng)) ||
-					!Number.isInteger(importedSiteConfig.defaultZoom) || importedSiteConfig.defaultZoom < 1 || importedSiteConfig.defaultZoom > 20) {
-					throw new Error("config.json must include a city, region, app title, map center, and zoom from 1 to 20.");
-				}
-				if (importedSiteConfig.analyticsMeasurementId && !/^G-[A-Z0-9]+$/.test(importedSiteConfig.analyticsMeasurementId)) {
+				if (candidateSite.analyticsMeasurementId && !/^G-[A-Z0-9]+$/.test(candidateSite.analyticsMeasurementId)) {
 					throw new Error("Google Analytics Measurement ID must use the G-XXXXXXXXXX format or be left blank.");
 				}
-				if (importedSiteConfig.reportWebhookUrl && !/^https:\/\/discord\.com\/api\/webhooks\/[0-9]+\/[A-Za-z0-9_-]+$/.test(importedSiteConfig.reportWebhookUrl)) {
+				if (candidateSite.reportWebhookUrl && !/^https:\/\/discord\.com\/api\/webhooks\/[0-9]+\/[A-Za-z0-9_-]+$/.test(candidateSite.reportWebhookUrl)) {
 					throw new Error("Report webhook URL must be a Discord webhook URL.");
 				}
-				if (!Array.isArray(importedBoundaries.features)) throw new Error("boundaries.geojson must contain a FeatureCollection.");
-				const featureIds = importedBoundaries.features.map((feature) => feature?.properties?.id);
-				if (featureIds.some((id) => typeof id !== "string" || !id) || new Set(featureIds).size !== featureIds.length) {
-					throw new Error("Every boundary Feature must have a unique properties.id.");
+				if (!candidateTemplates || !Array.isArray(candidateTemplates.categories)) throw new Error("templates.json must contain a categories array.");
+				if (typeof candidateTemplates.emailSubjectTemplate !== "string" || typeof candidateTemplates.emailTemplate !== "string") {
+					throw new Error("templates.json must include default email subject and body templates.");
 				}
-				if (importedBoundaries.features.some((feature) => feature?.type !== "Feature" || feature.geometry?.type !== "Polygon")) {
-					throw new Error("Every boundary Feature must contain a Polygon geometry.");
+				if (candidateBoundaries?.type !== "FeatureCollection" || !Array.isArray(candidateBoundaries.features)) {
+					throw new Error("boundaries.geojson must contain a FeatureCollection.");
 				}
-				const availableIds = new Set(featureIds);
-				importedTemplates.categories.forEach((category) => {
+				const ids = new Set();
+				const names = new Set();
+				candidateBoundaries.features.forEach((feature) => {
+					const id = feature?.properties?.id;
+					if (feature?.type !== "Feature" || feature.geometry?.type !== "Polygon" || typeof id !== "string" || !id || ids.has(id)) {
+						throw new Error("Every boundary must be a Polygon Feature with a unique properties.id.");
+					}
+					const rings = feature.geometry.coordinates;
+					if (!Array.isArray(rings) || !rings.length || rings.some((ring) => !Array.isArray(ring) || ring.length < 4 ||
+						ring.some((position) => !Array.isArray(position) || position.length < 2 || !Number.isFinite(position[0]) || !Number.isFinite(position[1]) || Math.abs(position[0]) > 180 || Math.abs(position[1]) > 90) ||
+						JSON.stringify(ring[0]) !== JSON.stringify(ring[ring.length - 1]))) {
+						throw new Error(`Boundary "${id}" has an invalid or unclosed Polygon ring.`);
+					}
+					ids.add(id);
+					const name = typeof feature.properties?.name === "string" ? feature.properties.name.trim() : "";
+					const normalizedName = name.toLocaleLowerCase();
+					if (!name) throw new Error(`Boundary "${id}" needs a name.`);
+					if (names.has(normalizedName)) throw new Error(`Boundary names must be unique (case-insensitive): "${name}".`);
+					names.add(normalizedName);
+				});
+				candidateTemplates.categories.forEach((category) => {
 					const jurisdiction = category.jurisdiction;
-					if (jurisdiction && typeof jurisdiction === "object" &&
-						("polygons" in jurisdiction || "excludedPolygons" in jurisdiction)) {
+					if (jurisdiction && (typeof jurisdiction !== "object" || Array.isArray(jurisdiction))) {
+						throw new Error(`Category "${category.id}" jurisdiction must be an object.`);
+					}
+					if (jurisdiction && ("polygons" in jurisdiction || "excludedPolygons" in jurisdiction)) {
 						throw new Error(`Category "${category.id}" still contains inline polygons; migrate them to boundaries.geojson.`);
 					}
 					for (const key of ["includes", "excludes"]) {
-						if (category.jurisdiction?.[key] !== undefined && !Array.isArray(category.jurisdiction[key])) {
+						if (jurisdiction?.[key] !== undefined && !Array.isArray(jurisdiction[key])) {
 							throw new Error(`Category "${category.id}" jurisdiction.${key} must be an array.`);
 						}
 						const references = categoryBoundaryIds(category, key);
 						if (new Set(references).size !== references.length) throw new Error(`Category "${category.id}" has duplicate jurisdiction.${key} IDs.`);
-					}
-					normalizeJurisdiction(category);
-					for (const id of [...categoryBoundaryIds(category, "includes"), ...categoryBoundaryIds(category, "excludes")]) {
-						if (!availableIds.has(id)) throw new Error(`Category "${category.id}" references missing boundary "${id}".`);
+						for (const id of references) {
+							if (!ids.has(id)) throw new Error(`Category "${category.id}" references missing boundary "${id}".`);
+						}
 					}
 				});
-				siteConfig = { ...blankSiteConfig(), ...importedSiteConfig, mapCenter: { ...blankSiteConfig().mapCenter, ...importedSiteConfig.mapCenter } };
-				config = importedTemplates;
-				boundaryCollection = importedBoundaries;
+			}
+
+			function applyCandidate(candidateSite, candidateTemplates, candidateBoundaries, source) {
+				validateCandidate(candidateSite, candidateTemplates, candidateBoundaries);
+				editRevision += 1;
+				siteConfig = { ...blankSiteConfig(), ...candidateSite, mapCenter: { ...blankSiteConfig().mapCenter, ...candidateSite.mapCenter } };
+				config = candidateTemplates;
+				boundaryCollection = candidateBoundaries;
 				activeCategory = config.categories.length ? 0 : -1;
 				drawing = false;
 				draftPoints = [];
+				drawingBoundaryName = "";
+				dataSource = source;
+				dataDirty = false;
 				renderAll();
-				triggerAutosave();
-				setStatus(`Imported all three files and ${config.categories.length} categories. Review changes, then download the updated files.`);
+				persistDraft();
+			}
+
+			const importKinds = {
+				"config.json": "config",
+				"templates.json": "templates",
+				"boundaries.geojson": "boundaries"
+			};
+
+			async function importFiles(files, requiredKind = null) {
+				const candidate = {
+					site: JSON.parse(JSON.stringify(siteConfig)),
+					templates: JSON.parse(JSON.stringify(config)),
+					boundaries: JSON.parse(JSON.stringify(boundaryCollection))
+				};
+			const importedKinds = new Set();
+			for (const file of files) {
+					const kind = requiredKind || importKinds[file.name.toLowerCase()];
+					if (!kind || (!requiredKind && !importKinds[file.name.toLowerCase()])) throw new Error(`Choose the matching file: ${requiredKind ? `${requiredKind}.json` : "config.json, templates.json, or boundaries.geojson"}.`);
+				if (importedKinds.has(kind)) throw new Error(`Choose only one ${file.name} file.`);
+				importedKinds.add(kind);
+				const parsed = JSON.parse(await file.text());
+				if (kind === "config") candidate.site = parsed;
+				if (kind === "templates") candidate.templates = parsed;
+				if (kind === "boundaries") candidate.boundaries = parsed;
+			}
+			if (requiredKind && !importedKinds.has(requiredKind)) throw new Error(`Choose ${requiredKind === "boundaries" ? "boundaries.geojson" : `${requiredKind}.json`}.`);
+			if (!requiredKind && importedKinds.size !== 3) throw new Error("Import All needs config.json, templates.json, and boundaries.geojson together.");
+			applyCandidate(candidate.site, candidate.templates, candidate.boundaries, "Imported files");
+			setStatus(requiredKind ? `Imported ${requiredKind === "boundaries" ? "boundaries.geojson" : `${requiredKind}.json`}.` : "Imported all three deployment files.");
+		}
+
+			async function loadDeployment(initial = false) {
+				if (!initial && !window.confirm("Load the files beside this configurator and replace the current editor data?")) return;
+				if (!/^https?:$/.test(window.location.protocol)) {
+					setStatus("Deployment loading needs the configurator served over HTTP(S). Import files manually when using file://.", true);
+					return;
+				}
+				const requestRevision = editRevision;
+				try {
+					const paths = ["config.json", "templates.json", "boundaries.geojson"];
+					const responses = await Promise.all(paths.map((path) => fetch(new URL(path, document.baseURI), { cache: "no-cache" })));
+					const failed = responses.findIndex((response) => !response.ok);
+					if (failed !== -1) throw new Error(`Could not load ${paths[failed]} from this deployment.`);
+					const [nextSite, nextTemplates, loadedBoundaries] = await Promise.all(responses.map((response) => response.json()));
+					const usedNames = new Set(loadedBoundaries.features.map((feature) => String(feature.properties?.name ?? "").trim().toLocaleLowerCase()).filter(Boolean));
+					let assignedLegacyName = false;
+					const nextBoundaries = {
+						...loadedBoundaries,
+						features: loadedBoundaries.features.map((feature) => {
+							if (typeof feature.properties?.name === "string" && feature.properties.name.trim()) return feature;
+							assignedLegacyName = true;
+							const base = `Boundary - ${feature.properties?.id || "unnamed"}`;
+						let name = base;
+						let suffix = 2;
+						while (usedNames.has(name.toLocaleLowerCase())) name = `${base} (${suffix++})`;
+						usedNames.add(name.toLocaleLowerCase());
+						return { ...feature, properties: { ...feature.properties, name } };
+						})
+					};
+					if (editRevision !== requestRevision || (initial && dataDirty)) {
+						setStatus("Deployment data was not applied because the editor changed while files were loading.");
+						return;
+					}
+					applyCandidate(nextSite, nextTemplates, nextBoundaries, "Current deployment");
+					setStatus(assignedLegacyName
+						? "Loaded deployment files. Names were generated for older unnamed boundaries; review them in section 2."
+						: "Loaded the current deployment files. Changes are saved locally in this browser.");
+				} catch (error) {
+					setStatus(`Could not load deployment files: ${error.message}`, true);
+				}
+			}
+
+			function clearAllData() {
+				if (!window.confirm("Clear the site settings, templates, and all boundaries? The blank configuration will be saved in this browser.")) return;
+				clearTimeout(autosaveTimer);
+				editRevision += 1;
+				siteConfig = blankSiteConfig();
+				config = blankConfig();
+				boundaryCollection = blankBoundaries();
+				activeCategory = -1;
+				drawing = false;
+				draftPoints = [];
+				drawingBoundaryName = "";
+				mapRadiusMiles = 2.5;
+				mapView = "streets";
+				dataSource = "Blank configuration";
+				dataDirty = false;
+				renderAll();
+				persistDraft();
+				setStatus("Cleared all deployment data. The blank configuration is saved locally.");
 			}
 
 			function downloadFile(filename, data, contentType) {
-				if (!siteConfig.cityName.trim() || !siteConfig.regionName.trim() || !siteConfig.appTitle.trim() ||
-					!Number.isFinite(Number(siteConfig.mapCenter.lat)) || !Number.isFinite(Number(siteConfig.mapCenter.lng)) ||
-					!Number.isInteger(siteConfig.defaultZoom) || siteConfig.defaultZoom < 1 || siteConfig.defaultZoom > 20) {
-					setStatus("Complete the city, region, app title, map center, and valid zoom before downloading.", true);
-					return;
-				}
-				if (siteConfig.analyticsMeasurementId && !/^G-[A-Z0-9]+$/.test(siteConfig.analyticsMeasurementId)) {
-					setStatus("Use a valid Google Analytics Measurement ID or leave it blank.", true);
-					return;
-				}
-				if (siteConfig.reportWebhookUrl && !/^https:\/\/discord\.com\/api\/webhooks\/[0-9]+\/[A-Za-z0-9_-]+$/.test(siteConfig.reportWebhookUrl)) {
-					setStatus("Use a valid Discord report webhook URL or leave it blank.", true);
-					return;
-				}
 				const blob = new Blob([`${JSON.stringify(data, null, 2)}\n`], { type: contentType });
 				const url = URL.createObjectURL(blob);
 				const anchor = document.createElement("a");
@@ -1014,7 +1190,38 @@
 				anchor.click();
 				anchor.remove();
 				setTimeout(() => URL.revokeObjectURL(url), 1000);
-				setStatus(`Downloaded ${filename}.`);
+			}
+
+			const exportItems = {
+				config: () => ["config.json", siteConfig, "application/json"],
+				templates: () => ["templates.json", config, "application/json"],
+				boundaries: () => ["boundaries.geojson", boundaryCollection, "application/geo+json"]
+			};
+
+			function exportFile(kind, quiet = false) {
+				try {
+					validateCandidate(siteConfig, config, boundaryCollection);
+					const [filename, data, contentType] = exportItems[kind]();
+					downloadFile(filename, data, contentType);
+					if (!quiet) setStatus(`Downloaded ${filename}.`);
+					return true;
+				} catch (error) {
+					setStatus(`Cannot export: ${error.message}`, true);
+					return false;
+				}
+			}
+
+			function exportAll() {
+				try {
+					validateCandidate(siteConfig, config, boundaryCollection);
+					Object.keys(exportItems).forEach((kind) => {
+						const [filename, data, contentType] = exportItems[kind]();
+						downloadFile(filename, data, contentType);
+					});
+					setStatus("Started downloads for config.json, templates.json, and boundaries.geojson. Check your browser's download prompt if needed.");
+				} catch (error) {
+					setStatus(`Cannot export files: ${error.message}`, true);
+				}
 			}
 
 			async function copyJson() {
@@ -1037,16 +1244,25 @@
 
 			function renderAll() {
 				renderSettings();
+				renderTemplateDefaults();
+				renderBoundaryEditor();
 				renderCategoryList();
 				renderCategoryEditor();
+				syncDataSource();
 			}
 
 			document.addEventListener("input", (event) => {
-				if (event.target.dataset.polygonName !== undefined) {
-					const ids = categoryBoundaryIds(currentCategory(), event.target.dataset.polygonKey);
-					const polygon = boundaryById(ids[Number(event.target.dataset.polygonIndex)]);
-					if (polygon) polygon.properties.name = event.target.value;
+				if (event.target.dataset.newBoundaryName !== undefined) {
+					drawingBoundaryName = event.target.value;
+					updateMapToolButtons();
 					triggerAutosave();
+					return;
+				}
+				if (event.target.dataset.boundarySearch !== undefined) {
+					const query = event.target.value.trim().toLocaleLowerCase();
+					event.target.closest(".boundary-picker").querySelectorAll("[data-boundary-choice]").forEach((choice) => {
+						choice.hidden = !choice.dataset.searchName.includes(query);
+					});
 					return;
 				}
 				const setting = event.target.dataset.setting;
@@ -1088,10 +1304,41 @@
 				if (event.target.dataset.mapRadius !== undefined) {
 					mapRadiusMiles = Math.max(0.1, Number(event.target.value) || 2.5);
 					renderMap();
+					triggerAutosave();
 				}
 			});
 
 			document.addEventListener("change", (event) => {
+				if (event.target.dataset.boundaryName !== undefined) {
+					const id = event.target.dataset.boundaryName;
+					const feature = boundaryById(id);
+					const name = event.target.value.trim();
+					const error = boundaryNameError(name, id);
+					if (error) {
+						event.target.value = feature?.properties?.name || "";
+						setStatus(error, true);
+						return;
+					}
+					feature.properties.name = name;
+					renderPolygonList();
+					renderCategoryEditor();
+					triggerAutosave();
+					setStatus("Boundary name updated.");
+					return;
+				}
+				if (event.target.dataset.categoryBoundary !== undefined) {
+					const category = currentCategory();
+					const key = event.target.dataset.categoryBoundary;
+					const id = event.target.dataset.boundaryId;
+					category.jurisdiction = category.jurisdiction || {};
+					category.jurisdiction[key] = safeArray(category.jurisdiction[key]);
+					if (event.target.checked && !category.jurisdiction[key].includes(id)) category.jurisdiction[key].push(id);
+					else if (!event.target.checked) category.jurisdiction[key] = category.jurisdiction[key].filter((value) => value !== id);
+					normalizeJurisdiction(category);
+					renderPolygonList();
+					triggerAutosave();
+					return;
+				}
 				if (event.target.dataset.emergencyEnabled !== undefined) {
 					const category = currentCategory();
 					category.emergency = category.emergency || {};
@@ -1100,10 +1347,6 @@
 					if (!category.emergency.keywords?.length) delete category.emergency.keywords;
 					if (!Object.keys(category.emergency).length) delete category.emergency;
 					triggerAutosave();
-					return;
-				}
-				if (event.target.dataset.jurisdictionTarget !== undefined) {
-					jurisdictionTarget = event.target.value === "excludes" ? "excludes" : "includes";
 					return;
 				}
 				if (event.target.dataset.questionRequired !== undefined) {
@@ -1148,16 +1391,12 @@
 				}
 				if (action === "delete-category") {
 					config.categories.splice(activeCategory, 1);
-					const usedBoundaryIds = new Set(config.categories.flatMap((category) => [
-						...categoryBoundaryIds(category, "includes"),
-						...categoryBoundaryIds(category, "excludes")
-					]));
-					boundaryCollection.features = boundaryCollection.features.filter((feature) => usedBoundaryIds.has(feature.properties?.id));
 					activeCategory = config.categories.length ? Math.min(activeCategory, config.categories.length - 1) : -1;
 					drawing = false;
 					draftPoints = [];
 					renderCategoryList();
 					renderCategoryEditor();
+					renderPolygonList();
 					triggerAutosave();
 					setStatus("Category removed.");
 				}
@@ -1175,11 +1414,18 @@
 					setStatus("Question removed.");
 				}
 				if (action === "draw-polygon") {
+					const nameInput = $("[data-new-boundary-name]");
+					drawingBoundaryName = nameInput?.value.trim() || "";
+					const nameError = boundaryNameError(drawingBoundaryName);
+					if (nameError) {
+						setStatus(nameError, true);
+						nameInput?.focus();
+						return;
+					}
 					if (editingPolygons) savePolygonEdits();
 					if (canUseLeafletMap()) {
 						drawing = true;
-						const targetKey = jurisdictionTarget === "excludes" ? "excludes" : "includes";
-						const nextColor = colorForPolygon(currentCategory().jurisdiction?.[targetKey]?.length || 0, targetKey);
+						const nextColor = colorForPolygon(boundaryCollection.features.length);
 						drawHandler = new L.Draw.Polygon(leafletMap, { shapeOptions: { color: nextColor, fillColor: nextColor, fillOpacity: 0.2 } });
 						drawHandler.enable();
 						updateMapToolButtons();
@@ -1187,8 +1433,8 @@
 					} else {
 						drawing = true;
 						draftPoints = [];
-						renderCategoryEditor();
-						setStatus("Click three or more points on the map canvas.");
+						renderBoundaryEditor();
+						setStatus("Click three or more points on the map canvas to draw the named boundary.");
 					}
 				}
 				if (action === "edit-polygons") startPolygonEditing();
@@ -1198,17 +1444,26 @@
 					if (canUseLeafletMap() && drawHandler) drawHandler.deleteLastVertex();
 					else {
 						draftPoints.pop();
-						renderCategoryEditor();
+						renderBoundaryEditor();
 					}
 				}
-				if (action === "delete-polygon") {
-					const category = currentCategory();
-					const index = Number(event.target.dataset.polygonIndex);
-					const polygonKey = event.target.dataset.polygonKey || "includes";
-					if (!removeBoundaryReference(category, polygonKey, index)) return;
+				if (action === "delete-boundary") {
+					const id = event.target.dataset.boundaryId;
+					const feature = boundaryById(id);
+					if (!feature) return;
+					const references = boundaryReferences(id);
+					if (references.length && !window.confirm(`"${feature.properties.name}" is assigned to ${references.join(", ")}. Delete the boundary and remove these assignments?`)) return;
+					config.categories.forEach((category) => {
+						["includes", "excludes"].forEach((key) => {
+							if (category.jurisdiction?.[key]) category.jurisdiction[key] = category.jurisdiction[key].filter((value) => value !== id);
+						});
+						normalizeJurisdiction(category);
+					});
+					boundaryCollection.features = boundaryCollection.features.filter((item) => item.properties?.id !== id);
+					renderBoundaryEditor();
 					renderCategoryEditor();
 					triggerAutosave();
-					setStatus(polygonKey === "excludes" ? "Excluded boundary and its references removed." : "Allowed boundary and its references removed.");
+					setStatus("Boundary and its category assignments removed.");
 				}
 			});
 
@@ -1231,18 +1486,36 @@
 				if (undo) undo.disabled = false;
 			});
 
-			$("#import-button").addEventListener("click", () => $("#import-file").click());
-			$("#import-file").addEventListener("change", async (event) => {
+			$("#data-button").addEventListener("click", () => $("#data-dialog").showModal());
+			document.querySelectorAll("[data-close-dialog]").forEach((button) => button.addEventListener("click", () => $("#data-dialog").close()));
+			$("#data-dialog").addEventListener("click", (event) => {
+				if (event.target === $("#data-dialog")) $("#data-dialog").close();
+			});
+			document.querySelectorAll("[data-import-file]").forEach((button) => button.addEventListener("click", () => {
+				const input = $("#single-import-file");
+				input.dataset.importKind = button.dataset.importFile;
+				input.click();
+			}));
+			$("#single-import-file").addEventListener("change", async (event) => {
+				const files = Array.from(event.target.files || []);
+				if (!files.length) return;
+				try { await importFiles(files, event.target.dataset.importKind); }
+				catch (error) { setStatus(`Could not import file: ${error.message}`, true); }
+				event.target.value = "";
+			});
+			$("#import-all-button").addEventListener("click", () => $("#all-import-files").click());
+			$("#all-import-files").addEventListener("change", async (event) => {
 				const files = Array.from(event.target.files || []);
 				if (!files.length) return;
 				try { await importFiles(files); }
-				catch (error) { setStatus(`Could not import JSON: ${error.message}`, true); }
+				catch (error) { setStatus(`Could not import files: ${error.message}`, true); }
 				event.target.value = "";
 			});
-			$("#copy-button").addEventListener("click", copyJson);
-			$("#export-config-button").addEventListener("click", () => downloadFile("config.json", siteConfig, "application/json"));
-			$("#export-templates-button").addEventListener("click", () => downloadFile("templates.json", config, "application/json"));
-			$("#export-boundaries-button").addEventListener("click", () => downloadFile("boundaries.geojson", boundaryCollection, "application/geo+json"));
+			document.querySelectorAll("[data-export-file]").forEach((button) => button.addEventListener("click", () => exportFile(button.dataset.exportFile)));
+			$("#export-all-button").addEventListener("click", exportAll);
+			$("#copy-templates-button").addEventListener("click", copyJson);
+			$("#clear-all-button").addEventListener("click", clearAllData);
+			$("#load-deployment-button").addEventListener("click", () => loadDeployment(false));
 			$("#add-category").addEventListener("click", addCategory);
 			window.addEventListener("offline", () => {
 				if (drawHandler) drawHandler.disable();
@@ -1257,10 +1530,11 @@
 					loadOnlineMapLibraries();
 					return;
 				}
-				if (currentCategory()) mountLeafletMap();
+				if ($("#boundary-editor")) mountLeafletMap();
 				syncMapViews();
 			});
 			renderAll();
+			if (!savedDraft) loadDeployment(true);
 			loadOnlineMapLibraries();
 		})();
 	</script>

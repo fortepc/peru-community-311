@@ -1117,6 +1117,9 @@ function updateDispatchOutput() {
   if (!category) return;
 
   const emergency = isAcuteEmergency(category);
+  const emergencyPhone = category.emergency && category.emergency.phone
+    ? category.emergency.phone
+    : category.destinations && category.destinations.phone;
   const emergencyBox = document.getElementById("acute-emergency-box");
   const deptEmergencyCall = document.getElementById("dept-emergency-call");
   const deptEmergencyName = document.getElementById("dept-emergency-name");
@@ -1155,13 +1158,13 @@ function updateDispatchOutput() {
   // Handle Acute Emergency Mode
   if (emergency) {
     if (emergencyBox) emergencyBox.classList.remove("hidden");
-    if (category.destinations && category.destinations.phone) {
+    if (emergencyPhone) {
       if (deptEmergencyCall) {
-        deptEmergencyCall.href = `tel:${category.destinations.phone.replace(/[^0-9]/g, "")}`;
+        deptEmergencyCall.href = `tel:${emergencyPhone.replace(/[^0-9]/g, "")}`;
         deptEmergencyCall.classList.remove("hidden");
       }
       if (deptEmergencyName) {
-        deptEmergencyName.textContent = `Call 24/7 Dispatch: ${category.destinations.phone}`;
+        deptEmergencyName.textContent = `Call emergency contact now: ${emergencyPhone}`;
       }
     } else {
       if (deptEmergencyCall) deptEmergencyCall.classList.add("hidden");

@@ -52,18 +52,19 @@
       "jurisdiction": {
         "includes": [
           "wabash-flats"
-        ]
+        ],
+        "excludes": []
       }
     },
     {
       "id": "street_sanitation",
-      "name": "Street Surface & Debris (Potholes, Roadkill, Obstructions)",
+      "name": "Street Surface & Debris (Potholes, Obstructions, Missed Collection)",
       "department": "Street & Sanitation Department (Brian Stillings, Commissioner)",
-      "description": "Report potholes, asphalt damage, roadkill removal on street/alley, fallen road debris, or missed trash collection.",
+      "description": "Report potholes, asphalt damage, fallen road debris, or missed residential trash, recycling, and yard-waste collection.",
       "icon": "road-circle-xmark",
       "destinations": {
         "email": "brians@cityofperu.org",
-        "webformUrl": "https://www.cityofperu.org/egov/apps/action/center.egov?view=form;page=1;id=33",
+        "webformUrl": "https://www.cityofperu.org/egov/apps/action/center.egov?view=form;page=1;id=5",
         "phone": "(765) 472-2501",
         "address": "351 E Canal St, Peru, IN 46970",
         "socialUrl": null
@@ -76,35 +77,40 @@
           "required": true,
           "options": [
             "Pothole / Deep Asphalt Crater",
-            "Deceased Animal Removal (Roadkill on Public Street)",
             "Roadway Obstruction / Fallen Cargo / Debris",
+            "Missed Trash, Recycling, or Yard Waste Collection",
             "Snow / Ice Removal Request",
             "Other"
           ]
         },
         {
           "id": "traffic_impact",
-          "label": "Traffic Impact",
+          "label": "Traffic / Collection Impact",
           "type": "select",
           "required": true,
           "options": [
             "No - Traffic moving normally",
             "Partially - Drivers must slow down or swerve",
-            "Completely - Lane or alley completely blocked"
+            "Completely - Lane or alley completely blocked",
+            "Collection missed - Cart was out before the route"
           ]
         },
         {
           "id": "details",
-          "label": "Location Details & Description",
+          "label": "Location, Road Hazard, or Collection Details",
           "type": "textarea",
           "required": false,
-          "placeholder": "Dead animal in the northbound lane, needs removed"
+          "placeholder": "Street address or cross streets; lane and pothole size, debris details, or waste type and whether the cart was out by 6:00 AM."
         }
       ],
       "jurisdiction": {
         "excludes": [
-          "street-sanitation-wabash-flats-exclusion",
-          "street-sanitation-northwest-exclusion"
+          "street-sanitation-northwest-exclusion",
+          "wabash-flats",
+          "boundary-mw5abl52-3"
+        ],
+        "includes": [
+          "boundary-mw5a52rp-1"
         ]
       }
     },
@@ -130,7 +136,7 @@
           "options": [
             "Traffic Signal Dark / Flashing / Malfunctioning",
             "Damaged or Knocked-Down Stop / Yield Sign",
-            "Missing Street Name Sign",
+            "Missing / Damaged / Vandalized Street Name or Traffic Sign",
             "Crosswalk / Curb Line Painting Need",
             "Damaged Traffic Signal Pole / Push Button"
           ]
@@ -140,9 +146,18 @@
           "label": "Intersection or Location Details",
           "type": "textarea",
           "required": false,
-          "placeholder": "e.g. Stop sign knocked down at the corner of Broadway and Main St."
+          "placeholder": "Exact intersection, sign or signal type, and whether it is missing, down, obscured, dark, or flashing. For an immediate traffic danger, call 911."
         }
-      ]
+      ],
+      "jurisdiction": {
+        "excludes": [
+          "wabash-flats",
+          "street-sanitation-northwest-exclusion"
+        ],
+        "includes": [
+          "boundary-mw5a52rp-1"
+        ]
+      }
     },
     {
       "id": "foliage_hazard_tree",
@@ -165,6 +180,7 @@
           "required": true,
           "options": [
             "Overgrown Tree / Hedge Obscuring Stop Sign or Intersection View",
+            "Low-Hanging Limbs Over a Roadway or Public Sidewalk",
             "Fallen Tree Branch Blocking Roadway / Alley / Sidewalk",
             "Tree Limb Resting on Wires (Power / Telecom)",
             "Dead or Leaning Municipal Tree Posing Immediate Fall Risk"
@@ -186,9 +202,18 @@
           "label": "Specific Location & Visual Description",
           "type": "textarea",
           "required": false,
-          "placeholder": "e.g. Low pine branch completely blocks view of stop sign approaching 5th & Broadway."
+          "placeholder": "Address and whether the tree is in the public right-of-way; note vehicle or pedestrian clearance and any blocked sidewalk. Stay clear of limbs touching wires."
         }
-      ]
+      ],
+      "jurisdiction": {
+        "excludes": [
+          "street-sanitation-northwest-exclusion",
+          "wabash-flats"
+        ],
+        "includes": [
+          "boundary-mw5a52rp-1"
+        ]
+      }
     },
     {
       "id": "stormwater_flooding_drain",
@@ -222,9 +247,18 @@
           "label": "Specific Location & Water Depth Details",
           "type": "textarea",
           "required": false,
-          "placeholder": "e.g. Broadway underpass flooded with 6+ inches of standing water after heavy rain."
+          "placeholder": "Exact street/intersection, water depth and flow, whether the grate is broken or blocked, and any roadway or property impact."
         }
-      ]
+      ],
+      "jurisdiction": {
+        "excludes": [
+          "street-sanitation-northwest-exclusion",
+          "wabash-flats"
+        ],
+        "includes": [
+          "boundary-mw5a52rp-1"
+        ]
+      }
     },
     {
       "id": "peru_utilities_water_sewer",
@@ -233,15 +267,16 @@
       "description": "Report gushing water leaks, water bubbling from street/curb, low pressure, discolored water, or raw sewage backup/smell.",
       "icon": "fa-droplet",
       "emergency": {
+        "phone": "(765) 473-6681",
         "keywords": [
           "active water main break",
-          "emergency (call 765-473-7651 immediately for 24/7 dispatch)"
+          "property threat"
         ]
       },
       "destinations": {
         "email": null,
         "webformUrl": "https://www.peruutilities.com/my-account-1/report-a-problem/",
-        "phone": "(765) 473-7651",
+        "phone": "(765) 473-6681",
         "address": "335 E Canal St, Peru, IN 46970",
         "socialUrl": "https://www.facebook.com/PeruUtilities"
       },
@@ -252,7 +287,8 @@
           "type": "select",
           "required": true,
           "options": [
-            "Suspected Water Main Break / Gushing Water in Street or Yard",
+            "Water Main Leak / Clean Water Bubbling or Flowing from Ground",
+            "Fire Hydrant Damaged, Leaking, or Struck",
             "Water Bubbling Up From Curb / Sidewalk",
             "Sewage Odor / Raw Sewer Line Backup",
             "Discolored / Cloudy / Rusty Water",
@@ -267,7 +303,7 @@
           "options": [
             "Standard Maintenance Report",
             "Active Water Main Break / Property Threat",
-            "EMERGENCY (Call 765-473-7651 immediately for 24/7 dispatch)"
+            "Emergency / Active Main Break or Property Threat (call Peru Utilities at 765-473-6681)"
           ]
         },
         {
@@ -275,9 +311,18 @@
           "label": "Location & Observed Conditions",
           "type": "textarea",
           "required": false,
-          "placeholder": "e.g. Water stream flowing out from lawn near meter pit in front of 120 E 3rd St."
+          "placeholder": "Exact address or intersection, amount and direction of water flow, hydrant condition, and any roadway or property impact. For urgent issues, call Peru Utilities at 765-473-6681."
         }
-      ]
+      ],
+      "jurisdiction": {
+        "excludes": [
+          "street-sanitation-northwest-exclusion",
+          "wabash-flats"
+        ],
+        "includes": [
+          "boundary-mw5a52rp-1"
+        ]
+      }
     },
     {
       "id": "natural_gas_nipsco",
@@ -286,7 +331,8 @@
       "description": "Report suspected natural gas leaks or rotten egg odors. IF YOU SMELL GAS INSIDE OR NEAR BUILDINGS, EVACUATE IMMEDIATELY AND CALL 911.",
       "icon": "fa-fire-flame-simple",
       "emergency": {
-        "enabled": true
+        "enabled": true,
+        "phone": "(800) 634-3524"
       },
       "destinations": {
         "email": null,
@@ -313,7 +359,7 @@
           "label": "Location & Details",
           "type": "textarea",
           "required": false,
-          "placeholder": "e.g. Distinct rotten egg gas odor near alley meter behind 45 N Broadway."
+          "placeholder": "From a safe distance, give the location and describe the odor, hissing, or damaged line. Evacuate; do not operate switches or start vehicles. Call 911 or NIPSCO."
         }
       ]
     },
@@ -321,7 +367,7 @@
       "id": "animal_control",
       "name": "Animal Care & Control (Loose, Injured, or Stray Animals)",
       "department": "Peru Animal Care & Control (Greg Douglass, Officer)",
-      "description": "Report stray dogs running loose, aggressive or nuisance animals, injured wildlife, or lost/found pets.",
+      "description": "Report loose or aggressive dogs, deceased animals on roadways, and animal-control concerns. For a loose dog, City guidance says to call 24/7 Dispatch at (765) 473-5522.",
       "icon": "fa-paw",
       "destinations": {
         "email": "gdouglass@cityofperu.org",
@@ -337,8 +383,8 @@
           "type": "select",
           "required": true,
           "options": [
-            "Stray Animal Loose in Traffic / Neighborhood",
-            "Aggressive / Nuisance Animal",
+            "Stray or Aggressive Dog / Loose Dog in Traffic",
+            "Dead Animal on a Public Roadway or Right-of-Way",
             "Lost or Found Pet Report",
             "Animal Neglect / Cruelty / Welfare Concern",
             "Injured Wildlife Request"
@@ -361,7 +407,7 @@
           "label": "Animal Description & Last Known Location",
           "type": "textarea",
           "required": false,
-          "placeholder": "e.g. Brown lab mix running loose near Broadway. Friendly but heading towards highway."
+          "placeholder": "For a loose dog, call Dispatch at (765) 473-5522. Otherwise give the address or cross streets, animal type, condition, and whether it is in a lane or on the shoulder. Do not approach an aggressive animal."
         }
       ]
     },
@@ -386,7 +432,8 @@
           "required": true,
           "options": [
             "Damaged / Broken Playground Equipment",
-            "Park Shelter / Restroom / Bench Damage",
+            "Damaged, Vandalized, or Unsanitary Park Restroom",
+            "Park Shelter / Bench Damage",
             "Overflowing Trash Receptacles in Park",
             "Vandalism or Graffiti on Park Structure",
             "Fallen Tree Branch on Park Trail or Play Area"
@@ -404,16 +451,32 @@
           "label": "Specific Location & Context",
           "type": "textarea",
           "required": false,
-          "placeholder": "e.g. Broken swing chain on the west swing set near the big playground shelter."
+          "placeholder": "Park and exact location within it; identify the equipment or fixture and describe the damage or sanitation issue."
         }
-      ]
+      ],
+      "jurisdiction": {
+        "includes": [
+          "boundary-mw5a8kio-2"
+        ],
+        "excludes": []
+      }
     },
     {
       "id": "peru_utilities_electric",
       "name": "Electric Power Outage & Street Light Outages",
       "department": "Peru Utilities Line Department (Michael Biesenbach, T&D Supt)",
-      "description": "Report street light outages, flickering neighborhood lights, damaged utility poles, or localized electric outages.",
+      "description": "Report streetlight outages, flickering or dayburning lights, and damaged transformers. For downed wires, sparks, or smoke, stay at least 30 feet away and call 911.",
       "icon": "fa-bolt",
+      "emergency": {
+        "phone": "911",
+        "keywords": [
+          "downed power line",
+          "electrical sparking",
+          "sparking wire",
+          "transformer smoking",
+          "open electrical cabinet"
+        ]
+      },
       "destinations": {
         "email": null,
         "webformUrl": "https://www.peruutilities.com/my-account-1/report-a-problem/",
@@ -428,10 +491,10 @@
           "type": "select",
           "required": true,
           "options": [
-            "Street Light Out / Flickering Dark at Night",
+            "Streetlight Out, Flickering, or Remaining On During Daylight",
             "Power Outage / Neighborhood Blackout",
-            "Damaged Electrical Pole / Loose Equipment",
-            "Sparking Wire / Electrical Hazard"
+            "Damaged Transformer or Open Pad-Mount Cabinet",
+            "Downed Power Line / Electrical Sparking (call 911; stay at least 30 feet away)"
           ]
         },
         {
@@ -446,9 +509,15 @@
           "label": "Additional Context",
           "type": "textarea",
           "required": false,
-          "placeholder": "e.g. Street light over intersection flickers on and off every few minutes."
+          "placeholder": "Exact address or cross street, pole tag number, and whether the light is dark, flickering, or on during daylight. For downed wires, sparks, or smoke, stay at least 30 feet away and call 911."
         }
-      ]
+      ],
+      "jurisdiction": {
+        "includes": [
+          "boundary-mw5a52rp-1"
+        ],
+        "excludes": []
+      }
     },
     {
       "id": "railroad_crossing",
@@ -498,11 +567,17 @@
           "required": false,
           "placeholder": "e.g. Norfolk Southern train completely stopped across Broadway. Engine # if visible."
         }
-      ]
+      ],
+      "jurisdiction": {
+        "includes": [
+          "boundary-mw5a52rp-1"
+        ],
+        "excludes": []
+      }
     },
     {
       "id": "building_code_enforcement",
-      "name": "High Grass, Blight, Junk Vehicles & Code Violations",
+      "name": "High Grass, Blight, Private Vehicles & Code Violations",
       "department": "Building & Zoning Dept (Bruce Carson, Comm. / Bill Sheets, Code Enf.)",
       "description": "Report tall grass (>8 inches), junk/blight accumulation in yards, abandoned/inoperable vehicles, or unsafe structures.",
       "icon": "fa-house-triangle-exclamation",
@@ -522,8 +597,8 @@
           "options": [
             "High Grass / Overgrown Vegetation (>8 inches)",
             "Trash, Junk, or Blight in Yard or Alley",
-            "Inoperable / Unlicensed / Abandoned Vehicle",
-            "Unsafe Structure / Unmaintained Dilapidated Building",
+            "Inoperable / Unregistered Vehicle on Private Property",
+            "Blighted, Unsafe, or Unsecured Vacant Building",
             "Illegal Signage or Zoning Violation"
           ]
         },
@@ -544,9 +619,15 @@
           "label": "Specific Description of Violation",
           "type": "textarea",
           "required": false,
-          "placeholder": "e.g. Overgrown grass exceeding 12 inches with trash piling up near back alley."
+          "placeholder": "Property address, location on the lot, and details of the condition; for a vehicle, include make, model, color, and whether it is on private property or a public street."
         }
-      ]
+      ],
+      "jurisdiction": {
+        "includes": [
+          "boundary-mw5a52rp-1"
+        ],
+        "excludes": []
+      }
     },
     {
       "id": "sidewalk_curb_ada",
@@ -579,9 +660,61 @@
           "label": "Location & Context",
           "type": "textarea",
           "required": false,
-          "placeholder": "e.g. Large 3-inch concrete lip caused by tree roots outside 220 N Broadway."
+          "placeholder": "Street address, height of the raised edge or size of the missing section, and whether the sidewalk is blocked or difficult to pass."
         }
-      ]
+      ],
+      "jurisdiction": {
+        "includes": [
+          "boundary-mw5a52rp-1"
+        ],
+        "excludes": []
+      }
+    },
+    {
+      "id": "police_dispatch",
+      "name": "Abandoned Vehicles & Vandalism on Public Property",
+      "department": "Peru Police Department / Miami County Central Dispatch",
+      "description": "Report long-term abandoned vehicles on public streets or graffiti and vandalism on public property. For non-emergency reports, email the City or call Dispatch; call 911 for an immediate threat or active incident.",
+      "icon": "fa-shield-halved",
+      "destinations": {
+        "email": "mayorsadmin@cityofperu.org",
+        "webformUrl": null,
+        "phone": "(765) 473-5522",
+        "address": "35 S Broadway, Peru, IN 46970",
+        "socialUrl": null
+      },
+      "questions": [
+        {
+          "id": "issue_type",
+          "label": "Public-Space Police Issue",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Abandoned Vehicle on Public Street (over 72 hours)",
+            "Graffiti or Vandalism on Public Property or a Bridge"
+          ]
+        },
+        {
+          "id": "vehicle_details",
+          "label": "Vehicle Details (if applicable)",
+          "type": "textarea",
+          "required": false,
+          "placeholder": "For a vehicle: make, model, color, plate state/number, exact location, and how long it has been parked."
+        },
+        {
+          "id": "details",
+          "label": "Exact Location and Incident Details",
+          "type": "textarea",
+          "required": true,
+          "placeholder": "Street address or cross streets; for vandalism, identify the public structure and whether it is ongoing. Call 911 for an immediate threat."
+        }
+      ],
+      "jurisdiction": {
+        "includes": [
+          "boundary-mw5a52rp-1"
+        ],
+        "excludes": []
+      }
     },
     {
       "id": "indot_state_highway",
@@ -591,7 +724,7 @@
       "icon": "fa-route",
       "destinations": {
         "email": null,
-        "webformUrl": "https://indot.carsprogram.org/",
+        "webformUrl": "https://indot4u.511in.org/",
         "phone": "(855) 463-6848",
         "address": "INDOT Fort Wayne District Office",
         "socialUrl": "https://www.facebook.com/INDOTNortheast"
@@ -637,10 +770,10 @@
       "description": "Can't find a matching department above? Send a report to the site admin so we can direct you to the correct agency or update templates.json.",
       "icon": "fa-circle-question",
       "destinations": {
-        "email": "jeffers.david93@gmail.com",
+        "email": "jeffers.david93+perucommunity311@gmail.com",
         "webformUrl": "https://github.com/fortepc/peru-community-311/issues/new",
         "phone": null,
-        "address": "Peru, IN Open Source Project",
+        "address": null,
         "socialUrl": "https://github.com/fortepc/peru-community-311"
       },
       "questions": [

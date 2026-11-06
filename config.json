@@ -6,14 +6,14 @@
   "headerTagline": "Citizen-Powered Civic Reporting for Peru, Indiana",
   "pageDescription": "Independent community-built civic reporting portal for Peru, Indiana. Map local non-emergency issues and prepare reports for the responsible department.",
   "socialDescription": "Map non-emergency issues in Peru, IN and prepare reports for the responsible agency.",
+  "reportWebhookUrl": "https://discord.com/api/webhooks/1567369516546007101/qQWVY-e_wjhLpfV1MOO2ajWIwYrqk2pdnZAiHTnWI2USq2nYz9KBNetfT6QP2lzlcvTM",
   "mapCenter": {
     "lat": 40.7537,
     "lng": -86.0689
   },
   "defaultZoom": 14,
-  "analyticsMeasurementId": "G-HXZDM2HKTH",
-  "reportWebhookUrl": "https://discord.com/api/webhooks/1567369516546007101/qQWVY-e_wjhLpfV1MOO2ajWIwYrqk2pdnZAiHTnWI2USq2nYz9KBNetfT6QP2lzlcvTM",
-  "contactEmail": null,
+  "contactEmail": "jeffers.david93+311@gmail.com",
   "repositoryUrl": "https://github.com/fortepc/peru-community-311/",
-  "deploymentUrl": "https://fortepc.github.io/peru-community-311/"
+  "deploymentUrl": "https://fortepc.github.io/peru-community-311/",
+  "analyticsMeasurementId": "G-HXZDM2HKTH"
 }

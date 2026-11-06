@@ -80,6 +80,10 @@
                 "type": "boolean",
                 "description": "If true, immediately triggers emergency alert regardless of questionnaire answers."
               },
+              "phone": {
+                "type": ["string", "null"],
+                "description": "Optional phone number used for acute emergency calls instead of the routine department phone."
+              },
               "keywords": {
                 "type": "array",
                 "items": { "type": "string" },
